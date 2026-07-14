@@ -2,9 +2,9 @@
 
 ## 1. Approval gate
 
-**Current status: awaiting explicit project-owner approval.**
+**Current status: approved by the project owner on July 14, 2026; implementation in progress.**
 
-Do not begin Phase 1 or make implementation changes until the project owner confirms this plan. Documentation corrections are allowed before approval.
+Phase 1 has started on branch `codex/mvp-foundation`. The first responsive visual prototype is available for review while database-backed functionality remains in progress.
 
 ## 2. Delivery principles
 

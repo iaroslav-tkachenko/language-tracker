@@ -1,10 +1,10 @@
 # Repository Instructions
 
-## Current project gate
+## Current project status
 
-The repository is in the specification phase. Do not scaffold the application, install dependencies, create migrations, or implement product functionality until the project owner explicitly approves `docs/IMPLEMENTATION_PLAN.md`.
+The project owner explicitly approved `docs/IMPLEMENTATION_PLAN.md` on July 14, 2026. MVP implementation is authorized and in progress. Keep work within the approved specification and phased plan.
 
-Until that approval, permitted changes are limited to documentation corrections requested by the project owner.
+Notify the project owner whenever a new visual or clickable milestone is ready for review.
 
 ## Sources of truth
 

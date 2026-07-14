@@ -4,9 +4,13 @@ A responsive web application for recording and reviewing time spent learning for
 
 ## Project status
 
-**Specification complete; implementation not started.**
+**Implementation in progress.**
 
-The product requirements, architecture, and implementation plan are documented, but no application scaffold, dependency, database migration, or product functionality may be added until the project owner explicitly approves the plan.
+The project owner approved the implementation plan on July 14, 2026. A responsive, clickable visual prototype is available; its data is currently in-memory demonstration data while the Supabase-backed MVP is being implemented.
+
+### Current local preview
+
+When the development or production server is running, open [http://localhost:3000](http://localhost:3000). The preview supports year navigation, day selection, in-memory entry creation/deletion, board switching, a statistics preview, and board/activity additions through the settings drawer.
 
 ## MVP summary
 
@@ -31,6 +35,10 @@ The product requirements, architecture, and implementation plan are documented, 
 - Playwright for critical end-to-end tests
 - pgTAP for database constraints, functions, and RLS policies
 
+## Development storage
+
+The repository and installed dependencies live on drive `D:`. Package caches, browser-test artifacts, and other project-controlled development caches must also remain on `D:` as required by the project owner.
+
 ## Documentation
 
 - [Product specification](docs/PRODUCT_SPEC.md)
@@ -41,4 +49,3 @@ The product requirements, architecture, and implementation plan are documented, 
 ## Source language
 
 Code, identifiers, database objects, user-interface copy, and project documentation are written in English. Product discussions with the project owner may be conducted in Russian.
-
