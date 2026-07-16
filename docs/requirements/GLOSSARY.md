@@ -1,0 +1,46 @@
+# Domain Glossary
+
+## 1. Purpose
+
+This glossary provides one approved vocabulary for product discussion, design labels, code, database objects, and tests. English terms are authoritative even when project conversations take place in another language.
+
+## 2. Terms
+
+| Term                         | Definition                                                                                                                                                                                                                                            |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Active activity**          | An activity type that is not archived and can be selected for a new study entry.                                                                                                                                                                      |
+| **Active day**               | A calendar date, no later than today, whose owned entries on the selected board sum to at least one minute. Future dates are not active days until they arrive.                                                                                       |
+| **Active language board**    | A language board that is not archived and is available in the board selector and active statistics.                                                                                                                                                   |
+| **Activity catalog**         | The user's global collection of standard and custom activity types, reusable on all of that user's language boards.                                                                                                                                   |
+| **Activity type**            | A named category of study, such as `Reading`, `Anki`, or a user-defined activity. It is referenced by study entries and has a stable identity.                                                                                                        |
+| **Active-day average**       | The eligible total minutes divided by the number of active days in the same period. A period with no active days returns zero rather than dividing by zero.                                                                                           |
+| **Archived**                 | Retained in storage but excluded from active selection and the normal active interface. Archiving preserves identity, references, and history.                                                                                                        |
+| **Board-scoped**             | Calculated or displayed for exactly one selected language board; no cross-board aggregate exists in MVP.                                                                                                                                              |
+| **Browser-local date**       | The calendar date derived from the user's browser environment. The MVP does not expose a configurable timezone setting.                                                                                                                               |
+| **Calendar-day average**     | Eligible total minutes divided by elapsed calendar days through today for the current year, or by 365/366 days for a completed year. Future entries are excluded until their dates arrive.                                                            |
+| **Current streak**           | A consecutive run of active study dates ending today or yesterday. It is zero if the most recent active date is earlier than yesterday. Future entries never extend it.                                                                               |
+| **Custom activity**          | An activity type named by the user. It follows the same entry and statistical rules as a standard activity.                                                                                                                                           |
+| **Future entry**             | A study entry whose `studyDate` is later than the browser-local current date. It appears immediately in the selected year's heatmap and total but is excluded from current-period metrics, averages, active days, and streaks until its date arrives. |
+| **Heatmap**                  | A year-oriented grid of calendar-day squares whose intensity represents total exact study minutes for the selected board and date.                                                                                                                    |
+| **Heatmap threshold**        | One of the fixed minute ranges used to assign intensity: 0, 1–14, 15–29, 30–59, 60–119, 120–180, or 181+ minutes.                                                                                                                                     |
+| **Language board**           | A private user-owned workspace representing one language and containing its own study entries, heatmap, and statistics.                                                                                                                               |
+| **Longest streak**           | The greatest number of consecutive active dates on the selected board, considering eligible dates no later than today.                                                                                                                                |
+| **Normalized name**          | A trimmed, case-insensitive representation used to enforce name uniqueness and to restore an archived activity with the same name.                                                                                                                    |
+| **Other**                    | A UI action that asks the user to name a custom activity. It is not an unnamed activity type and must never be stored on a study entry.                                                                                                               |
+| **Owner**                    | The authenticated user whose identifier is stored on a user-owned database row and enforced by Row Level Security.                                                                                                                                    |
+| **Quick duration**           | One of the fixed entry shortcuts: 10, 15, 20, 30, 45, 60, 90, or 120 exact minutes. It is input convenience, not an approximate value.                                                                                                                |
+| **Row Level Security (RLS)** | PostgreSQL policies that restrict reading and mutation of user-owned rows according to the authenticated user's identity.                                                                                                                             |
+| **Selected year**            | The calendar year currently displayed in the board heatmap and year-scoped statistics. It may differ from the current year.                                                                                                                           |
+| **Standard activity**        | One of the seven seeded activities: `Reading`, `Podcast`, `Speaking`, `Writing`, `Anki`, `Grammar`, and `TV Show / Film`.                                                                                                                             |
+| **Study date**               | The calendar date to which a study entry belongs, stored as PostgreSQL `date` rather than a timestamp.                                                                                                                                                |
+| **Study entry**              | One owned record containing a language board, activity type, study date, exact integer duration in minutes, and optional comment.                                                                                                                     |
+| **Time distribution**        | A bar-chart data series containing summed minutes grouped by day, week, month, or year according to the selected granularity.                                                                                                                         |
+| **User**                     | A registered language learner authenticated through Supabase Auth. Each user can access only their own product data.                                                                                                                                  |
+
+## 3. Naming guidance
+
+- Use **streak**, never `steak`, for a consecutive run of active days.
+- Use **archive** for preserving a used board or activity while removing it from active views.
+- Use **delete** only for study-entry removal or user-facing language that intentionally maps to archival.
+- Use **minutes** as the stored unit. Labels such as `3+ hours` describe a heatmap threshold and are never stored as duration data.
+- Prefer domain names such as `languageBoard`, `activityType`, `studyEntry`, and `studyDate` in code and technical documentation.

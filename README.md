@@ -41,6 +41,14 @@ The repository and installed dependencies live on drive `D:`. Package caches, br
 
 ## Documentation
 
+- [Documentation home](docs/README.md) — the recommended starting point, with reading paths for product, design, engineering, and QA.
+- [Product vision and scope](docs/requirements/PRODUCT_VISION.md)
+- [Business requirements](docs/requirements/BUSINESS_REQUIREMENTS.md)
+- [Functional requirements](docs/requirements/FUNCTIONAL_REQUIREMENTS.md)
+- [Non-functional requirements](docs/requirements/NON_FUNCTIONAL_REQUIREMENTS.md)
+- [Use cases](docs/requirements/USE_CASES.md)
+- [Requirements traceability matrix](docs/requirements/TRACEABILITY_MATRIX.md)
+- [Domain glossary](docs/requirements/GLOSSARY.md)
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
