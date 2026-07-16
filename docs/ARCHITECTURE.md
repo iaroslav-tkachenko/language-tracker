@@ -2,7 +2,7 @@
 
 ## 1. Status and decision gate
 
-This document defines the approved architecture. The project owner authorized implementation on July 14, 2026. Changes must remain within the product specification and implementation plan.
+This document defines the architecture baseline. The original implementation was authorized on July 14, 2026; the expanded July 16 scope is documented here but remains behind the updated documentation review gate before feature implementation.
 
 ## 2. Architecture summary
 
@@ -113,6 +113,8 @@ src/
     boards/
     entries/
     heatmap/
+    vocabulary/
+    cefr/
     statistics/
     settings/
     ui/
@@ -120,6 +122,7 @@ src/
     auth/
     data/
     dates/
+    cefr/
     statistics/
     supabase/
     validation/
@@ -129,6 +132,7 @@ src/
 - `lib/auth`: verified-user helpers and authorization primitives.
 - `lib/data`: server-only reads, aggregation calls, and minimal DTO mapping.
 - `lib/dates`: local-date parsing, Monday-week boundaries, leap-year behavior, and display formatting.
+- `lib/cefr`: immutable reference targets, sourced level descriptions, and pure forecast calculations.
 - `lib/statistics`: pure rules for presentation and any non-SQL transformations.
 - `lib/supabase`: browser, server, and proxy client factories.
 - `lib/validation`: shared schemas for form and server validation.
@@ -195,6 +199,7 @@ Required database rules:
 | `study_date` | `date` | Required local calendar date; past, present, or future |
 | `duration_minutes` | `smallint` | Integer from 1 through 1,440 |
 | `comment` | `varchar(150)` | Nullable normalized comment |
+| `batch_id` | `uuid` | Nullable provenance link to `study_entry_batches`; absent for single-day creation |
 | `created_at` | `timestamptz` | Audit timestamp |
 | `updated_at` | `timestamptz` | Audit timestamp |
 
@@ -202,6 +207,7 @@ Ownership constraints:
 
 - `(board_id, user_id)` references `language_boards(id, user_id)`.
 - `(activity_type_id, user_id)` references `activity_types(id, user_id)`.
+- `(batch_id, user_id)` references `study_entry_batches(id, user_id)` when present.
 
 These constraints prevent cross-user references even if application validation fails.
 
@@ -209,12 +215,82 @@ PostgreSQL `date` is appropriate because a study entry belongs to a calendar day
 
 Reference: [PostgreSQL date/time types](https://www.postgresql.org/docs/current/datatype-datetime.html).
 
-### 5.5 Indexes
+### 5.5 `study_entry_batches`
+
+| Column | Type | Constraints and purpose |
+| --- | --- | --- |
+| `id` | `uuid` | Client-generated operation identifier and primary key |
+| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
+| `board_id` | `uuid` | Required owned board |
+| `activity_type_id` | `uuid` | Required owned activity |
+| `start_date` | `date` | Inclusive first date |
+| `end_date` | `date` | Inclusive final date |
+| `duration_minutes` | `smallint` | Integer from 1 through 1,440 copied to each entry |
+| `comment` | `varchar(150)` | Nullable shared comment copied to each entry |
+| `created_at` | `timestamptz` | Audit timestamp |
+
+Required rules:
+
+- Composite ownership references match the batch owner.
+- `start_date <= end_date`, both dates have the same calendar year, and the inclusive range contains at most 366 dates.
+- Unique `(id, user_id)` supports owned provenance references.
+- Unique `(batch_id, study_date)` on batch-created study entries guarantees one generated row per target date for one operation.
+- Reusing the same owned batch ID returns the original outcome; a conflicting payload for that ID is rejected.
+- Individual generated entries remain independently editable and deletable; no bulk-edit or bulk-delete behavior is implied.
+
+An authenticated database function validates the complete payload and inserts the batch plus its entries in one transaction. It expands the inclusive date range with PostgreSQL `generate_series`/date arithmetic and never deletes, replaces, merges, or skips existing entries. Reference: [PostgreSQL set-returning functions](https://www.postgresql.org/docs/current/functions-srf.html).
+
+### 5.6 `vocabulary_daily_totals`
+
+| Column | Type | Constraints and purpose |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key, generated UUID |
+| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
+| `board_id` | `uuid` | Required owned board |
+| `study_date` | `date` | Required local calendar date; past, present, or future |
+| `words_learned` | `integer` | Required positive final daily total |
+| `created_at` | `timestamptz` | Audit timestamp |
+| `updated_at` | `timestamptz` | Audit timestamp |
+
+Required rules:
+
+- `(board_id, user_id)` references `language_boards(id, user_id)`.
+- Unique `(user_id, board_id, study_date)` guarantees one record per board/date under concurrency.
+- `words_learned > 0`; zero is represented by deleting or omitting the row.
+- Create-on-existing becomes an explicit update/upsert of the owned record, never a second row.
+
+### 5.7 `cefr_level_events`
+
+| Column | Type | Constraints and purpose |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key, generated UUID |
+| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
+| `board_id` | `uuid` | Required owned board |
+| `level` | `text` | Required check-constrained value: A1, A2, B1, B2, C1, or C2 |
+| `effective_date` | `date` | User-declared past or current local calendar date |
+| `comment` | `varchar(150)` | Nullable normalized context |
+| `created_at` | `timestamptz` | Audit timestamp |
+| `updated_at` | `timestamptz` | Audit timestamp |
+
+Required rules:
+
+- `(board_id, user_id)` references `language_boards(id, user_id)`.
+- Unique `(user_id, board_id, effective_date)` allows one effective declaration per board/date; changing it on the same date updates that event.
+- A trusted mutation validates `effective_date <= local_today`; database ownership and value constraints remain authoritative.
+- Current level is the event with the greatest effective date, with deterministic timestamp/ID tie-breaking.
+- Forecast calculations read events and study entries but never mutate level history.
+
+CEFR descriptions and Cambridge target ranges are immutable versioned application reference data rather than user-editable rows. If the reference model changes, its version and methodology must change explicitly so historical interpretation remains reviewable.
+
+### 5.8 Indexes
 
 Initial indexes:
 
 - `study_entries (user_id, board_id, study_date)` for heatmaps, day views, and period totals.
 - `study_entries (user_id, board_id, activity_type_id, study_date)` for activity breakdowns.
+- `vocabulary_daily_totals (user_id, board_id, study_date)` for yearly heatmaps and statistics; the uniqueness constraint may provide this index.
+- `cefr_level_events (user_id, board_id, effective_date desc)` for current level and history.
+- `study_entry_batches (user_id, board_id, created_at)` for owned operation lookup.
 - Partial active-name indexes described above.
 
 Primary and unique constraints provide their own supporting indexes. Additional indexes require query-plan evidence.
@@ -235,7 +311,7 @@ An application-level recovery path should detect and repair an incomplete profil
 ### 7.1 Reads
 
 - A Server Component verifies the user and requests only data required by the route.
-- The board screen reads the board, selected-year daily totals, summary statistics, and selected-day entries.
+- The board screen reads the board, selected tracker/year aggregates, summary statistics, selected-day data, current CEFR declaration, and forecast inputs.
 - DTOs prevent accidental exposure of internal or unrelated fields.
 - Authenticated reads are dynamic and not shared across users.
 
@@ -252,6 +328,8 @@ Each Server Action follows this sequence:
 
 Board/activity creation and restoration use database functions so name restoration and active-count limits remain atomic under concurrent requests.
 
+Batch creation uses a single authenticated database function. The function derives the owner from `auth.uid()`, validates the owned board/activity and the complete range, records the operation ID, and inserts all generated entries atomically. Vocabulary uses an owned upsert constrained by the board/date uniqueness rule. CEFR declaration uses an owned mutation that validates the browser-local effective date at both the server boundary and constrained database function boundary.
+
 ## 8. Aggregation design
 
 MVP stores source entries only. Heatmap and statistics are derived in PostgreSQL.
@@ -261,6 +339,8 @@ Planned `security invoker` functions:
 - `get_board_year_heatmap(board_id, year)` returns daily totals and intensity levels.
 - `get_board_statistics(board_id, selected_year, local_today)` returns totals, averages, active days, activity breakdown, current streak, and longest streak.
 - `get_board_distribution(board_id, granularity, period)` returns chart buckets.
+- `get_board_vocabulary_year(board_id, year, local_today)` returns daily word totals, selected-year total, active days, and vocabulary streaks.
+- `get_board_cefr_forecast(board_id, local_today)` returns the current declaration, eligible minutes, seven-day pace, remaining reference minutes, and estimated date inputs.
 
 Rules:
 
@@ -270,6 +350,8 @@ Rules:
 - Selected-year total and heatmap include future entries.
 - Current-period averages and streaks exclude dates after `local_today`.
 - Weeks begin on Monday.
+- Vocabulary uses one source row per board/date and the same non-future active-day/streak cutoffs.
+- CEFR pace uses exactly seven calendar dates ending at `local_today`, including zero-study dates.
 
 No aggregate table or materialized view is planned. Index-backed aggregation over a single user's board is appropriate for the stated scale.
 
@@ -278,8 +360,12 @@ No aggregate table or materialized view is planned. Index-backed aggregation ove
 - Render a semantic, keyboard-accessible 7-row by week-column grid.
 - Calculate the calendar structure with pure deterministic date utilities.
 - Return pre-aggregated daily totals rather than all entries.
-- Map totals to fixed levels: `0`, `1–14`, `15–29`, `30–59`, `60–119`, `120–180`, and `181+`.
+- Map Study Time totals to fixed levels: `0`, `1–14`, `15–29`, `30–59`, `60–119`, `120–180`, and `181+`.
+- Derive the zero-minute semantic state from the cell date: past is red; today/future is white.
+- Map the three positive sub-hour levels to yellow-family tokens and the three 60+ levels to progressively darker green tokens.
+- Map Vocabulary totals independently to `0`, `1–2`, `3–5`, `6–9`, `10–14`, `15–19`, `20–39`, and `40+` green-family levels.
 - Expose a full accessible label such as `July 14, 2026: 30 minutes`.
+- Expose equivalent vocabulary labels such as `July 14, 2026: 12 new words`.
 - Use horizontal overflow on narrow screens rather than shrinking controls below a usable size.
 
 ## 10. Security model
@@ -292,6 +378,8 @@ Security is layered:
 4. Composite foreign keys enforce same-owner relationships.
 5. RLS restricts every database operation.
 6. Database constraints enforce bounds and referential integrity.
+
+The same controls apply to `study_entry_batches`, `vocabulary_daily_totals`, and `cefr_level_events`. Every table exposed through the Data API enables RLS and has explicit owner policies. Functions run with caller permissions where possible; any narrowly scoped `security definer` function must set a safe `search_path`, derive ownership from `auth.uid()`, avoid accepting trusted owner IDs, and have direct pgTAP abuse cases. Reference: [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
 The browser receives only the Supabase publishable key. Any future administrative capability must live in a dedicated server-only module and must never rely on client-provided ownership.
 
@@ -316,9 +404,12 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Leap years and 53-week heatmap layouts.
 - Monday week boundaries.
 - Intensity thresholds, especially 180 versus 181 minutes.
+- Past/today/future zero-state colors and every Study Time and Vocabulary threshold boundary.
 - Current/completed-year averages.
 - Future-entry exclusions.
 - Current and longest streak behavior.
+- Batch range validation, leap-year 366-day ranges, and cross-year rejection.
+- CEFR midpoint differences, remaining-minute floor, seven-day zero-inclusive pace, rounding, C2, and unavailable forecasts.
 
 ### Database tests
 
@@ -328,6 +419,9 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Cross-user composite-reference rejection.
 - RLS allow/deny behavior for every operation.
 - Aggregation correctness with archived activities and future entries.
+- Batch atomicity/idempotency and preservation of matching existing entries.
+- Vocabulary board/date uniqueness, upsert behavior, ownership, and RLS.
+- CEFR event ownership, valid levels, effective-date mutation validation, history, and RLS.
 
 ### Playwright tests
 
@@ -335,8 +429,12 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Sign in, sign out, and password recovery critical path.
 - Board and activity lifecycle.
 - Entry create/edit/delete on past, current, and future dates.
+- Collapsed create form, disabled-save prerequisites, card edit/cancel/update, and confirmed delete.
+- Batch creation preview, success, matching-entry preservation, and retry behavior.
+- Vocabulary tab create/edit/delete, heatmap, and streak behavior.
+- CEFR declaration history, approximate forecast disclosures, and zero-pace/C2 states.
 - User A cannot access User B's data.
-- Desktop and mobile heatmap interaction.
+- Desktop and mobile heatmap interaction, hover/focus/touch parity, and the 1366×768 above-the-fold contract.
 
 Playwright can launch the local app through its `webServer` configuration and use separate desktop/mobile projects.
 
@@ -351,3 +449,5 @@ The following are intentionally deferred beyond MVP:
 - theme system;
 - all-language analytics;
 - persisted aggregates or background processing.
+- vocabulary-to-CEFR word-count values;
+- ideal activity-distribution percentages by CEFR level.

@@ -61,6 +61,8 @@ The requirements structure is inspired by ISO/IEC/IEEE 29148 principles: each re
 | `FR-ACT`   | Activity-catalog function             | `FR-ACT-006`   |
 | `FR-ENTRY` | Study-entry function                  | `FR-ENTRY-004` |
 | `FR-HEAT`  | Heatmap function                      | `FR-HEAT-003`  |
+| `FR-VOCAB` | Vocabulary-tracking function          | `FR-VOCAB-003` |
+| `FR-CEFR`  | CEFR history and forecast function    | `FR-CEFR-004`  |
 | `FR-STAT`  | Statistics function                   | `FR-STAT-007`  |
 | `FR-UI`    | Cross-cutting interface function      | `FR-UI-002`    |
 | `NFR`      | Non-functional requirement            | `NFR-SEC-001`  |

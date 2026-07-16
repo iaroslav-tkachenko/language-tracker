@@ -35,6 +35,9 @@ This document describes the main MVP interactions from the user's point of view.
 | `UC-07` | Explore the yearly heatmap      | The learner reviews study consistency and opens a calendar day.                   |
 | `UC-08` | Review board statistics         | The learner reviews totals, averages, streaks, and distributions.                 |
 | `UC-09` | Archive a populated board       | The learner removes a board from the active interface without destroying history. |
+| `UC-10` | Add study entries for a date range | The learner safely creates one repeated entry on every date in an approved range. |
+| `UC-11` | Track daily vocabulary          | The learner creates, edits, or deletes one final new-word total for a date.        |
+| `UC-12` | Declare CEFR and review forecast | The learner maintains level history and reviews an approximate next-level date.   |
 
 ## 4. Detailed use cases
 
@@ -162,12 +165,15 @@ This document describes the main MVP interactions from the user's point of view.
 **Main success scenario:**
 
 1. The system displays the selected board and calendar date.
-2. The learner selects one active activity type.
-3. The learner selects a quick duration of 10, 15, 20, 30, 45, 60, 90, or 120 minutes, or enters a custom integer duration.
-4. The learner optionally enters a comment of up to 150 normalized characters.
-5. The learner saves the entry.
-6. The system validates ownership and all values, then stores exactly one entry.
-7. The day list, heatmap intensity, and affected statistics refresh.
+2. If the date is empty, the system displays `Add study session` rather than an expanded form.
+3. The learner activates `Add study session`.
+4. The system reveals quick and custom duration controls, active activities, `Other`, disabled `Save`, and `Cancel`.
+5. The learner selects one active activity type.
+6. The learner selects a quick duration of 10, 15, 20, 30, 45, 60, 90, or 120 minutes, or enters a custom integer duration.
+7. `Save` becomes active after both required values are valid.
+8. The learner optionally enters a comment of up to 150 normalized characters and saves.
+9. The system validates ownership and all values, then stores exactly one entry.
+10. The day card, heatmap intensity, and affected statistics refresh.
 
 **Alternatives and errors:**
 
@@ -189,13 +195,16 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Trigger:** The learner chooses edit or delete from a day's entry list.
 
+**Control discovery:** Each entry card shows duration, activity, and board name. Edit and delete controls appear on hover and focus and have an equivalent discoverable touch interaction.
+
 **Main success scenario — edit:**
 
 1. The system loads the entry's current date, activity, duration, and comment.
 2. The learner changes one or more values.
-3. The system validates ownership and the updated values.
-4. The system saves the changes atomically.
-5. The affected day lists, heatmaps, and statistics refresh.
+3. The learner chooses `Update`, or chooses `Cancel` to leave the entry unchanged.
+4. The system validates ownership and the updated values.
+5. The system saves the changes atomically.
+6. The affected day lists, heatmaps, and statistics refresh.
 
 **Delete scenario:**
 
@@ -223,9 +232,10 @@ This document describes the main MVP interactions from the user's point of view.
 1. The system displays a Monday-based yearly grid for the selected board and year.
 2. Each day shows intensity based on the sum of exact minutes for that date.
 3. The legend communicates the approved thresholds: 0, 1–14, 15–29, 30–59, 60–119, 120–180, and 181+ minutes.
-4. Future entries appear immediately in their dates and in the selected-year total.
-5. The learner moves to a previous or next year.
-6. The learner selects a date to review or add entries.
+4. A past zero-minute date is red, an empty today or future date is white, sub-hour positive levels are yellow-family colors, and 60+ minute levels are progressively darker green.
+5. Future entries appear immediately in their dates and in the selected-year total.
+6. The learner moves to a previous or next year.
+7. The learner selects a date to review or add entries.
 
 **Accessibility and responsive behavior:** Intensity is available through text or an accessible name, not color alone; on narrow screens the grid scrolls horizontally inside its region without widening the page.
 
@@ -248,7 +258,9 @@ This document describes the main MVP interactions from the user's point of view.
 3. The learner sees totals by activity, including historically used archived activities.
 4. The learner sees active-day count, calendar-day average, active-day average, current streak, and longest streak.
 5. The learner switches distribution granularity among day, week, month, and year.
-6. The interface explains the period represented by each distribution.
+6. The learner reviews actual time by activity for the latest seven calendar dates.
+7. The learner reviews Study Time, Vocabulary, and CEFR information with clearly identified units and periods.
+8. The interface explains the period and methodology represented by each distribution or forecast.
 
 **Calculation rules:** Future entries count in their selected year's total and heatmap, but not in current day/week/month metrics, averages, active-day counts, or streaks until their dates arrive. A current streak remains active when the latest active date is today or yesterday.
 
@@ -278,3 +290,77 @@ This document describes the main MVP interactions from the user's point of view.
 **Postconditions:** The board is archived and excluded from active product views, while its history remains recoverable at the data level.
 
 **Related requirements:** `FR-BOARD-007`, `FR-BOARD-008`, `BR-004`, `NFR-DATA-004`.
+
+### UC-10 — Add study entries for a date range
+
+**Goal:** Record one repeated activity and duration across many calendar dates without overwriting history.
+
+**Preconditions:** The learner is authenticated; the selected board and activity are active.
+
+**Trigger:** The learner chooses the date-range option from study-session creation.
+
+**Main success scenario:**
+
+1. The learner selects an activity, exact duration, optional shared comment, start date, and end date.
+2. The system validates that the inclusive range is ordered, remains within one calendar year, and contains no more than 366 dates.
+3. The system presents a confirmation summary with the number of entries and explains that existing entries remain.
+4. The learner confirms.
+5. The system atomically creates one independent entry for every date in the range.
+6. The heatmap and statistics refresh.
+
+**Alternatives and errors:**
+
+- Cancelling changes nothing.
+- Invalid, unauthorized, archived-resource, cross-year, or oversized input is rejected before any row is created.
+- A matching existing entry remains and receives an additional independent entry.
+- Retrying the same submission intent returns the original result without duplicating the batch.
+
+**Postconditions:** Every target date contains the new entry, or none do if the operation fails.
+
+**Related requirements:** `FR-ENTRY-018`–`FR-ENTRY-022`, `NFR-DATA-006`, `NFR-REL-002`.
+
+### UC-11 — Track daily vocabulary
+
+**Goal:** Maintain one final count of newly learned words for a board and calendar date.
+
+**Preconditions:** The learner is authenticated and has selected an active board.
+
+**Trigger:** The learner switches to `Vocabulary` and selects a date.
+
+**Main success scenario:**
+
+1. The system preserves the selected board and year and shows the Vocabulary heatmap.
+2. The learner enters a positive integer for the selected past, current, or future date.
+3. The system creates the single daily value or updates the existing value for that board/date.
+4. The heatmap, selected-year word total, active days, and vocabulary streak refresh.
+5. The learner may later edit the value or delete it after confirmation.
+
+**Alternatives and errors:** Invalid or unauthorized input changes nothing. Deleting the record returns the date to its zero state.
+
+**Postconditions:** The board/date has at most one vocabulary record and all derived views agree with it.
+
+**Related requirements:** `FR-VOCAB-001`–`FR-VOCAB-011`, `NFR-DATA-007`, `NFR-A11Y-005`.
+
+### UC-12 — Declare CEFR and review forecast
+
+**Goal:** Record a self-assessed language level and understand an approximate next-level trajectory.
+
+**Preconditions:** The learner is authenticated and has selected an active board.
+
+**Trigger:** The learner chooses to add or update the board's CEFR level.
+
+**Main success scenario:**
+
+1. The learner chooses A1, A2, B1, B2, C1, or C2, an effective past/current date, and an optional comment.
+2. The system saves the declaration without deleting earlier history.
+3. The system displays the current level and a concise sourced description.
+4. For A1–C1, the system calculates approximate remaining hours using the fixed Cambridge-based model and logged Study Time since the effective date.
+5. The system calculates the average across the latest seven calendar dates, including zero-study days.
+6. If pace is positive, the system displays an estimated date for the next level.
+7. The system displays the approximation and cross-language warning beside the forecast.
+
+**Alternatives and errors:** A future effective date is rejected. Zero pace produces no estimated date. C2 has no next level. Completing estimated hours prompts reassessment but never changes the level automatically.
+
+**Postconditions:** The declaration history is preserved and the forecast remains derived, transparent, and non-authoritative.
+
+**Related requirements:** `FR-CEFR-001`–`FR-CEFR-009`, `NFR-TRUST-001`–`NFR-TRUST-003`.

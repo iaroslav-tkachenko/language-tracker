@@ -2,7 +2,7 @@
 
 ## Current project status
 
-The project owner explicitly approved `docs/IMPLEMENTATION_PLAN.md` on July 14, 2026. MVP implementation is authorized and in progress. Keep work within the approved specification and phased plan.
+The project owner approved the original implementation plan on July 14, 2026 and an expanded phased product scope on July 16, 2026. The documentation baseline is being updated before implementation of the new scope begins. Do not implement the July 16 feature expansion until the project owner reviews the updated documentation and authorizes the next phase.
 
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 
@@ -30,6 +30,9 @@ If the files conflict, stop and ask the project owner to resolve the conflict. D
 - `Other` is a UI action that creates or restores a named custom activity; do not save entries against an unnamed generic `Other` activity.
 - Statistics and heatmaps are always scoped to one language board.
 - Study entries may use past, current, or future calendar dates.
+- Vocabulary uses one editable daily word total per language board and date.
+- CEFR levels are user-declared, board-specific historical events; the system never promotes a user automatically.
+- CEFR forecasts are approximate guidance and must display their methodology and limitations.
 - A used activity or language board must be archived rather than physically deleted.
 - Historical entries and statistics must survive activity archival and restoration.
 - Do not add features listed as out of scope in the product specification.
@@ -47,6 +50,7 @@ If the files conflict, stop and ask the project owner to resolve the conflict. D
 - Generate TypeScript database types from the schema rather than duplicating them manually.
 - Use `date` for `study_date` and `timestamptz` for audit timestamps.
 - Do not create cached or persisted aggregate tables for MVP statistics unless measurements prove they are necessary.
+- Batch entry creation must be atomic, idempotent for one submission intent, and must never overwrite existing study entries.
 - Preserve unrelated user changes in a dirty worktree.
 
 ## Validation defaults

@@ -13,6 +13,8 @@ The MVP is private and single-user in nature: it has no social graph, public dat
 - Make daily study logging fast on desktop and mobile.
 - Preserve an accurate, editable history of exact study minutes.
 - Provide a motivating yearly visual history and study streak.
+- Track newly learned vocabulary as a separate daily signal on every language board.
+- Preserve self-declared CEFR history and provide transparent, approximate progress guidance.
 - Provide useful statistics without combining unrelated languages.
 - Protect every user's data at both the application and database layers.
 
@@ -26,6 +28,8 @@ The MVP is private and single-user in nature: it has no social graph, public dat
 - Theme selection, dark theme, or system theme.
 - UI localization or an app-language selector.
 - Offline support or native mobile applications.
+- Automatic CEFR assessment, certification, or promotion.
+- User-defined CEFR hour targets, CEFR vocabulary cutoffs, or ideal activity distributions.
 
 ## 4. Users and access
 
@@ -57,6 +61,7 @@ A user can:
 - A used board is archived rather than physically deleted.
 - An archived board and its entries disappear from the normal UI and statistics.
 - Each heatmap and every statistic are scoped to exactly one selected board.
+- Each board exposes `Study Time` and `Vocabulary` tracker tabs and its own CEFR history.
 - There is no combined all-language view in MVP.
 
 ## 6. Activity catalog
@@ -146,6 +151,26 @@ Fixed quick-select values are:
 
 The user can also enter any valid custom integer duration. Values such as `3+ hours` are presentation labels and are never stored as entry durations.
 
+### 7.4 Selected-day interaction
+
+- Selecting an empty past, current, or future date shows its heading and `Add study session`; the entry form is initially collapsed.
+- Activating `Add study session` reveals quick durations, custom minutes, active activities, `Other`, disabled `Save`, and `Cancel`.
+- `Save` becomes available only after both a valid duration and active activity are selected.
+- A saved entry card shows its duration, activity, and language-board name.
+- Edit and delete actions appear on pointer hover and keyboard focus and have an equivalent discoverable touch interaction.
+- Edit exposes current values with explicit `Update` and `Cancel` actions.
+- Delete always requires confirmation.
+
+### 7.5 Batch entry creation
+
+The user can create the same study entry across a date range:
+
+1. Select one active board, active activity, exact duration, optional shared comment, start date, and end date.
+2. Review a confirmation containing the inclusive dates and number of entries.
+3. Confirm one atomic operation that creates one independent entry per date.
+
+The inclusive range must be ordered, remain inside one calendar year, and contain no more than 366 dates. Existing entries are never replaced, merged, or skipped, including entries with the same activity and duration. Retrying the same submission intent must not create a second copy of the batch.
+
 ## 8. Calendar and local-date behavior
 
 - An entry represents a calendar date rather than a time of day.
@@ -169,15 +194,16 @@ The user can also enter any valid custom integer duration. Values such as `3+ ho
 
 ### 9.2 Fixed intensity levels
 
-| Daily total | Level |
-| --- | ---: |
-| 0 minutes | 0 |
-| 1–14 minutes | 1 |
-| 15–29 minutes | 2 |
-| 30–59 minutes | 3 |
-| 60–119 minutes | 4 |
-| 120–180 minutes | 5 |
-| 181+ minutes | 6 |
+| Daily total | Level | Semantic color |
+| --- | ---: | --- |
+| 0 minutes on a past date | 0 | Red |
+| 0 minutes today or on a future date | 0 | White |
+| 1–14 minutes | 1 | Light yellow family |
+| 15–29 minutes | 2 | Yellow family |
+| 30–59 minutes | 3 | Strong yellow family |
+| 60–119 minutes | 4 | Light green |
+| 120–180 minutes | 5 | Green |
+| 181+ minutes | 6 | Dark green |
 
 The highest legend label is `3+ hours`, following the approved product wording. The exact numeric boundary is 181 minutes.
 
@@ -188,6 +214,21 @@ Levels are absolute rather than relative to that year's maximum, so the same col
 - Color is not the only source of information; each cell exposes its date and minute total to assistive technology and tooltips.
 - Cells have visible keyboard focus and can be selected by keyboard.
 - Mobile preserves a usable cell size and may horizontally scroll the yearly grid.
+
+### 9.4 Vocabulary tracker and heatmap
+
+Every language board provides a `Vocabulary` tab alongside `Study Time`.
+
+- A board/date has either no vocabulary record or one final positive-integer total of newly learned words.
+- The record stores only a count, not individual words.
+- The user can create the total for a past, current, or future date, edit it, or delete it after confirmation.
+- A second save for the same board/date updates the existing daily record rather than creating another row.
+- Zero is represented by no daily record.
+- The Vocabulary heatmap uses a green visual scale and independent year navigation while preserving the selected board.
+- Its fixed thresholds are `0`, `1–2`, `3–5`, `6–9`, `10–14`, `15–19`, `20–39`, and `40+` words.
+- Each cell exposes its date and word count without requiring color perception.
+
+Vocabulary summary statistics include selected-year word total, non-future active days, current streak, and longest streak. A vocabulary active day has at least one word. Future totals appear in the selected-year heatmap and total immediately but do not affect active-day counts or streaks until their date arrives.
 
 ## 10. Statistics
 
@@ -232,12 +273,57 @@ Statistics include a bar chart with a granularity selector:
 
 Future entries can appear in selected-year and selected-month distributions, but they remain excluded from current-period averages and streaks as specified above.
 
+### 10.5 Recent activity analysis
+
+Detailed statistics show actual Study Time grouped by activity across the latest seven calendar dates ending today. The window includes zero-study dates and excludes future entries. The user can distinguish activity, minutes, and period represented by the chart.
+
+The product will later compare actual allocation with a fixed ideal distribution for each CEFR level. The model will not be user-editable, but its percentages and methodology remain deferred until separate product-owner approval and must not be implemented with provisional values.
+
+### 10.6 CEFR declaration history
+
+- CEFR belongs to one language board.
+- The user manually declares A1, A2, B1, B2, C1, or C2 with an effective date no later than browser-local today and an optional comment of at most 150 normalized characters.
+- Earlier declarations remain visible; the latest effective declaration is current.
+- The system never infers or promotes the level from hours or vocabulary.
+- Each level has a concise product-authored description based on sourced CEFR can-do descriptors.
+
+### 10.7 Approximate next-level forecast
+
+The forecast uses the midpoint of Cambridge English's published cumulative guided-learning-hour ranges as a fixed reference:
+
+| CEFR level | Published cumulative range | Reference midpoint |
+| --- | ---: | ---: |
+| A1 | 90–100 hours | 95 hours |
+| A2 | 180–200 hours | 190 hours |
+| B1 | 350–400 hours | 375 hours |
+| B2 | 500–600 hours | 550 hours |
+| C1 | 700–800 hours | 750 hours |
+| C2 | 1,000–1,200 hours | 1,100 hours |
+
+For a current declaration below C2:
+
+1. Reference hours to the next level equal the difference between the next and current midpoints.
+2. Eligible logged Study Time is the board total from the current declaration's effective date through today.
+3. Remaining minutes equal the reference difference in minutes minus eligible logged minutes, with a floor of zero.
+4. Recent pace equals total eligible minutes over today and the previous six calendar dates divided by seven, including zero-study dates.
+5. When pace is positive, the forecast date is today plus the ceiling of remaining minutes divided by average minutes per calendar day.
+
+A zero pace produces no estimated date. C2 has no next level. Reaching zero remaining minutes prompts the user to reassess their level but never changes it automatically.
+
+Every result must state that the estimate applies Cambridge English guided-learning guidance to all language boards and is not a proficiency assessment or guarantee. Learning background, language, intensity, exposure, age, and other factors can materially change progress. Reference: [Cambridge English guided learning hours](https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours). CEFR descriptions are based on the [Council of Europe CEFR levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-%20descriptions).
+
+Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Their values remain deferred and must not be shown until separately approved.
+
 ## 11. Responsive UI
 
 - The interface is responsive on desktop and mobile.
 - MVP UI copy is English only.
 - MVP uses a light theme only.
 - The primary board screen contains board selection, year navigation, heatmap, summary metrics, the selected day's entries, and an entry form.
+- The primary board screen provides `Study Time` and `Vocabulary` tabs and places year navigation near the top without avoidable empty space.
+- At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
+- The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` may live in detailed statistics.
+- The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A settings area manages boards and the global activity catalog.
 - Destructive actions use clear labels and confirmation where historical data would become hidden.
 
@@ -249,6 +335,8 @@ Future entries can appear in selected-year and selected-month distributions, but
 - Invalid, expired, or reused authentication links show a recoverable error state.
 - Failed saves preserve user input and show actionable feedback.
 - Repeated submissions must not silently create unintended duplicate entries.
+- Batch creation either creates every target entry or none and is idempotent for one operation identifier.
+- Forecast errors or unavailable inputs produce an honest unavailable state rather than an invented value.
 
 ## 13. Capacity and performance assumptions
 
@@ -259,4 +347,4 @@ Future entries can appear in selected-year and selected-month distributions, but
 
 ## 14. Acceptance summary
 
-The MVP is acceptable when an authenticated user can manage up to six private boards and 30 global activities, record exact minutes on any date, safely retain history through activity and board archival, use the yearly heatmap, and view correct board-specific statistics on desktop and mobile without accessing another user's data.
+The expanded phased MVP is acceptable when an authenticated user can manage up to six private boards and 30 global activities; record exact minutes on one date or an approved date range; maintain one daily vocabulary total; retain study, vocabulary, activity, board, and CEFR history safely; use both yearly heatmaps; and review correct, transparent board-specific statistics and forecasts on desktop and mobile without accessing another user's data.
