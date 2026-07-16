@@ -2,7 +2,7 @@
 
 ## 1. Status and decision gate
 
-This document defines the planned architecture. It does not authorize implementation. No application scaffold, dependency installation, migration, or product code may be added until the project owner explicitly approves `docs/IMPLEMENTATION_PLAN.md`.
+This document defines the approved architecture. The project owner authorized implementation on July 14, 2026. Changes must remain within the product specification and implementation plan.
 
 ## 2. Architecture summary
 

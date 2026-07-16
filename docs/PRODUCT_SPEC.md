@@ -1,5 +1,7 @@
 # Product Specification
 
+> For role-based reading paths and the structured requirements set, start at the [documentation home](README.md).
+
 ## 1. Product overview
 
 Language Learning Time Tracker is a responsive web application for recording time spent learning foreign languages. A user creates separate language boards, records study entries on calendar dates, and reviews a yearly contribution-style heatmap and statistics for each board.
