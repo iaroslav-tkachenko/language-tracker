@@ -196,7 +196,7 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Trigger:** The learner chooses edit or delete from a day's entry list.
 
-**Control discovery:** Each entry card shows duration, activity, and board name. Edit and delete controls appear on hover and focus on desktop; both icons remain persistently visible on mobile/touch layouts.
+**Control discovery:** Each entry card shows duration, activity, and its activity icon without repeating the current board name. Standard activities have distinct icons; all user-created activities share one distinct custom-activity icon. Edit and delete controls appear on hover and focus on desktop; both icons remain persistently visible on mobile/touch layouts.
 
 **Main success scenario — edit:**
 

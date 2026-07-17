@@ -49,6 +49,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 - Show `Study Time` and a disabled `Vocabulary` tab labelled `Coming soon`; do not enable Vocabulary behavior before Phase 3.
 - At 1366×768 and 100% zoom, show navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` without page scrolling.
 - Prioritize selected-year total, selected-year active days, and flame-treated current streak. Remove `Top activity` from the main screen. For screenshot review and the isolated test user only, use `Current level: B1` and `Estimated B2: in about 6 months at this pace`; never expose this fixture as production-user data.
+- Render the current-level value in a circular badge and give the selected-day numeric total the stronger visual treatment approved from the high-contrast concept.
 - Give the statistics destination an explicit text label or icon-and-label treatment.
 
 Before changing the application layout, prepare two static screenshot alternatives using the same content and different heatmap color treatments. The project owner selects one direction; only then implement the approved screen. After implementation, provide desktop and mobile screenshots plus a clickable local preview before continuing to Milestone 1B.
@@ -58,7 +59,9 @@ Before changing the application layout, prepare two static screenshot alternativ
 - Keep the form collapsed behind `Add study session` for an empty selected date.
 - Reveal quick/custom duration, active activities, `Other`, disabled `Save`, and `Cancel` on demand.
 - Enable `Save` only when duration and activity are valid.
-- Render entry cards with duration, activity, and board name.
+- Render entry cards with duration and activity only; do not repeat the current board name.
+- Give standard activities distinct Lucide icons: Reading (`BookOpen`), Podcast (`Headphones`), Speaking (`MessagesSquare`), Writing (`PenLine`), Anki (`Layers3`), Grammar (`SpellCheck2`), and TV Show / Film (`Clapperboard`). Use `Shapes` as the one shared, visually distinct icon for every user-created activity.
+- Place prominent previous-day and next-day arrows beside the selected date; each activation changes the selected date by exactly one calendar day, including across month and year boundaries.
 - Provide hover/focus edit and delete controls on desktop and keep both icons persistently visible on mobile/touch layouts.
 - Show `Add study session` below existing cards so the user can add another entry to a populated date.
 - Implement edit with `Update`/`Cancel` and deletion with explicit confirmation.
@@ -71,6 +74,7 @@ Before changing the application layout, prepare two static screenshot alternativ
 - Retain fixed minute thresholds: 0, 1–14, 15–29, 30–59, 60–119, 120–180, and 181+.
 - Render past zero-minute dates red and zero-minute today/future dates white.
 - Use three fixed yellow-family positive levels below 60 minutes and three progressively darker green levels from 60 minutes.
+- Use the approved soft treatment: muted missed-day red, warm yellows, and muted sage-to-forest greens.
 - Preserve accessible labels, visible focus, equivalent non-color detail, and mobile horizontal containment.
 - Complete selected-year/current-period totals, averages, active days, current/longest streaks, activity totals, and day/week/month/year distributions.
 - Add actual activity allocation for the latest seven calendar dates ending today.
@@ -79,7 +83,7 @@ Before changing the application layout, prepare two static screenshot alternativ
 
 - Unit: calendar boundaries, all heatmap bands and date states, averages, future exclusions, and streaks.
 - Database: aggregation and ownership fixtures.
-- Playwright: disabled `Vocabulary — Coming soon`, absence of `Top activity` on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, create/edit/cancel/update/delete, two persistent mobile action icons, desktop 1366×768 visibility, keyboard flow, and non-color information.
+- Playwright: disabled `Vocabulary — Coming soon`, absence of `Top activity` and repeated board names on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, previous/next day navigation across calendar boundaries, standard/custom activity icons, create/edit/cancel/update/delete, two persistent mobile action icons, desktop 1366×768 visibility, keyboard flow, and non-color information.
 
 ### Phase exit criteria
 

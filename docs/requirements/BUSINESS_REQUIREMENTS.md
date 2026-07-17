@@ -86,6 +86,10 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-056`: On mobile/touch layouts, edit and delete icons remain persistently visible on every study-entry card.
 - `BR-RULE-057`: During Phases 1 and 2, the visible Vocabulary tab is disabled and labelled `Coming soon`.
 - `BR-RULE-058`: `Top activity` does not appear in the primary summary; Phase 1 design review may use an isolated B1-to-B2 six-month test fixture until real Phase 4 CEFR data replaces it.
+- `BR-RULE-059`: A study-entry card does not repeat the current board name; standard activities have distinct recognizable icons, while all user-created activities share one distinct custom-activity icon.
+- `BR-RULE-067`: Previous-day and next-day controls move the selected day by exactly one calendar date without changing the selected board.
+- `BR-RULE-068`: The selected-day total receives stronger visual emphasis than supporting labels, while remaining understandable to assistive technology.
+- `BR-RULE-069`: The Study Time heatmap uses the approved soft red, warm-yellow, and muted-green visual direction while preserving the fixed semantic bands.
 
 ### Vocabulary
 

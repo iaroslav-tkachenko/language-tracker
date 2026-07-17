@@ -155,11 +155,14 @@ The user can also enter any valid custom integer duration. Values such as `3+ ho
 - Selecting an empty past, current, or future date shows its heading and `Add study session`; the entry form is initially collapsed.
 - Activating `Add study session` reveals quick durations, custom minutes, active activities, `Other`, disabled `Save`, and `Cancel`.
 - `Save` becomes available only after both a valid duration and active activity are selected.
-- A saved entry card shows its duration, activity, and language-board name.
+- A saved entry card shows its duration and activity without repeating the current language-board name.
+- Every standard activity uses its own recognizable icon. All user-created activities share one distinct custom-activity icon; the icon is presentation metadata and does not change the stored activity model.
 - Edit and delete actions appear on pointer hover and keyboard focus on desktop. Both icons remain persistently visible on mobile/touch layouts.
 - Edit exposes current values with explicit `Update` and `Cancel` actions.
 - Delete always requires confirmation.
 - A populated selected day shows `Add study session` below its existing entry cards so another independent entry can be added directly.
+- Prominent previous-day and next-day arrow controls beside the selected date move the day view by exactly one calendar date while preserving the selected board.
+- The selected day's total is visually emphasized, with the numeric duration stronger than its supporting `total` label.
 
 ### 7.5 Batch entry creation
 
@@ -208,6 +211,8 @@ The inclusive range must be ordered, remain inside one calendar year, and contai
 The highest legend label is `3+ hours`, following the approved product wording. The exact numeric boundary is 181 minutes.
 
 Levels are absolute rather than relative to that year's maximum, so the same color always represents the same range.
+
+The Phase 1 visual direction uses a soft, approachable version of the semantic palette: muted red for missed past dates, warm yellows below 60 minutes, and muted sage-to-forest greens from 60 minutes upward.
 
 ### 9.3 Accessibility and responsive behavior
 
@@ -324,6 +329,7 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - During Phases 1 and 2, `Vocabulary` is visible but disabled with `Coming soon`; it becomes interactive only when Phase 3 is complete.
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
 - The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.
+- When the current CEFR level appears in the primary summary, its value uses a circular badge rather than a pill or oval.
 - Phase 1 screenshot reviews may use an isolated test-user fixture reading `Current level: B1` and `Estimated B2: in about 6 months at this pace`. This fixture must never be presented as real data to a production user and is replaced by the Phase 4 calculation.
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A settings area manages boards and the global activity catalog.
