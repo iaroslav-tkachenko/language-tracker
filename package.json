@@ -7,9 +7,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
+    "db:start": "node scripts/run-supabase.mjs start",
+    "db:stop": "node scripts/run-supabase.mjs stop",
+    "db:reset": "node scripts/run-supabase.mjs db reset",
+    "db:test": "node scripts/run-supabase.mjs test db",
+    "db:types": "node scripts/run-supabase.mjs gen types typescript --local --schema public > src/lib/database.types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
@@ -21,6 +30,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
@@ -28,9 +38,9 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "16.2.10",
     "prettier": "^3.0.0",
+    "supabase": "^2.109.1",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   }
 }
-

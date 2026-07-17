@@ -47,6 +47,7 @@ flowchart TD
 - [Product specification](PRODUCT_SPEC.md) — approved narrative baseline for MVP behavior.
 - [Architecture](ARCHITECTURE.md) — system boundaries, security model, data model, and technical decisions.
 - [Implementation plan](IMPLEMENTATION_PLAN.md) — the current Phase 0–4 delivery sequence, review milestones, risks, exit criteria, and definition of done.
+- [Supabase setup and verification](development/SUPABASE_SETUP.md) — hosted/local setup, migrations, generated types, authentication redirects, and Phase 0 checks.
 - [Repository instructions](../AGENTS.md) — rules that apply to automated and human contributors.
 
 ## Documentation conventions

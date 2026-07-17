@@ -1,9 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/env";
+import {
+  credentialsSchema,
+  emailSchema,
+  resetPasswordSchema,
+} from "@/lib/auth/validation";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionState = {
@@ -11,25 +16,6 @@ export type AuthActionState = {
   message?: string;
   fieldErrors?: Record<string, string[]>;
 };
-
-const credentialsSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z
-    .string()
-    .min(8, "Password must contain at least 8 characters.")
-    .max(72, "Password must contain at most 72 characters."),
-});
-
-const emailSchema = credentialsSchema.pick({ email: true });
-const resetPasswordSchema = z
-  .object({
-    password: credentialsSchema.shape.password,
-    confirmPassword: z.string(),
-  })
-  .refine(({ password, confirmPassword }) => password === confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
 
 function configurationError(): AuthActionState | null {
   return isSupabaseConfigured()
