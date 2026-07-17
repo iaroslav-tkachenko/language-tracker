@@ -141,25 +141,25 @@ src/
 
 ### 5.1 `profiles`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `user_id` | `uuid` | Primary key; references `auth.users(id)` with cascade deletion |
-| `created_at` | `timestamptz` | Required, default current timestamp |
-| `updated_at` | `timestamptz` | Required, maintained on update |
+| Column       | Type          | Constraints and purpose                                        |
+| ------------ | ------------- | -------------------------------------------------------------- |
+| `user_id`    | `uuid`        | Primary key; references `auth.users(id)` with cascade deletion |
+| `created_at` | `timestamptz` | Required, default current timestamp                            |
+| `updated_at` | `timestamptz` | Required, maintained on update                                 |
 
 No user time-zone setting is stored in MVP. A profile table is retained as an application-owned lifecycle anchor and extension point.
 
 ### 5.2 `language_boards`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `id` | `uuid` | Primary key, generated UUID |
-| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
-| `name` | `text` | Required trimmed name, 1–50 characters |
-| `position` | `smallint` | Required display order |
-| `archived_at` | `timestamptz` | Null while active |
-| `created_at` | `timestamptz` | Audit timestamp |
-| `updated_at` | `timestamptz` | Audit timestamp |
+| Column        | Type          | Constraints and purpose                        |
+| ------------- | ------------- | ---------------------------------------------- |
+| `id`          | `uuid`        | Primary key, generated UUID                    |
+| `user_id`     | `uuid`        | Required owner; references `profiles(user_id)` |
+| `name`        | `text`        | Required trimmed name, 1–50 characters         |
+| `position`    | `smallint`    | Required display order                         |
+| `archived_at` | `timestamptz` | Null while active                              |
+| `created_at`  | `timestamptz` | Audit timestamp                                |
+| `updated_at`  | `timestamptz` | Audit timestamp                                |
 
 Required database rules:
 
@@ -169,16 +169,16 @@ Required database rules:
 
 ### 5.3 `activity_types`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `id` | `uuid` | Primary key, generated UUID |
-| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
-| `name` | `text` | Required current display name, 1–50 characters |
-| `system_key` | `text` | Nullable stable origin for seeded activities |
-| `position` | `smallint` | Required display order |
-| `archived_at` | `timestamptz` | Null while selectable |
-| `created_at` | `timestamptz` | Audit timestamp |
-| `updated_at` | `timestamptz` | Audit timestamp |
+| Column        | Type          | Constraints and purpose                        |
+| ------------- | ------------- | ---------------------------------------------- |
+| `id`          | `uuid`        | Primary key, generated UUID                    |
+| `user_id`     | `uuid`        | Required owner; references `profiles(user_id)` |
+| `name`        | `text`        | Required current display name, 1–50 characters |
+| `system_key`  | `text`        | Nullable stable origin for seeded activities   |
+| `position`    | `smallint`    | Required display order                         |
+| `archived_at` | `timestamptz` | Null while selectable                          |
+| `created_at`  | `timestamptz` | Audit timestamp                                |
+| `updated_at`  | `timestamptz` | Audit timestamp                                |
 
 Required database rules:
 
@@ -190,18 +190,18 @@ Required database rules:
 
 ### 5.4 `study_entries`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `id` | `uuid` | Primary key, generated UUID |
-| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
-| `board_id` | `uuid` | Required board |
-| `activity_type_id` | `uuid` | Required activity |
-| `study_date` | `date` | Required local calendar date; past, present, or future |
-| `duration_minutes` | `smallint` | Integer from 1 through 1,440 |
-| `comment` | `varchar(150)` | Nullable normalized comment |
-| `batch_id` | `uuid` | Nullable provenance link to `study_entry_batches`; absent for single-day creation |
-| `created_at` | `timestamptz` | Audit timestamp |
-| `updated_at` | `timestamptz` | Audit timestamp |
+| Column             | Type           | Constraints and purpose                                                           |
+| ------------------ | -------------- | --------------------------------------------------------------------------------- |
+| `id`               | `uuid`         | Primary key, generated UUID                                                       |
+| `user_id`          | `uuid`         | Required owner; references `profiles(user_id)`                                    |
+| `board_id`         | `uuid`         | Required board                                                                    |
+| `activity_type_id` | `uuid`         | Required activity                                                                 |
+| `study_date`       | `date`         | Required local calendar date; past, present, or future                            |
+| `duration_minutes` | `smallint`     | Integer from 1 through 1,440                                                      |
+| `comment`          | `varchar(150)` | Nullable normalized comment                                                       |
+| `batch_id`         | `uuid`         | Nullable provenance link to `study_entry_batches`; absent for single-day creation |
+| `created_at`       | `timestamptz`  | Audit timestamp                                                                   |
+| `updated_at`       | `timestamptz`  | Audit timestamp                                                                   |
 
 Ownership constraints:
 
@@ -217,17 +217,17 @@ Reference: [PostgreSQL date/time types](https://www.postgresql.org/docs/current/
 
 ### 5.5 `study_entry_batches`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `id` | `uuid` | Client-generated operation identifier and primary key |
-| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
-| `board_id` | `uuid` | Required owned board |
-| `activity_type_id` | `uuid` | Required owned activity |
-| `start_date` | `date` | Inclusive first date |
-| `end_date` | `date` | Inclusive final date |
-| `duration_minutes` | `smallint` | Integer from 1 through 1,440 copied to each entry |
-| `comment` | `varchar(150)` | Nullable shared comment copied to each entry |
-| `created_at` | `timestamptz` | Audit timestamp |
+| Column             | Type           | Constraints and purpose                               |
+| ------------------ | -------------- | ----------------------------------------------------- |
+| `id`               | `uuid`         | Client-generated operation identifier and primary key |
+| `user_id`          | `uuid`         | Required owner; references `profiles(user_id)`        |
+| `board_id`         | `uuid`         | Required owned board                                  |
+| `activity_type_id` | `uuid`         | Required owned activity                               |
+| `start_date`       | `date`         | Inclusive first date                                  |
+| `end_date`         | `date`         | Inclusive final date                                  |
+| `duration_minutes` | `smallint`     | Integer from 1 through 1,440 copied to each entry     |
+| `comment`          | `varchar(150)` | Nullable shared comment copied to each entry          |
+| `created_at`       | `timestamptz`  | Audit timestamp                                       |
 
 Required rules:
 
@@ -242,15 +242,15 @@ An authenticated database function validates the complete payload and inserts th
 
 ### 5.6 `vocabulary_daily_totals`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `id` | `uuid` | Primary key, generated UUID |
-| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
-| `board_id` | `uuid` | Required owned board |
-| `study_date` | `date` | Required local calendar date; past, present, or future |
-| `words_learned` | `integer` | Required positive final daily total |
-| `created_at` | `timestamptz` | Audit timestamp |
-| `updated_at` | `timestamptz` | Audit timestamp |
+| Column          | Type          | Constraints and purpose                                |
+| --------------- | ------------- | ------------------------------------------------------ |
+| `id`            | `uuid`        | Primary key, generated UUID                            |
+| `user_id`       | `uuid`        | Required owner; references `profiles(user_id)`         |
+| `board_id`      | `uuid`        | Required owned board                                   |
+| `study_date`    | `date`        | Required local calendar date; past, present, or future |
+| `words_learned` | `integer`     | Required positive final daily total                    |
+| `created_at`    | `timestamptz` | Audit timestamp                                        |
+| `updated_at`    | `timestamptz` | Audit timestamp                                        |
 
 Required rules:
 
@@ -261,16 +261,16 @@ Required rules:
 
 ### 5.7 `cefr_level_events`
 
-| Column | Type | Constraints and purpose |
-| --- | --- | --- |
-| `id` | `uuid` | Primary key, generated UUID |
-| `user_id` | `uuid` | Required owner; references `profiles(user_id)` |
-| `board_id` | `uuid` | Required owned board |
-| `level` | `text` | Required check-constrained value: A1, A2, B1, B2, C1, or C2 |
-| `effective_date` | `date` | User-declared past or current local calendar date |
-| `comment` | `varchar(150)` | Nullable normalized context |
-| `created_at` | `timestamptz` | Audit timestamp |
-| `updated_at` | `timestamptz` | Audit timestamp |
+| Column           | Type           | Constraints and purpose                                     |
+| ---------------- | -------------- | ----------------------------------------------------------- |
+| `id`             | `uuid`         | Primary key, generated UUID                                 |
+| `user_id`        | `uuid`         | Required owner; references `profiles(user_id)`              |
+| `board_id`       | `uuid`         | Required owned board                                        |
+| `level`          | `text`         | Required check-constrained value: A1, A2, B1, B2, C1, or C2 |
+| `effective_date` | `date`         | User-declared past or current local calendar date           |
+| `comment`        | `varchar(150)` | Nullable normalized context                                 |
+| `created_at`     | `timestamptz`  | Audit timestamp                                             |
+| `updated_at`     | `timestamptz`  | Audit timestamp                                             |
 
 Required rules:
 
@@ -339,6 +339,7 @@ Planned `security invoker` functions:
 - `get_board_year_heatmap(board_id, year)` returns daily totals and intensity levels.
 - `get_board_statistics(board_id, selected_year, local_today)` returns totals, averages, active days, activity breakdown, current streak, and longest streak.
 - `get_board_distribution(board_id, granularity, period)` returns chart buckets.
+- `get_board_recent_activity(board_id, local_today)` returns minutes grouped by activity for the seven calendar dates ending at `local_today`.
 - `get_board_vocabulary_year(board_id, year, local_today)` returns daily word totals, selected-year total, active days, and vocabulary streaks.
 - `get_board_cefr_forecast(board_id, local_today)` returns the current declaration, eligible minutes, seven-day pace, remaining reference minutes, and estimated date inputs.
 
@@ -352,6 +353,35 @@ Rules:
 - Weeks begin on Monday.
 - Vocabulary uses one source row per board/date and the same non-future active-day/streak cutoffs.
 - CEFR pace uses exactly seven calendar dates ending at `local_today`, including zero-study dates.
+
+### 8.1 CEFR reference model and calculation
+
+The first forecast model is versioned immutable application reference data named `cambridge-midpoint-v1`. It uses these published cumulative ranges and canonical midpoint hours:
+
+| Level | Published range | Canonical midpoint |
+| ----- | --------------: | -----------------: |
+| A1    |          90–100 |                 95 |
+| A2    |         180–200 |                190 |
+| B1    |         350–400 |                375 |
+| B2    |         500–600 |                550 |
+| C1    |         700–800 |                750 |
+| C2    |     1,000–1,200 |              1,100 |
+
+For the latest effective declaration below C2:
+
+```text
+referenceMinutes = (nextMidpointHours - currentMidpointHours) * 60
+eligibleMinutes = sum(study entries from effectiveDate through localToday)
+remainingMinutes = max(0, referenceMinutes - eligibleMinutes)
+sevenDayMinutes = sum(study entries from localToday - 6 days through localToday)
+averageMinutesPerDay = sevenDayMinutes / 7
+daysRemaining = ceil(remainingMinutes / averageMinutesPerDay)
+estimatedDate = localToday + daysRemaining
+```
+
+`estimatedDate` is absent when there is no current declaration, the current level is C2, or `averageMinutesPerDay` is zero. When `remainingMinutes` is zero, the UI asks the learner to reassess rather than changing their level. The query returns the model key and calculation inputs so UI copy and tests can disclose and reproduce the result.
+
+The model deliberately applies Cambridge English guidance across all boards for the first version. It must be labelled approximate and non-diagnostic. Reference: [Cambridge English guided learning hours](https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours).
 
 No aggregate table or materialized view is planned. Index-backed aggregation over a single user's board is appropriate for the stated scale.
 
@@ -442,7 +472,7 @@ References: [Playwright web server](https://playwright.dev/docs/test-webserver),
 
 ## 13. Deferred decisions
 
-The following are intentionally deferred beyond MVP:
+The following are intentionally outside the current expanded MVP or blocked until separate product approval:
 
 - import/export format;
 - localization architecture;

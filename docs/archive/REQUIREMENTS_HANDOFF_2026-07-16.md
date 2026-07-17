@@ -1,10 +1,10 @@
-# Expanded Requirements Update — Work Handoff
+# Archived Expanded Requirements Work Handoff — July 16, 2026
 
 ## Status
 
-**Paused safely on July 16, 2026 at the project owner's request.**
+**Historical checkpoint completed on July 17, 2026.**
 
-This is a checkpoint, not the final approved documentation baseline. No expanded-scope feature implementation is authorized until the documents listed below are completed, validated, reviewed by the project owner, and explicitly approved for Phase 1.
+This file records the checkpoint used to resume the documentation update. Its work items were completed on July 17, 2026. The current sources of truth are `../PRODUCT_SPEC.md`, `../ARCHITECTURE.md`, and `../IMPLEMENTATION_PLAN.md`. Expanded-scope implementation still requires explicit product-owner authorization for Phase 1.
 
 ## Approved product decisions captured
 
@@ -47,6 +47,6 @@ This is a checkpoint, not the final approved documentation baseline. No expanded
 8. Create a final documentation commit and push it to GitHub.
 9. Present the completed documentation to the project owner and wait for explicit Phase 1 implementation approval.
 
-## Implementation prohibition
+## Completion note
 
-Do not change application functionality, database migrations, or tests for the expanded requirements while this handoff remains incomplete. The next work session is documentation-only until the final review gate is satisfied.
+The architecture calculation, re-baselined implementation plan, traceability updates, navigation/status wording, and documentation checks were completed in the resumed work session. This archived checklist is not an active instruction file.

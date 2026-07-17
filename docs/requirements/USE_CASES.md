@@ -24,20 +24,20 @@ This document describes the main MVP interactions from the user's point of view.
 
 ## 3. Use-case overview
 
-| ID      | Use case                        | Primary outcome                                                                   |
-| ------- | ------------------------------- | --------------------------------------------------------------------------------- |
-| `UC-01` | Register and confirm an account | The learner obtains a verified private account.                                   |
-| `UC-02` | Sign in or recover access       | The learner establishes a valid session or resets the password.                   |
-| `UC-03` | Manage language boards          | The learner creates, selects, renames, reorders, or archives a board.             |
-| `UC-04` | Manage the activity catalog     | The learner maintains reusable global activity types without losing history.      |
-| `UC-05` | Add a study entry               | The learner records exact study time for a selected board and date.               |
-| `UC-06` | Edit or delete a study entry    | The learner corrects previously recorded data.                                    |
-| `UC-07` | Explore the yearly heatmap      | The learner reviews study consistency and opens a calendar day.                   |
-| `UC-08` | Review board statistics         | The learner reviews totals, averages, streaks, and distributions.                 |
-| `UC-09` | Archive a populated board       | The learner removes a board from the active interface without destroying history. |
+| ID      | Use case                           | Primary outcome                                                                   |
+| ------- | ---------------------------------- | --------------------------------------------------------------------------------- |
+| `UC-01` | Register and confirm an account    | The learner obtains a verified private account.                                   |
+| `UC-02` | Sign in or recover access          | The learner establishes a valid session or resets the password.                   |
+| `UC-03` | Manage language boards             | The learner creates, selects, renames, reorders, or archives a board.             |
+| `UC-04` | Manage the activity catalog        | The learner maintains reusable global activity types without losing history.      |
+| `UC-05` | Add a study entry                  | The learner records exact study time for a selected board and date.               |
+| `UC-06` | Edit or delete a study entry       | The learner corrects previously recorded data.                                    |
+| `UC-07` | Explore the yearly heatmap         | The learner reviews study consistency and opens a calendar day.                   |
+| `UC-08` | Review board statistics            | The learner reviews totals, averages, streaks, and distributions.                 |
+| `UC-09` | Archive a populated board          | The learner removes a board from the active interface without destroying history. |
 | `UC-10` | Add study entries for a date range | The learner safely creates one repeated entry on every date in an approved range. |
-| `UC-11` | Track daily vocabulary          | The learner creates, edits, or deletes one final new-word total for a date.        |
-| `UC-12` | Declare CEFR and review forecast | The learner maintains level history and reviews an approximate next-level date.   |
+| `UC-11` | Track daily vocabulary             | The learner creates, edits, or deletes one final new-word total for a date.       |
+| `UC-12` | Declare CEFR and review forecast   | The learner maintains level history and reviews an approximate next-level date.   |
 
 ## 4. Detailed use cases
 

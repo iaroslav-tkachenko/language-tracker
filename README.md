@@ -1,12 +1,12 @@
 # Language Learning Time Tracker
 
-A responsive web application for recording and reviewing time spent learning foreign languages. Each user maintains private language boards, logs one or more study entries for any calendar date, and reviews a GitHub-style yearly heatmap and board-specific statistics.
+A responsive web application for recording and reviewing foreign-language study time, newly learned vocabulary, and self-declared CEFR progress on private language boards.
 
 ## Project status
 
-**Implementation in progress.**
+**Expanded documentation baseline ready for product-owner review; new-scope implementation is not yet authorized.**
 
-The project owner approved the implementation plan on July 14, 2026. A responsive, clickable visual prototype is available; its data is currently in-memory demonstration data while the Supabase-backed MVP is being implemented.
+The project owner approved the original implementation plan on July 14, 2026 and the expanded four-phase direction on July 16, 2026. The requirements, architecture, traceability, and delivery plan now describe that direction. Phase 1 begins only after explicit review approval. The existing responsive prototype remains in-memory demonstration data rather than proof of the expanded functionality.
 
 ### Current local preview
 
@@ -18,10 +18,12 @@ When the development or production server is running, open [http://localhost:300
 - Private per-user data protected by Supabase Row Level Security.
 - Up to six language boards per user.
 - One global activity catalog per user, shared across all boards.
-- Unlimited study entries per calendar day, saved one entry at a time.
+- Unlimited study entries per calendar day plus atomic, non-overwriting date-range creation of up to 366 entries.
 - Exact durations from 1 to 1,440 minutes, with fixed quick-select values.
-- A yearly heatmap with fixed, comparable intensity thresholds.
-- Board-specific totals, averages, active days, streaks, and time distributions.
+- Separate Study Time and Vocabulary yearly heatmaps with fixed, comparable intensity thresholds.
+- One editable final vocabulary total per board and date.
+- Board-specific totals, averages, active days, streaks, recent activity allocation, and time distributions.
+- User-declared CEFR history and a clearly qualified Cambridge-based next-level forecast.
 - Responsive English-language interface for desktop and mobile.
 
 ## Planned stack

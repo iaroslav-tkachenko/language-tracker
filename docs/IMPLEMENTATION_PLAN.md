@@ -2,252 +2,237 @@
 
 ## 1. Approval gate
 
-**Current status: approved by the project owner on July 14, 2026; implementation in progress.**
+**Current status: documentation review required before expanded-scope implementation.**
 
-Phase 1 has started on branch `codex/mvp-foundation`. The first responsive visual prototype is available for review while database-backed functionality remains in progress.
+The project owner approved the original MVP plan on July 14, 2026 and the four-phase product direction on July 16, 2026. This document re-baselines delivery around that direction. No July 16 feature expansion may begin until the project owner reviews this completed documentation baseline and explicitly authorizes Phase 1.
+
+The existing responsive prototype and any completed foundation work are inputs to this plan, not evidence that the expanded requirements are implemented.
 
 ## 2. Delivery principles
 
-- Deliver vertical, testable increments.
-- Put security and schema constraints in place before feature UI depends on them.
-- Keep the MVP within the approved product specification.
-- Prefer simple source-of-truth data over duplicated aggregates.
-- Verify responsive behavior and accessibility throughout implementation, not only at the end.
-- Keep every phase buildable and reviewable.
+- Deliver vertical, clickable increments that the project owner can inspect.
+- Notify the project owner whenever a new visual or clickable milestone is ready.
+- Keep every phase buildable, testable, and independently reviewable.
+- Establish database ownership, constraints, and RLS before production UI depends on new data.
+- Derive statistics from source records; do not add persisted aggregates without measurement.
+- Treat approximate CEFR guidance as transparent motivation, never assessment or guarantee.
+- Do not implement deferred reference models with guessed values.
+- Verify responsive behavior and accessibility throughout delivery.
 
-## 3. Phase 1 — Project foundation
+## 3. Phase 0 — Foundation and security baseline
 
-### Work
-
-- Scaffold the current stable Next.js App Router with TypeScript and `src/` layout.
-- Enable strict TypeScript, Tailwind CSS, linting, and formatting.
-- Choose and lock one package manager.
-- Add environment-variable validation and `.env.example` without secrets.
-- Initialize Supabase CLI directories and local configuration.
-- Add baseline unit-test, pgTAP, and Playwright configuration.
-- Add CI checks for formatting, linting, type checking, tests, and build.
-- Establish accessible UI primitives and global visual tokens based on the supplied mockups.
-
-### Exit criteria
-
-- The empty app runs locally and produces a production build.
-- CI executes the baseline checks.
-- No secrets are committed.
-- Desktop and mobile shell layouts render without overflow defects.
-
-## 4. Phase 2 — Database foundation and RLS
+Phase 0 consolidates the original technical foundation. Completed items are verified rather than recreated; missing items remain prerequisites for production-backed features.
 
 ### Work
 
-- Create migrations for `profiles`, `language_boards`, `activity_types`, and `study_entries`.
-- Add length, duration, referential, uniqueness, and archival constraints.
-- Add composite ownership keys and initial indexes.
-- Add the new-user initialization trigger and the seven persisted standard activity seeds; keep `Other` as a UI creation action.
-- Enable RLS and define explicit policies.
-- Generate TypeScript database types.
-- Add pgTAP tests for schema, initialization, constraints, and cross-user isolation.
+- Maintain the locked Next.js App Router, strict TypeScript, Tailwind CSS, formatting, linting, and build configuration.
+- Maintain Supabase browser/server clients, environment validation, local configuration, and version-controlled migrations.
+- Provide baseline Vitest, pgTAP, Playwright, and CI configuration.
+- Complete email/password sign-up, confirmation, sign-in, sign-out, and recovery with verified claims.
+- Create and protect `profiles`, `language_boards`, `activity_types`, and `study_entries`.
+- Enforce RLS, composite ownership, active-count limits, normalized names, archival, and activity restoration.
+- Generate database types from the schema.
 
 ### Exit criteria
 
-- A clean local database can be rebuilt entirely from version-controlled migrations and seed data.
-- Every user-facing table has tested RLS.
-- Cross-user board/activity references are rejected by the database.
-- Concurrent creation cannot exceed six active boards or 30 active activities.
+- A clean database rebuild reproduces the schema and policies.
+- Every user-facing table has positive and negative RLS coverage.
+- Authentication and protected routes work locally.
+- The app formats, lints, type-checks, tests, and builds from the committed lockfile.
+- Unrelated local changes remain preserved.
 
-## 5. Phase 3 — Authentication
+## 4. Phase 1 — Study Time core and revised daily UX
 
-### Work
+### Milestone 1A — Above-the-fold board experience
 
-- Implement Supabase browser, server, and proxy clients.
-- Implement sign-up, confirmation callback, sign-in, and sign-out.
-- Implement forgot-password and update-password flows.
-- Add authenticated route protection with verified claims.
-- Add error states for invalid, expired, and reused links.
-- Configure local email capture and document production SMTP requirements.
-- Configure local, Preview, and Production redirect URLs.
+- Move year navigation close to the top and remove avoidable vertical whitespace.
+- Establish clear `Study Time` and future `Vocabulary` tab placement without enabling unfinished Vocabulary behavior.
+- At 1366×768 and 100% zoom, show navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` without page scrolling.
+- Prioritize selected-year total, selected-year active days, and flame-treated current streak. The fourth card may remain `Top activity` until Phase 4 replaces it with real CEFR/forecast data; do not display invented forecast data.
+- Give the statistics destination an explicit text label or icon-and-label treatment.
 
-### Critical Playwright coverage
+**Review notification:** provide desktop and mobile screenshots plus a clickable local preview before continuing to Milestone 1B.
 
-- Protected pages redirect unauthenticated users.
-- A confirmed user can sign in and sign out.
-- Recovery callback reaches the update-password screen.
-- One authenticated user cannot open another user's board URL.
+### Milestone 1B — Selected-day session workflow
 
-### Exit criteria
+- Keep the form collapsed behind `Add study session` for an empty selected date.
+- Reveal quick/custom duration, active activities, `Other`, disabled `Save`, and `Cancel` on demand.
+- Enable `Save` only when duration and activity are valid.
+- Render entry cards with duration, activity, and board name.
+- Provide edit/delete controls with hover, focus, and touch parity.
+- Implement edit with `Update`/`Cancel` and deletion with explicit confirmation.
+- Preserve any number of independent entries per date and all past/current/future rules.
 
-- Authentication works locally through the supported flows.
-- Server authorization does not trust an unverified session cookie.
-- Auth pages are responsive and keyboard accessible.
+**Review notification:** provide a clickable create/edit/delete flow before proceeding.
 
-## 6. Phase 4 — Board and activity management
+### Milestone 1C — Revised heatmap and Study Time statistics
 
-### Work
+- Retain fixed minute thresholds: 0, 1–14, 15–29, 30–59, 60–119, 120–180, and 181+.
+- Render past zero-minute dates red and zero-minute today/future dates white.
+- Use three fixed yellow-family positive levels below 60 minutes and three progressively darker green levels from 60 minutes.
+- Preserve accessible labels, visible focus, equivalent non-color detail, and mobile horizontal containment.
+- Complete selected-year/current-period totals, averages, active days, current/longest streaks, activity totals, and day/week/month/year distributions.
+- Add actual activity allocation for the latest seven calendar dates ending today.
 
-- Implement board creation, selection, rename, reorder, and confirmed archival.
-- Enforce the six-active-board limit with useful feedback.
-- Implement the global activity catalog.
-- Implement custom activity creation through both catalog management and the `Other` entry flow.
-- Require a concrete custom name before an entry started through `Other` can be saved.
-- Implement rename, hide/archive, and restore-by-name behavior.
-- Enforce case-insensitive uniqueness and the 30-active-activity limit.
-- Ensure historical references use the current activity name.
+### Critical verification
 
-### Critical coverage
+- Unit: calendar boundaries, all heatmap bands and date states, averages, future exclusions, and streaks.
+- Database: aggregation and ownership fixtures.
+- Playwright: collapsed/expanded form, disabled-save prerequisites, create/edit/cancel/update/delete, desktop 1366×768 visibility, mobile/touch behavior, keyboard flow, and non-color information.
 
-- Restoring an archived name reuses the same identity.
-- Renaming changes historical display without changing entries.
-- Archiving prevents new selection but preserves historical reads.
-- Archiving a board requires explicit confirmation and hides its statistics.
+### Phase exit criteria
 
-### Exit criteria
-
-- Board and activity lifecycle rules match the product specification.
-- All operations remain isolated by user.
-- Settings work at desktop and mobile widths.
-
-## 7. Phase 5 — Study-entry workflow
-
-### Work
-
-- Implement selected-day navigation and entry list.
-- Implement one-entry-at-a-time creation.
-- Add quick durations: 10, 15, 20, 30, 45, 60, 90, and 120.
-- Add validated custom minute input from 1 through 1,440.
-- Add optional comments up to 150 characters.
-- Support past, current, and future dates.
-- Implement entry edit and delete flows.
-- Prevent selection of archived boards and activities for new entries.
-- Preserve form values and show actionable errors when a save fails.
-
-### Critical coverage
-
-- Multiple independent entries can exist on one date.
-- Custom activity creation makes the activity available on every board.
-- Edit/delete changes the derived day total.
-- Past and future dates accept entries.
-- Duplicate submission protection prevents accidental repeated saves.
-
-### Exit criteria
-
-- The primary logging journey is complete and responsive.
-- Database constraints and UI validation agree.
-- Entry mutations update the affected board without exposing other data.
-
-## 8. Phase 6 — Yearly heatmap
-
-### Work
-
-- Implement selected-year navigation and calendar-grid generation.
-- Add the yearly daily-total database function.
-- Implement fixed level mapping:
-  - 0;
-  - 1–14;
-  - 15–29;
-  - 30–59;
-  - 60–119;
-  - 120–180;
-  - 181+ minutes.
-- Include future-dated entries in the heatmap.
-- Add tooltips, accessible labels, keyboard navigation, today/selected states, and legend.
-- Add horizontal mobile overflow while retaining usable cell targets.
-
-### Critical coverage
-
-- Leap years and year boundaries render correctly.
-- 180 minutes uses level 5 and 181 uses level 6.
-- Multiple entries aggregate to one daily cell.
-- Editing or deleting an entry updates its cell.
-- Desktop and mobile interaction remain usable.
-
-### Exit criteria
-
-- Heatmap data and visual levels match the specification.
-- The heatmap is operable without a pointer and understandable without color alone.
-
-## 9. Phase 7 — Statistics
-
-### Work
-
-- Add database functions for board summary and distributions.
-- Implement selected-year total, current day/week/month totals, and per-activity totals.
-- Implement active days and both average calculations.
-- Implement current and longest streaks.
-- Implement bar-chart granularity for day, week, month, and year.
-- Include archived activities in historical breakdowns.
-- Apply the approved future-entry inclusion and exclusion rules.
-
-### Critical coverage
-
-- Weeks start on Monday.
-- Current streak survives an empty today when yesterday is active.
-- Future dates do not extend streaks or current averages.
-- Current-year average uses elapsed days including today.
-- Completed-year average uses 365 or 366 days.
-- Selected-year total includes future entries.
-- Zero denominators return zero.
-
-### Exit criteria
-
+- The complete single-day Study Time loop is production-backed, responsive, and accessible.
 - Statistics match independently calculated fixtures.
-- Chart controls are accessible and responsive.
-- Queries remain fast for realistic multi-year seed data.
+- The project owner approves the Phase 1 visual and interaction milestone.
 
-## 10. Phase 8 — Hardening and deployment
+## 5. Phase 2 — Batch study-entry creation
 
 ### Work
 
-- Complete critical Playwright journeys in desktop Chromium and an emulated mobile project.
-- Add targeted cross-browser coverage where layout or date behavior differs.
-- Run accessibility checks on auth, board, entry, heatmap, statistics, and settings screens.
-- Test realistic multi-year data and query plans.
-- Verify RLS policies and grants from a clean database.
-- Configure Vercel Development, Preview, and Production environments.
-- Configure production Supabase redirects and SMTP.
-- Document local setup, migration, testing, deployment, and recovery procedures in `README.md`.
+- Add `study_entry_batches` and nullable study-entry batch provenance through migrations.
+- Add composite ownership, same-year/ordered/366-date constraints, RLS, and generated database types.
+- Implement one authenticated transaction that expands the inclusive date range.
+- Use a client-generated operation ID so one submission intent is idempotent.
+- Add a date-range mode with activity, duration, optional shared comment, start/end dates, and clear cancellation.
+- Display a confirmation summarizing activity, duration, dates, count, and preservation of existing entries.
+- Create one independent entry per date; never overwrite, merge, or skip matching existing entries.
+- Keep generated entries independently editable and deletable.
+
+### Critical verification
+
+- Single-day, 365-day, and leap-year 366-day ranges.
+- Reversed, cross-year, 367-day, unauthorized, and archived-resource rejection.
+- Existing matching entries remain and receive an additional entry.
+- Injected failure produces zero entries; retrying the same operation ID does not duplicate the batch.
+
+### Phase exit criteria
+
+- Batch creation is atomic, idempotent, RLS-isolated, and understandable before confirmation.
+- The project owner approves the clickable range flow.
+
+## 6. Phase 3 — Vocabulary tracker
+
+### Work
+
+- Add `vocabulary_daily_totals` with one owned positive integer per board/date, unique under concurrency.
+- Add RLS, composite board ownership, indexes, generated types, and pgTAP coverage.
+- Enable the `Study Time`/`Vocabulary` tracker switch while preserving board and year.
+- Implement create, edit, and confirmed delete for the single daily final word total.
+- Implement the green Vocabulary heatmap with fixed levels: 0, 1–2, 3–5, 6–9, 10–14, 15–19, 20–39, and 40+.
+- Implement selected-year total, non-future active days, current streak, and longest streak.
+- Apply the approved future-date inclusion/exclusion rules.
+- Provide accessible date/count labels and responsive heatmap behavior.
+
+### Critical verification
+
+- Concurrent writes cannot create two values for one board/date.
+- A second save updates the existing record; deletion returns the date to zero.
+- Every threshold boundary, year navigation, future total, active-day rule, and vocabulary streak is covered.
+- User A cannot read or mutate User B's vocabulary.
+
+### Phase exit criteria
+
+- Vocabulary is a complete, private, board-scoped daily tracker with production-backed behavior.
+- The project owner approves the clickable Vocabulary milestone.
+
+## 7. Phase 4 — CEFR history, forecast, and combined analytics
+
+### Milestone 4A — CEFR history
+
+- Add `cefr_level_events` with board ownership, A1–C2 constraint, non-future effective-date mutation, optional comment, RLS, and history index.
+- Add product-authored, sourced summaries of each CEFR level.
+- Implement manual declaration and chronological history; never auto-promote.
+
+### Milestone 4B — Approximate forecast
+
+- Version immutable Cambridge cumulative ranges and canonical midpoints in application reference data.
+- Calculate reference difference to the next level, eligible logged minutes since the current declaration, and remaining minutes with a zero floor.
+- Calculate pace over exactly seven calendar dates ending today, including zero-study dates.
+- Display approximate remaining hours and estimated date when possible.
+- Handle no declaration, zero pace, completed estimate, and C2 explicitly.
+- Display the Cambridge source, cross-language limitation, and non-assessment warning with every forecast.
+- Replace the temporary fourth summary card with current level and estimated next-level date.
+
+### Milestone 4C — Statistics integration
+
+- Combine Study Time, Vocabulary, CEFR history, and forecast information on the labelled Statistics destination.
+- Present units, periods, and methodologies unambiguously.
+- Keep `Top activity` and latest-seven-day actual allocation in detailed statistics.
+
+### Deferred within Phase 4
+
+- Do not implement vocabulary-to-CEFR word-count cutoffs until the owner supplies and approves their immutable values.
+- Do not implement ideal activity distributions until the owner supplies and approves the per-level model and methodology.
+- Users will not edit either reference model.
+
+### Critical verification
+
+- Historical ordering, same-day update behavior, level regression/reassessment, and cross-user isolation.
+- Cambridge midpoint differences, effective-date subtraction, seven-day zero-inclusive pace, rounding, zero remaining, zero pace, and C2.
+- Copy makes clear that the level is self-declared and the forecast is approximate.
+
+### Phase exit criteria
+
+- CEFR history is preserved and forecasts are deterministic, transparent, and non-authoritative.
+- Combined statistics are responsive and accessible.
+- The project owner approves the Phase 4 visual and analytical milestone.
+
+## 8. Hardening and deployment
+
+### Work
+
+- Complete critical Playwright journeys in desktop Chromium and emulated mobile, with targeted Firefox/WebKit coverage.
+- Run WCAG 2.2 AA-oriented automated and manual checks, including red/yellow/green heatmaps and color-vision considerations.
+- Test representative multi-year study, vocabulary, batch, and CEFR data and inspect query plans.
+- Rebuild a clean database and re-run all RLS/grant tests.
+- Verify Vercel Development, Preview, and Production environments, Supabase redirects, and production SMTP.
+- Update setup, migration, testing, deployment, and recovery documentation.
 
 ### Exit criteria
 
-- Formatting, linting, type checks, unit tests, database tests, Playwright tests, and production build pass.
-- Preview deployment passes the critical smoke test.
-- Production has no test credentials or service-role key exposed to the client.
-- Product-owner acceptance testing is complete on desktop and mobile.
+- Formatting, linting, strict type checking, unit tests, pgTAP, Playwright, and production build pass.
+- Preview deployment passes critical smoke tests.
+- No secret or service-role key is exposed to browser code or Git.
+- Product-owner acceptance passes on representative desktop and mobile viewports.
 
-## 11. Planned critical end-to-end journeys
+## 9. Planned critical end-to-end journeys
 
-1. Register, confirm email, sign in, and sign out.
-2. Request password recovery and set a new password.
-3. Create two language boards and verify their entries/statistics remain separate.
-4. Create a custom activity and use it on multiple boards.
-5. Archive and restore an activity while preserving historical statistics.
-6. Add, edit, and delete multiple entries on one date.
-7. Add entries to past and future dates and verify heatmap/statistics rules.
-8. Verify current and longest streak behavior across an empty today.
-9. Archive a populated board through explicit confirmation.
-10. Prove User A cannot read or mutate User B's data.
+1. Register, confirm email, sign in, recover password, and sign out.
+2. Manage two boards and prove their Study Time, Vocabulary, CEFR, and statistics remain separate.
+3. Create, archive, restore, and reuse a custom activity across boards.
+4. Add, edit, cancel, update, and confirm-delete study entries on past/current/future dates.
+5. Create a batch across a valid range without overwriting matching entries.
+6. Navigate both yearly heatmaps and verify semantic states without relying only on color.
+7. Create, replace, and delete one vocabulary total and verify vocabulary streaks.
+8. Declare CEFR twice, preserve history, and review forecast/no-forecast states.
+9. Review current and longest Study Time streaks across an empty today.
+10. Prove User A cannot read, reference, aggregate, or mutate User B's data in any feature.
 
-## 12. Risks and mitigations
+## 10. Risks and mitigations
 
-| Risk | Mitigation |
-| --- | --- |
-| Auth callback failures across Vercel environments | Explicit site URL, scoped redirect allowlist, and Preview smoke tests |
-| Default Supabase email limits | Local Mailpit and production SMTP before launch |
-| RLS policy mistakes | Composite ownership constraints plus positive and negative pgTAP tests |
-| Concurrent board/activity limit bypass | Atomic database functions and concurrency-oriented tests |
-| Browser/server disagreement about today | Browser-local ISO date passed explicitly to validated current-period queries |
-| Future entries corrupt streaks | Centralized cutoff rule and boundary tests |
-| Archived activities disappear from history | Stable foreign-key identity and restoration rather than duplication |
-| Mobile heatmap becomes unreadable | Fixed usable cell size and horizontal scroll |
-| Statistics become inconsistent | Source entries only; aggregation rules centralized and tested |
+| Risk                                         | Mitigation                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Dense desktop layout harms readability       | Treat 1366×768 as a tested contract while allowing the expanded form and detailed statistics to scroll |
+| Red/green heatmap excludes color-blind users | Accessible labels, equivalent detail, patterns/borders where needed, and measured contrast             |
+| Batch requests partially write or duplicate  | One database transaction, operation ID, unique provenance/date constraint, and retry/failure tests     |
+| Vocabulary daily values race                 | Database uniqueness plus owned upsert and concurrent tests                                             |
+| CEFR forecast appears authoritative          | Persistent approximation/source warning, self-declared language, and explicit unavailable states       |
+| Cambridge guidance is English-specific       | Disclose cross-language application and avoid automatic level changes                                  |
+| Deferred models acquire guessed values       | Traceable deferred requirements and an implementation gate requiring owner-approved values             |
+| Future entries corrupt current metrics       | Centralized `local_today` cutoff and boundary fixtures for both trackers                               |
+| RLS policies miss new tables/functions       | Explicit allow/deny pgTAP coverage and composite ownership constraints before UI delivery              |
 
-## 13. Final MVP definition of done
+## 11. Expanded MVP definition of done
 
-The MVP is done only when:
+The expanded MVP is done only when:
 
-- all in-scope behavior in `PRODUCT_SPEC.md` is implemented;
-- RLS isolation and ownership constraints are proven by tests;
-- critical Playwright journeys pass;
-- statistics pass fixed boundary fixtures;
-- the interface is usable on representative desktop and mobile viewports;
-- authentication email and redirect settings are production-ready;
-- documentation accurately describes setup and operation;
-- no deferred feature has been silently added to scope.
+- Phases 0–4 in the approved specification are implemented, except explicitly deferred reference models;
+- every user-owned table and callable mutation has verified owner isolation;
+- batch, Study Time, Vocabulary, CEFR, and statistics rules pass boundary fixtures;
+- critical Playwright journeys pass on representative desktop and mobile configurations;
+- the interface is keyboard/touch usable and does not depend on color alone;
+- CEFR guidance is sourced, versioned, and presented as approximate;
+- authentication, SMTP, and redirect configuration are production-ready;
+- documentation accurately describes setup, behavior, calculations, and deferred scope;
+- no deferred values or out-of-scope feature has been silently introduced.

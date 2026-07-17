@@ -18,11 +18,11 @@ Business requirements describe the outcomes and invariant rules the product must
 | `BR-008` | The product shall support desktop and mobile browser use.                                                                       | Study entries may be recorded in different contexts and on different devices.                         | Must     | Approved |
 | `BR-009` | The product shall retain exact minute values as the source of truth for all calculations.                                       | Exact source data prevents ambiguous or inconsistent statistics.                                      | Must     | Approved |
 | `BR-010` | The MVP shall remain operationally simple for an expected population of up to 100 registered users.                             | The first release should avoid infrastructure that adds cost or complexity without demonstrated need. | Must     | Approved |
-| `BR-011` | The primary board view shall expose the selected day's next action without avoidable desktop scrolling.                         | Low-friction daily logging is the core product loop.                                                   | Must     | Approved |
-| `BR-012` | The product shall allow one study pattern to be recorded safely across a date range.                                             | Learners often repeat the same activity and duration on many dates.                                    | Must     | Approved |
-| `BR-013` | Each language board shall track newly learned vocabulary separately from study time.                                             | Vocabulary consistency is a distinct learning signal and needs its own history.                        | Must     | Approved |
-| `BR-014` | Each language board shall retain user-declared CEFR history and provide a qualified next-level forecast.                         | Learners want a motivational direction while retaining control over level assessment.                  | Must     | Approved |
-| `BR-015` | Detailed statistics shall compare recent actual behavior with clearly identified reference guidance.                            | Recent activity balance is actionable, but estimated guidance must not be presented as fact.           | Should   | Approved |
+| `BR-011` | The primary board view shall expose the selected day's next action without avoidable desktop scrolling.                         | Low-friction daily logging is the core product loop.                                                  | Must     | Approved |
+| `BR-012` | The product shall allow one study pattern to be recorded safely across a date range.                                            | Learners often repeat the same activity and duration on many dates.                                   | Must     | Approved |
+| `BR-013` | Each language board shall track newly learned vocabulary separately from study time.                                            | Vocabulary consistency is a distinct learning signal and needs its own history.                       | Must     | Approved |
+| `BR-014` | Each language board shall retain user-declared CEFR history and provide a qualified next-level forecast.                        | Learners want a motivational direction while retaining control over level assessment.                 | Must     | Approved |
+| `BR-015` | Detailed statistics shall compare recent actual behavior with clearly identified reference guidance.                            | Recent activity balance is actionable, but estimated guidance must not be presented as fact.          | Should   | Approved |
 
 ## 3. Business rules
 
@@ -111,4 +111,4 @@ Business requirements describe the outcomes and invariant rules the product must
 
 ## 4. Business acceptance statement
 
-The business requirements are satisfied when an authenticated learner can maintain private, accurate, board-specific study history; safely manage boards and activities without losing history; and use the heatmap and statistics to understand consistency over time on desktop and mobile.
+The business requirements are satisfied when an authenticated learner can maintain private, accurate, board-specific Study Time, Vocabulary, and CEFR history; safely create single-day and batch entries without overwriting history; manage boards and activities without losing historical meaning; and use accessible heatmaps, statistics, and qualified forecasts on desktop and mobile.

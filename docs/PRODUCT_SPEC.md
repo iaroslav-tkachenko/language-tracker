@@ -127,7 +127,7 @@ Each entry contains:
 ### 7.2 Entry rules
 
 - A date can contain any number of entries.
-- The entry form creates one entry per save operation.
+- Each successful single-day submission creates exactly one entry; the separately confirmed batch flow creates one independent entry per target date.
 - Users can create entries for past, current, and future dates.
 - Users can edit and delete individual entries.
 - Deleting an entry removes its minutes from every derived heatmap and statistic.
@@ -194,16 +194,16 @@ The inclusive range must be ordered, remain inside one calendar year, and contai
 
 ### 9.2 Fixed intensity levels
 
-| Daily total | Level | Semantic color |
-| --- | ---: | --- |
-| 0 minutes on a past date | 0 | Red |
-| 0 minutes today or on a future date | 0 | White |
-| 1–14 minutes | 1 | Light yellow family |
-| 15–29 minutes | 2 | Yellow family |
-| 30–59 minutes | 3 | Strong yellow family |
-| 60–119 minutes | 4 | Light green |
-| 120–180 minutes | 5 | Green |
-| 181+ minutes | 6 | Dark green |
+| Daily total                         | Level | Semantic color       |
+| ----------------------------------- | ----: | -------------------- |
+| 0 minutes on a past date            |     0 | Red                  |
+| 0 minutes today or on a future date |     0 | White                |
+| 1–14 minutes                        |     1 | Light yellow family  |
+| 15–29 minutes                       |     2 | Yellow family        |
+| 30–59 minutes                       |     3 | Strong yellow family |
+| 60–119 minutes                      |     4 | Light green          |
+| 120–180 minutes                     |     5 | Green                |
+| 181+ minutes                        |     6 | Dark green           |
 
 The highest legend label is `3+ hours`, following the approved product wording. The exact numeric boundary is 181 minutes.
 
@@ -292,13 +292,13 @@ The product will later compare actual allocation with a fixed ideal distribution
 The forecast uses the midpoint of Cambridge English's published cumulative guided-learning-hour ranges as a fixed reference:
 
 | CEFR level | Published cumulative range | Reference midpoint |
-| --- | ---: | ---: |
-| A1 | 90–100 hours | 95 hours |
-| A2 | 180–200 hours | 190 hours |
-| B1 | 350–400 hours | 375 hours |
-| B2 | 500–600 hours | 550 hours |
-| C1 | 700–800 hours | 750 hours |
-| C2 | 1,000–1,200 hours | 1,100 hours |
+| ---------- | -------------------------: | -----------------: |
+| A1         |               90–100 hours |           95 hours |
+| A2         |              180–200 hours |          190 hours |
+| B1         |              350–400 hours |          375 hours |
+| B2         |              500–600 hours |          550 hours |
+| C1         |              700–800 hours |          750 hours |
+| C2         |          1,000–1,200 hours |        1,100 hours |
 
 For a current declaration below C2:
 

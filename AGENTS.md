@@ -2,7 +2,7 @@
 
 ## Current project status
 
-The project owner approved the original implementation plan on July 14, 2026 and an expanded phased product scope on July 16, 2026. The documentation baseline is being updated before implementation of the new scope begins. Do not implement the July 16 feature expansion until the project owner reviews the updated documentation and authorizes the next phase.
+The project owner approved the original implementation plan on July 14, 2026 and an expanded phased product scope on July 16, 2026. The expanded documentation baseline is complete and awaiting product-owner review. Do not implement the July 16 feature expansion until the project owner explicitly authorizes Phase 1 of `docs/IMPLEMENTATION_PLAN.md`.
 
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 
@@ -69,9 +69,9 @@ Run checks proportional to the change. The completed MVP must include:
 
 - formatting and linting;
 - TypeScript type checking;
-- unit tests for calendar, heatmap, averages, and streak rules;
-- pgTAP tests for schema constraints, database functions, and RLS isolation;
-- Playwright tests for critical authentication and study-entry journeys;
+- unit tests for calendar, both heatmaps, batch ranges, averages, streaks, and CEFR forecast rules;
+- pgTAP tests for schema constraints, batch atomicity/idempotency, database functions, and RLS isolation across every user-facing table;
+- Playwright tests for critical authentication, Study Time, batch, Vocabulary, CEFR, and statistics journeys;
 - a production Next.js build;
 - responsive and accessibility checks on desktop and mobile viewports.
 
