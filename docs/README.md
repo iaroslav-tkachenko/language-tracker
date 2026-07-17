@@ -2,7 +2,7 @@
 
 This directory is the documentation home for Language Tracker. It is organized so that a product owner, designer, engineer, or tester can start from the same approved product baseline and follow the level of detail relevant to their work.
 
-**Current gate:** the expanded July 16 requirements baseline is complete and awaiting product-owner review. Phase 1 implementation is not authorized until that review is explicitly approved.
+**Current status:** the requirements baseline and Phase 1 visual direction are approved. Phase 0 authentication, schema, and security implementation is in progress; production Supabase connection and database verification remain pending.
 
 ## Start here
 
