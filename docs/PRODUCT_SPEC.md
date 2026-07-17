@@ -337,6 +337,7 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
 - The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.
 - When the current CEFR level appears in the primary summary, its value uses a circular badge rather than a pill or oval.
+- On mobile, the CEFR summary uses a compact two-line layout: the first line shows the current circular level badge, a directional arrow, and the next level (for example, `B1 → B2`); the second line shows the approximate forecast (for example, `Estimated in ≈ 6 months`). Desktop may retain the more descriptive current-level and pace labels.
 - Phase 1 screenshot reviews may use an isolated test-user fixture reading `Current level: B1` and `Estimated B2: in about 6 months at this pace`. This fixture must never be presented as real data to a production user and is replaced by the Phase 4 calculation.
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A settings area manages boards and the global activity catalog.

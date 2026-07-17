@@ -473,8 +473,8 @@ function SummaryCards({
         value="195"
         label="Current streak"
       />
-      <article className="flex min-h-28 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:min-h-24 sm:flex-row sm:gap-5 sm:px-5 sm:py-4">
-        <div className="text-center">
+      <article className="flex min-h-28 min-w-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:min-h-24 sm:flex-row sm:gap-5 sm:px-5 sm:py-4">
+        <div className="hidden text-center sm:block">
           <strong className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-lg font-bold text-violet-700 sm:h-12 sm:w-12 sm:text-xl">
             B1
           </strong>
@@ -486,7 +486,7 @@ function SummaryCards({
           className="hidden h-14 w-px bg-slate-200 sm:block"
           aria-hidden="true"
         />
-        <div className="min-w-0 text-center sm:text-left">
+        <div className="hidden min-w-0 text-center sm:block sm:text-left">
           <strong className="text-xs font-bold text-violet-700 sm:text-lg">
             B2{" "}
             <span className="font-normal text-slate-600">
@@ -495,6 +495,23 @@ function SummaryCards({
           </strong>
           <span className="mt-0.5 block text-[11px] text-slate-600 sm:mt-1 sm:text-sm">
             at this pace
+          </span>
+        </div>
+        <div className="text-center sm:hidden">
+          <div
+            className="flex items-center justify-center gap-2"
+            aria-label="B1 to B2"
+          >
+            <strong className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-lg font-bold text-violet-700">
+              B1
+            </strong>
+            <span className="text-lg text-slate-400" aria-hidden="true">
+              →
+            </span>
+            <strong className="text-lg font-bold text-violet-700">B2</strong>
+          </div>
+          <span className="mt-2 block text-xs text-slate-600">
+            Estimated in ≈ 6 months
           </span>
         </div>
       </article>

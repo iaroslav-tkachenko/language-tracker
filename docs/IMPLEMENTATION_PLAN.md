@@ -51,6 +51,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 - At 1366×768 and 100% zoom, show navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` without page scrolling.
 - Prioritize selected-year total, selected-year active days, and flame-treated current streak. Remove `Top activity` from the main screen. For screenshot review and the isolated test user only, use `Current level: B1` and `Estimated B2: in about 6 months at this pace`; never expose this fixture as production-user data.
 - Render the current-level value in a circular badge and give the selected-day numeric total the stronger visual treatment approved from the high-contrast concept.
+- Keep the mobile CEFR card to two lines: a `current level → next level` progress row and one concise approximate-forecast row. Retain the more descriptive labels on desktop where space permits.
 - Give the statistics destination an explicit text label or icon-and-label treatment.
 
 Before changing the application layout, prepare two static screenshot alternatives using the same content and different heatmap color treatments. The project owner selects one direction; only then implement the approved screen. After implementation, provide desktop and mobile screenshots plus a clickable local preview before continuing to Milestone 1B.

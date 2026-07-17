@@ -21,3 +21,5 @@ The approved direction includes the soft Study Time heatmap palette, labelled tr
 - [Mobile non-today heading and empty state](milestone-1b-mobile-selected-date.png)
 
 The mobile year is split into `Jan–Jun` and `Jul–Dec`. Dates before the board's first entry remain white; missed past dates after that entry are red, while yellow and green always indicate positive study time.
+
+The compact mobile CEFR card uses two lines: `B1 → B2` and `Estimated in ≈ 6 months`. The yellow and green cells in these prototype screenshots contain synthetic positive study sessions; they never represent empty past dates. Production data follows the same invariant: empty past gaps are red only after the board's first session, while earlier empty dates, today, and future dates are white.
