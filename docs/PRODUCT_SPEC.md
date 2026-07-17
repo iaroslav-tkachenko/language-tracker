@@ -159,10 +159,13 @@ The user can also enter any valid custom integer duration. Values such as `3+ ho
 - Every standard activity uses its own recognizable icon. All user-created activities share one distinct custom-activity icon; the icon is presentation metadata and does not change the stored activity model.
 - Edit and delete actions appear on pointer hover and keyboard focus on desktop. Both icons remain persistently visible on mobile/touch layouts.
 - Edit exposes current values with explicit `Update` and `Cancel` actions.
+- When editing begins, the saved duration and activity are selected and visibly highlighted. Choosing another value moves the highlight to the new selection.
 - Delete always requires confirmation.
 - A populated selected day shows `Add study session` below its existing entry cards so another independent entry can be added directly.
 - Prominent previous-day and next-day arrow controls beside the selected date move the day view by exactly one calendar date while preserving the selected board.
 - The selected day's total is visually emphasized, with the numeric duration stronger than its supporting `total` label.
+- Today uses the `Today` heading with its full date beneath it. Any other selected date uses the full weekday and date as the heading and never displays the generic text `Selected day`.
+- An empty selected date displays `No study session for this day yet.`
 
 ### 7.5 Batch entry creation
 
@@ -191,22 +194,24 @@ The inclusive range must be ordered, remain inside one calendar year, and contai
 - Users can navigate to earlier and later years.
 - Every day is represented by a square cell.
 - A cell's level is based on the sum of all entry minutes for that board and date.
+- Dates before the board's earliest study entry remain white, including past dates and complete earlier years. From the earliest entry date through yesterday, a zero-minute date is red. Yellow and green are reserved exclusively for dates with positive study minutes.
 - Past, current, and future entries are shown immediately in the selected year's heatmap.
 - Selecting a cell opens the corresponding day and its entries.
 - The layout is contribution-graph-like, with weekdays in rows and weeks in columns.
 
 ### 9.2 Fixed intensity levels
 
-| Daily total                         | Level | Semantic color       |
-| ----------------------------------- | ----: | -------------------- |
-| 0 minutes on a past date            |     0 | Red                  |
-| 0 minutes today or on a future date |     0 | White                |
-| 1–14 minutes                        |     1 | Light yellow family  |
-| 15–29 minutes                       |     2 | Yellow family        |
-| 30–59 minutes                       |     3 | Strong yellow family |
-| 60–119 minutes                      |     4 | Light green          |
-| 120–180 minutes                     |     5 | Green                |
-| 181+ minutes                        |     6 | Dark green           |
+| Daily total                             | Level | Semantic color       |
+| --------------------------------------- | ----: | -------------------- |
+| 0 minutes before the first entry        |     0 | White                |
+| 0 minutes from first entry to yesterday |     0 | Red                  |
+| 0 minutes today or on a future date     |     0 | White                |
+| 1–14 minutes                            |     1 | Light yellow family  |
+| 15–29 minutes                           |     2 | Yellow family        |
+| 30–59 minutes                           |     3 | Strong yellow family |
+| 60–119 minutes                          |     4 | Light green          |
+| 120–180 minutes                         |     5 | Green                |
+| 181+ minutes                            |     6 | Dark green           |
 
 The highest legend label is `3+ hours`, following the approved product wording. The exact numeric boundary is 181 minutes.
 
@@ -219,6 +224,7 @@ The Phase 1 visual direction uses a soft, approachable version of the semantic p
 - Color is not the only source of information; each cell exposes its date and minute total to assistive technology and tooltips.
 - Cells have visible keyboard focus and can be selected by keyboard.
 - Mobile preserves a usable cell size and may horizontally scroll the yearly grid.
+- On mobile, the Study Time year is presented as two compact half-year grids labelled `Jan–Jun` and `Jul–Dec`; summary metrics use a compact two-column layout.
 
 ### 9.4 Vocabulary tracker and heatmap
 

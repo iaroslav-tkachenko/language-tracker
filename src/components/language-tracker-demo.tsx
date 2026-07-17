@@ -107,8 +107,9 @@ function getCalendarCells(year: number): CalendarCell[] {
   });
 }
 
-function demoMinutes(date: Date, todayKey: string) {
-  if (toDateKey(date) > todayKey) return 0;
+function demoMinutes(date: Date, todayKey: string, demoStartKey: string) {
+  const dateKey = toDateKey(date);
+  if (dateKey < demoStartKey || dateKey > todayKey) return 0;
   const start = new Date(date.getFullYear(), 0, 1);
   const day = Math.floor((date.getTime() - start.getTime()) / 86_400_000);
   const hash = Math.abs((day * 47 + date.getFullYear() * 13) % 19);
@@ -138,14 +139,22 @@ function formatDuration(minutes: number) {
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
-function heatColor(minutes: number, dateKey: string, todayKey: string) {
+function heatColor(
+  minutes: number,
+  dateKey: string,
+  todayKey: string,
+  firstActivityKey: string,
+) {
   if (minutes <= 0)
-    return dateKey < todayKey ? heatColors.pastEmpty : heatColors.empty;
+    return dateKey >= firstActivityKey && dateKey < todayKey
+      ? heatColors.pastEmpty
+      : heatColors.empty;
   return heatColors.levels[heatLevel(minutes) - 1];
 }
 
 export function LanguageTrackerDemo() {
   const todayKey = toDateKey(new Date());
+  const demoStartKey = `${fromDateKey(todayKey).getFullYear()}-02-01`;
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(todayKey);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
@@ -170,6 +179,10 @@ export function LanguageTrackerDemo() {
       }, {}),
     [entries],
   );
+  const firstActivityKey = useMemo(
+    () => [demoStartKey, ...entries.map((entry) => entry.date)].sort()[0],
+    [demoStartKey, entries],
+  );
   const selectedEntries = entries.filter(
     (entry) => entry.date === selectedDate,
   );
@@ -181,7 +194,7 @@ export function LanguageTrackerDemo() {
     (total, cell) =>
       cell.inYear
         ? total +
-          demoMinutes(cell.date, todayKey) +
+          demoMinutes(cell.date, todayKey, demoStartKey) +
           (entryMinutes[cell.dateKey] ?? 0)
         : total,
     0,
@@ -190,7 +203,9 @@ export function LanguageTrackerDemo() {
     (cell) =>
       cell.inYear &&
       cell.dateKey <= todayKey &&
-      demoMinutes(cell.date, todayKey) + (entryMinutes[cell.dateKey] ?? 0) > 0,
+      demoMinutes(cell.date, todayKey, demoStartKey) +
+        (entryMinutes[cell.dateKey] ?? 0) >
+        0,
   ).length;
 
   function saveEntry() {
@@ -206,6 +221,12 @@ export function LanguageTrackerDemo() {
         activity: selectedActivity,
       },
     ]);
+    setSelectedActivity("");
+    setSelectedDuration(null);
+    setCustomDuration("");
+  }
+
+  function resetEntryDraft() {
     setSelectedActivity("");
     setSelectedDuration(null);
     setCustomDuration("");
@@ -327,6 +348,8 @@ export function LanguageTrackerDemo() {
             cells={calendarCells}
             selectedDate={selectedDate}
             todayKey={todayKey}
+            demoStartKey={demoStartKey}
+            firstActivityKey={firstActivityKey}
             entryMinutes={entryMinutes}
             onSelect={setSelectedDate}
           />
@@ -365,6 +388,15 @@ export function LanguageTrackerDemo() {
               )
             }
             onSave={saveEntry}
+            onUpdate={(id, duration, activity) => {
+              setEntries((current) =>
+                current.map((entry) =>
+                  entry.id === id ? { ...entry, duration, activity } : entry,
+                ),
+              );
+              resetEntryDraft();
+            }}
+            onReset={resetEntryDraft}
             onDate={(date) => {
               setSelectedDate(date);
               setYear(fromDateKey(date).getFullYear());
@@ -420,7 +452,7 @@ function SummaryCards({
 }) {
   return (
     <section
-      className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1.45fr]"
+      className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-[1fr_1fr_1fr_1.45fr]"
       aria-label="Year summary"
     >
       <MetricCard
@@ -441,24 +473,27 @@ function SummaryCards({
         value="195"
         label="Current streak"
       />
-      <article className="flex min-h-24 min-w-0 items-center justify-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:gap-5 sm:px-5">
+      <article className="flex min-h-28 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:min-h-24 sm:flex-row sm:gap-5 sm:px-5 sm:py-4">
         <div className="text-center">
-          <strong className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-50 text-xl font-bold text-violet-700">
+          <strong className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-lg font-bold text-violet-700 sm:h-12 sm:w-12 sm:text-xl">
             B1
           </strong>
-          <span className="mt-1.5 block text-sm text-slate-600">
+          <span className="mt-1 block text-xs text-slate-600 sm:text-sm">
             Current level
           </span>
         </div>
-        <span className="h-14 w-px bg-slate-200" aria-hidden="true" />
-        <div className="min-w-0">
-          <strong className="text-base font-bold text-violet-700 sm:text-lg">
+        <span
+          className="hidden h-14 w-px bg-slate-200 sm:block"
+          aria-hidden="true"
+        />
+        <div className="min-w-0 text-center sm:text-left">
+          <strong className="text-xs font-bold text-violet-700 sm:text-lg">
             B2{" "}
             <span className="font-normal text-slate-600">
               in about 6 months
             </span>
           </strong>
-          <span className="mt-1 block text-sm text-slate-600">
+          <span className="mt-0.5 block text-[11px] text-slate-600 sm:mt-1 sm:text-sm">
             at this pace
           </span>
         </div>
@@ -479,15 +514,17 @@ function MetricCard({
   label: string;
 }) {
   return (
-    <article className="flex min-h-24 items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <article className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-2 py-3 text-center shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:min-h-24 sm:flex-row sm:justify-start sm:gap-4 sm:px-5 sm:py-4 sm:text-left">
       <span
-        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12 ${iconClass}`}
       >
-        <Icon className="h-6 w-6" />
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </span>
       <div>
-        <strong className="block text-2xl font-bold">{value}</strong>
-        <span className="mt-0.5 block text-sm text-slate-600">{label}</span>
+        <strong className="block text-xl font-bold sm:text-2xl">{value}</strong>
+        <span className="mt-0.5 block text-xs text-slate-600 sm:text-sm">
+          {label}
+        </span>
       </div>
     </article>
   );
@@ -498,6 +535,8 @@ function Heatmap({
   cells,
   selectedDate,
   todayKey,
+  demoStartKey,
+  firstActivityKey,
   entryMinutes,
   onSelect,
 }: {
@@ -505,6 +544,8 @@ function Heatmap({
   cells: CalendarCell[];
   selectedDate: string;
   todayKey: string;
+  demoStartKey: string;
+  firstActivityKey: string;
   entryMinutes: Record<string, number>;
   onSelect: (date: string) => void;
 }) {
@@ -524,29 +565,232 @@ function Heatmap({
   });
 
   return (
-    <div
-      className="w-full max-w-full overflow-x-auto pb-1"
-      aria-label={`${year} study heatmap`}
-    >
-      <div className="w-max min-w-[1086px]">
-        <div
-          className="ml-8 grid h-5 text-[10px] text-slate-500"
-          style={{ gridTemplateColumns: "repeat(53, 17px)", columnGap: "3px" }}
-        >
-          {monthLabels.map((label) => (
-            <span
-              key={label.name}
+    <>
+      <div
+        className="hidden w-full max-w-full overflow-x-auto pb-1 sm:block"
+        aria-label={`${year} study heatmap`}
+      >
+        <div className="w-max min-w-[1086px]">
+          <div
+            className="ml-8 grid h-5 text-[10px] text-slate-500"
+            style={{
+              gridTemplateColumns: "repeat(53, 17px)",
+              columnGap: "3px",
+            }}
+          >
+            {monthLabels.map((label) => (
+              <span
+                key={label.name}
+                style={{
+                  gridColumnStart: label.week + 1,
+                  gridColumnEnd: "span 4",
+                }}
+              >
+                {label.name}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <div className="grid h-[137px] w-6 grid-rows-7 text-[10px] leading-[17px] text-slate-500">
+              <span />
+              <span>M</span>
+              <span />
+              <span>W</span>
+              <span />
+              <span>F</span>
+              <span />
+            </div>
+            <div
+              className="grid"
               style={{
-                gridColumnStart: label.week + 1,
-                gridColumnEnd: "span 4",
+                gridTemplateColumns: "repeat(53, 17px)",
+                gridTemplateRows: "repeat(7, 17px)",
+                gap: "3px",
               }}
             >
-              {label.name}
+              {cells.map((cell) => {
+                const minutes =
+                  demoMinutes(cell.date, todayKey, demoStartKey) +
+                  (entryMinutes[cell.dateKey] ?? 0);
+                return (
+                  <button
+                    key={cell.dateKey}
+                    type="button"
+                    className={`rounded-[2px] transition hover:scale-125 hover:ring-2 hover:ring-slate-500 ${
+                      cell.dateKey === selectedDate
+                        ? "ring-2 ring-slate-950 ring-offset-1"
+                        : ""
+                    } ${cell.inYear ? "" : "pointer-events-none opacity-0"}`}
+                    style={{
+                      backgroundColor: heatColor(
+                        minutes,
+                        cell.dateKey,
+                        todayKey,
+                        firstActivityKey,
+                      ),
+                      gridColumn: cell.week + 1,
+                      gridRow: cell.weekday + 1,
+                    }}
+                    onClick={() => onSelect(cell.dateKey)}
+                    aria-label={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
+                    title={`${formatLongDate(cell.dateKey)} · ${minutes} min`}
+                    tabIndex={cell.inYear ? 0 : -1}
+                  />
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 pl-8 text-xs text-slate-600">
+            {[
+              ["0 min", heatColors.pastEmpty],
+              ["1–14 min", heatColors.levels[0]],
+              ["15–29 min", heatColors.levels[1]],
+              ["30–59 min", heatColors.levels[2]],
+              ["60–119 min", heatColors.levels[3]],
+              ["120–180 min", heatColors.levels[4]],
+              ["181+ min", heatColors.levels[5]],
+            ].map(([label, color]) => (
+              <span key={label} className="flex items-center gap-2">
+                <span
+                  className="h-4 w-4 rounded-[3px] border border-black/5"
+                  style={{ backgroundColor: color }}
+                />
+                {label}
+              </span>
+            ))}
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 rounded-[3px] border border-slate-200 bg-slate-50" />
+              No data (future)
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        className="space-y-5 sm:hidden"
+        aria-label={`${year} mobile study heatmap`}
+      >
+        <MobileHeatmapHalf
+          label="Jan–Jun"
+          year={year}
+          startMonth={0}
+          cells={cells}
+          selectedDate={selectedDate}
+          todayKey={todayKey}
+          demoStartKey={demoStartKey}
+          firstActivityKey={firstActivityKey}
+          entryMinutes={entryMinutes}
+          onSelect={onSelect}
+        />
+        <MobileHeatmapHalf
+          label="Jul–Dec"
+          year={year}
+          startMonth={6}
+          cells={cells}
+          selectedDate={selectedDate}
+          todayKey={todayKey}
+          demoStartKey={demoStartKey}
+          firstActivityKey={firstActivityKey}
+          entryMinutes={entryMinutes}
+          onSelect={onSelect}
+        />
+        <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500">
+          <span>Less</span>
+          {[heatColors.pastEmpty, ...heatColors.levels].map((color) => (
+            <span
+              key={color}
+              className="h-3.5 w-3.5 rounded-[3px] border border-black/5"
+              style={{ backgroundColor: color }}
+            />
+          ))}
+          <span>More</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function MobileHeatmapHalf({
+  label,
+  year,
+  startMonth,
+  cells,
+  selectedDate,
+  todayKey,
+  demoStartKey,
+  firstActivityKey,
+  entryMinutes,
+  onSelect,
+}: {
+  label: string;
+  year: number;
+  startMonth: 0 | 6;
+  cells: CalendarCell[];
+  selectedDate: string;
+  todayKey: string;
+  demoStartKey: string;
+  firstActivityKey: string;
+  entryMinutes: Record<string, number>;
+  onSelect: (date: string) => void;
+}) {
+  const endMonth = startMonth + 5;
+  const firstMonthCell = cells.find(
+    (cell) =>
+      cell.inYear &&
+      cell.date.getMonth() === startMonth &&
+      cell.date.getDate() === 1,
+  );
+  const lastMonthCell = cells.find(
+    (cell) =>
+      cell.inYear &&
+      cell.date.getMonth() === endMonth &&
+      cell.date.getDate() === new Date(year, endMonth + 1, 0).getDate(),
+  );
+  const firstWeek = firstMonthCell?.week ?? 0;
+  const lastWeek = lastMonthCell?.week ?? firstWeek + 26;
+  const weekCount = lastWeek - firstWeek + 1;
+  const halfCells = cells.filter(
+    (cell) => cell.week >= firstWeek && cell.week <= lastWeek,
+  );
+  const monthLabels = Array.from({ length: 6 }, (_, offset) => {
+    const month = startMonth + offset;
+    const cell = cells.find(
+      (item) =>
+        item.inYear &&
+        item.date.getMonth() === month &&
+        item.date.getDate() <= 7,
+    );
+    return {
+      name: new Intl.DateTimeFormat("en", { month: "short" }).format(
+        new Date(year, month, 1),
+      ),
+      column: (cell?.week ?? firstWeek) - firstWeek + 1,
+    };
+  });
+
+  return (
+    <section aria-label={label}>
+      <h2 className="mb-2 text-center text-sm font-medium text-slate-500">
+        {label}
+      </h2>
+      <div className="mx-auto w-max max-w-full">
+        <div
+          className="ml-5 grid h-4 text-[9px] text-slate-500"
+          style={{
+            gridTemplateColumns: `repeat(${weekCount}, 10px)`,
+            columnGap: "2px",
+          }}
+        >
+          {monthLabels.map((month) => (
+            <span
+              key={month.name}
+              style={{ gridColumnStart: month.column, gridColumnEnd: "span 3" }}
+            >
+              {month.name}
             </span>
           ))}
         </div>
-        <div className="flex gap-2">
-          <div className="grid h-[137px] w-6 grid-rows-7 text-[10px] leading-[17px] text-slate-500">
+        <div className="flex gap-1.5">
+          <div className="grid h-[82px] w-3 grid-rows-7 text-[8px] leading-[10px] text-slate-500">
             <span />
             <span>M</span>
             <span />
@@ -558,63 +802,44 @@ function Heatmap({
           <div
             className="grid"
             style={{
-              gridTemplateColumns: "repeat(53, 17px)",
-              gridTemplateRows: "repeat(7, 17px)",
-              gap: "3px",
+              gridTemplateColumns: `repeat(${weekCount}, 10px)`,
+              gridTemplateRows: "repeat(7, 10px)",
+              gap: "2px",
             }}
           >
-            {cells.map((cell) => {
+            {halfCells.map((cell) => {
+              const inHalf =
+                cell.inYear &&
+                cell.date.getMonth() >= startMonth &&
+                cell.date.getMonth() <= endMonth;
               const minutes =
-                demoMinutes(cell.date, todayKey) +
+                demoMinutes(cell.date, todayKey, demoStartKey) +
                 (entryMinutes[cell.dateKey] ?? 0);
               return (
                 <button
-                  key={cell.dateKey}
+                  key={`${label}-${cell.dateKey}`}
                   type="button"
-                  className={`rounded-[2px] transition hover:scale-125 hover:ring-2 hover:ring-slate-500 ${
-                    cell.dateKey === selectedDate
-                      ? "ring-2 ring-slate-950 ring-offset-1"
-                      : ""
-                  } ${cell.inYear ? "" : "pointer-events-none opacity-0"}`}
+                  className={`rounded-[2px] ${cell.dateKey === selectedDate ? "ring-2 ring-slate-950 ring-offset-1" : ""} ${inHalf ? "" : "pointer-events-none opacity-0"}`}
                   style={{
-                    backgroundColor: heatColor(minutes, cell.dateKey, todayKey),
-                    gridColumn: cell.week + 1,
+                    backgroundColor: heatColor(
+                      minutes,
+                      cell.dateKey,
+                      todayKey,
+                      firstActivityKey,
+                    ),
+                    gridColumn: cell.week - firstWeek + 1,
                     gridRow: cell.weekday + 1,
                   }}
                   onClick={() => onSelect(cell.dateKey)}
                   aria-label={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
-                  title={`${formatLongDate(cell.dateKey)} · ${minutes} min`}
-                  tabIndex={cell.inYear ? 0 : -1}
+                  tabIndex={inHalf ? 0 : -1}
                 />
               );
             })}
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 pl-8 text-xs text-slate-600">
-          {[
-            ["0 min", heatColors.pastEmpty],
-            ["1–14 min", heatColors.levels[0]],
-            ["15–29 min", heatColors.levels[1]],
-            ["30–59 min", heatColors.levels[2]],
-            ["60–119 min", heatColors.levels[3]],
-            ["120–180 min", heatColors.levels[4]],
-            ["181+ min", heatColors.levels[5]],
-          ].map(([label, color]) => (
-            <span key={label} className="flex items-center gap-2">
-              <span
-                className="h-4 w-4 rounded-[3px] border border-black/5"
-                style={{ backgroundColor: color }}
-              />
-              {label}
-            </span>
-          ))}
-          <span className="flex items-center gap-2">
-            <span className="h-4 w-4 rounded-[3px] border border-slate-200 bg-slate-50" />
-            No data (future)
-          </span>
-        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -632,6 +857,8 @@ function DayPanel({
   onCustomDuration,
   onDelete,
   onSave,
+  onUpdate,
+  onReset,
   onOther,
   onDate,
 }: {
@@ -648,10 +875,30 @@ function DayPanel({
   onCustomDuration: (value: string) => void;
   onDelete: (id: number) => void;
   onSave: () => void;
+  onUpdate: (id: number, duration: number, activity: string) => void;
+  onReset: () => void;
   onOther: () => void;
   onDate: (date: string) => void;
 }) {
   const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  function closeForm() {
+    setFormOpen(false);
+    setEditingId(null);
+    onReset();
+  }
+
+  function openEdit(entry: StudyEntry) {
+    setEditingId(entry.id);
+    onActivity(entry.activity);
+    if (quickDurations.some((duration) => duration === entry.duration)) {
+      onDuration(entry.duration);
+    } else {
+      onCustomDuration(String(entry.duration));
+    }
+    setFormOpen(true);
+  }
   return (
     <section className="mt-5 border-t border-slate-200 pt-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -659,23 +906,35 @@ function DayPanel({
           <button
             type="button"
             className="rounded-xl border border-slate-300 p-2.5 hover:bg-slate-50"
-            onClick={() => onDate(shiftDate(date, -1))}
+            onClick={() => {
+              closeForm();
+              onDate(shiftDate(date, -1));
+            }}
             aria-label="Previous day"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <div className="min-w-48">
-            <h2 className="text-2xl font-bold">
-              {date === todayKey ? "Today" : "Selected day"}
-            </h2>
-            <p className="mt-0.5 text-sm text-slate-600">
-              {formatLongDate(date)}
-            </p>
+          <div className="min-w-0 sm:min-w-48">
+            {date === todayKey ? (
+              <>
+                <h2 className="text-2xl font-bold">Today</h2>
+                <p className="mt-0.5 text-sm text-slate-600">
+                  {formatLongDate(date)}
+                </p>
+              </>
+            ) : (
+              <h2 className="text-xl font-bold sm:text-2xl">
+                {formatLongDate(date)}
+              </h2>
+            )}
           </div>
           <button
             type="button"
             className="rounded-xl border border-slate-300 p-2.5 hover:bg-slate-50"
-            onClick={() => onDate(shiftDate(date, 1))}
+            onClick={() => {
+              closeForm();
+              onDate(shiftDate(date, 1));
+            }}
             aria-label="Next day"
           >
             <ChevronRight className="h-5 w-5" />
@@ -708,7 +967,7 @@ function DayPanel({
                   <button
                     type="button"
                     className="rounded-xl border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50"
-                    onClick={() => setFormOpen(true)}
+                    onClick={() => openEdit(entry)}
                     aria-label={`Edit ${entry.activity} entry`}
                   >
                     <Pencil className="h-4 w-4" />
@@ -734,7 +993,7 @@ function DayPanel({
           })
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 p-5 text-center text-sm text-slate-500">
-            No entries for this day yet.
+            No study session for this day yet.
           </div>
         )}
       </div>
@@ -803,7 +1062,7 @@ function DayPanel({
             <button
               type="button"
               className="rounded-xl border border-slate-300 px-5 py-2.5 font-semibold hover:bg-slate-50"
-              onClick={() => setFormOpen(false)}
+              onClick={closeForm}
             >
               Cancel
             </button>
@@ -811,14 +1070,22 @@ function DayPanel({
               type="button"
               className="min-w-28 rounded-xl bg-blue-600 px-5 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
               onClick={() => {
-                onSave();
+                const duration = customDuration
+                  ? Number(customDuration)
+                  : selectedDuration;
+                if (editingId && duration && selectedActivity) {
+                  onUpdate(editingId, duration, selectedActivity);
+                } else {
+                  onSave();
+                }
                 setFormOpen(false);
+                setEditingId(null);
               }}
               disabled={
                 !selectedActivity || (!selectedDuration && !customDuration)
               }
             >
-              Save
+              {editingId ? "Update" : "Save"}
             </button>
           </div>
         </div>
@@ -826,7 +1093,11 @@ function DayPanel({
         <button
           type="button"
           className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-blue-700"
-          onClick={() => setFormOpen(true)}
+          onClick={() => {
+            setEditingId(null);
+            onReset();
+            setFormOpen(true);
+          }}
         >
           <Plus className="h-5 w-5" />
           Add study session

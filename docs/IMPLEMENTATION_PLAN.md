@@ -63,6 +63,8 @@ Before changing the application layout, prepare two static screenshot alternativ
 - Render entry cards with duration and activity only; do not repeat the current board name.
 - Give standard activities distinct Lucide icons: Reading (`BookOpen`), Podcast (`Headphones`), Speaking (`MessagesSquare`), Writing (`PenLine`), Anki (`Layers3`), Grammar (`SpellCheck2`), and TV Show / Film (`Clapperboard`). Use `Shapes` as the one shared, visually distinct icon for every user-created activity.
 - Place prominent previous-day and next-day arrows beside the selected date; each activation changes the selected date by exactly one calendar day, including across month and year boundaries.
+- Use `Today` plus a date only for today; otherwise use the full weekday/date as the heading and never display `Selected day`. Use `No study session for this day yet.` for an empty date.
+- Preselect and highlight the saved duration and activity during edit; moving either selection moves its highlight, `Update` persists, and `Cancel` leaves the entry unchanged.
 - Provide hover/focus edit and delete controls on desktop and keep both icons persistently visible on mobile/touch layouts.
 - Show `Add study session` below existing cards so the user can add another entry to a populated date.
 - Implement edit with `Update`/`Cancel` and deletion with explicit confirmation.
@@ -73,9 +75,11 @@ Before changing the application layout, prepare two static screenshot alternativ
 ### Milestone 1C — Revised heatmap and Study Time statistics
 
 - Retain fixed minute thresholds: 0, 1–14, 15–29, 30–59, 60–119, 120–180, and 181+.
-- Render past zero-minute dates red and zero-minute today/future dates white.
+- Render zero-minute past dates red only from the board's earliest entry onward; earlier dates/years and zero-minute today/future dates remain white.
 - Use three fixed yellow-family positive levels below 60 minutes and three progressively darker green levels from 60 minutes.
 - Use the approved soft treatment: muted missed-day red, warm yellows, and muted sage-to-forest greens.
+- Start missed-day coloring at the board's earliest study entry: all earlier dates/years remain white, gaps after that date are red, and yellow/green always means positive minutes.
+- On mobile, render `Jan–Jun` and `Jul–Dec` as two compact grids and arrange the four primary summary cards in a compact two-column layout.
 - Preserve accessible labels, visible focus, equivalent non-color detail, and mobile horizontal containment.
 - Complete selected-year/current-period totals, averages, active days, current/longest streaks, activity totals, and day/week/month/year distributions.
 - Add actual activity allocation for the latest seven calendar dates ending today.

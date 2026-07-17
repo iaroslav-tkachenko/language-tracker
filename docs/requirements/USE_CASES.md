@@ -233,7 +233,7 @@ This document describes the main MVP interactions from the user's point of view.
 1. The system displays a Monday-based yearly grid for the selected board and year.
 2. Each day shows intensity based on the sum of exact minutes for that date.
 3. The legend communicates the approved thresholds: 0, 1–14, 15–29, 30–59, 60–119, 120–180, and 181+ minutes.
-4. A past zero-minute date is red, an empty today or future date is white, sub-hour positive levels are yellow-family colors, and 60+ minute levels are progressively darker green.
+4. Before the board's first entry, zero-minute dates are white. From that entry through yesterday, zero-minute dates are red; empty today/future dates are white, sub-hour positive levels are yellow-family colors, and 60+ minute levels are progressively darker green.
 5. Future entries appear immediately in their dates and in the selected-year total.
 6. The learner moves to a previous or next year.
 7. The learner selects a date to review or add entries.

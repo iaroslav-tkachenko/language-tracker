@@ -72,7 +72,7 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-045`: Future entries do not affect current-period averages, active days, or streaks before their date arrives.
 - `BR-RULE-046`: A current streak remains active when the latest active day is today or yesterday.
 - `BR-RULE-047`: Study Time heatmap thresholds are `0`, `1–14`, `15–29`, `30–59`, `60–119`, `120–180`, and `181+` minutes.
-- `BR-RULE-048`: A zero-minute past Study Time day is red; a zero-minute current or future day is white; positive totals below 60 minutes use yellow-family levels; totals of 60 minutes or more use increasingly dark green levels.
+- `BR-RULE-048`: Missed-day red begins with the board's earliest study entry; earlier dates, current/future zero-minute dates, and complete earlier empty years are white. Positive totals below 60 minutes use yellow-family levels and totals of 60 minutes or more use increasingly dark green levels.
 - `BR-RULE-049`: Heatmap levels are fixed across years rather than normalized to a year's maximum.
 
 ### Selected-day workflow
@@ -90,6 +90,8 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-067`: Previous-day and next-day controls move the selected day by exactly one calendar date without changing the selected board.
 - `BR-RULE-068`: The selected-day total receives stronger visual emphasis than supporting labels, while remaining understandable to assistive technology.
 - `BR-RULE-069`: The Study Time heatmap uses the approved soft red, warm-yellow, and muted-green visual direction while preserving the fixed semantic bands.
+- `BR-RULE-082`: Mobile Study Time uses two half-year heatmaps and a compact two-column primary summary.
+- `BR-RULE-083`: A non-today day view is headed by its full weekday/date rather than `Selected day`; the empty-state copy is `No study session for this day yet.`
 
 ### Vocabulary
 
