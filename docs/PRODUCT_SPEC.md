@@ -121,7 +121,6 @@ Each entry contains:
 - one study date;
 - one activity type;
 - an exact duration in minutes;
-- an optional comment;
 - creation and update timestamps.
 
 ### 7.2 Entry rules
@@ -132,7 +131,7 @@ Each entry contains:
 - Users can edit and delete individual entries.
 - Deleting an entry removes its minutes from every derived heatmap and statistic.
 - Duration is an integer from 1 through 1,440 minutes.
-- A normalized comment is at most 150 characters.
+- Study entries do not contain comments or notes.
 - The selected board and activity must both belong to the authenticated user.
 - An archived board or activity cannot be used for a new entry.
 
@@ -157,15 +156,16 @@ The user can also enter any valid custom integer duration. Values such as `3+ ho
 - Activating `Add study session` reveals quick durations, custom minutes, active activities, `Other`, disabled `Save`, and `Cancel`.
 - `Save` becomes available only after both a valid duration and active activity are selected.
 - A saved entry card shows its duration, activity, and language-board name.
-- Edit and delete actions appear on pointer hover and keyboard focus and have an equivalent discoverable touch interaction.
+- Edit and delete actions appear on pointer hover and keyboard focus on desktop. Both icons remain persistently visible on mobile/touch layouts.
 - Edit exposes current values with explicit `Update` and `Cancel` actions.
 - Delete always requires confirmation.
+- A populated selected day shows `Add study session` below its existing entry cards so another independent entry can be added directly.
 
 ### 7.5 Batch entry creation
 
 The user can create the same study entry across a date range:
 
-1. Select one active board, active activity, exact duration, optional shared comment, start date, and end date.
+1. Select one active board, active activity, exact duration, start date, and end date.
 2. Review a confirmation containing the inclusive dates and number of entries.
 3. Confirm one atomic operation that creates one independent entry per date.
 
@@ -282,7 +282,7 @@ The product will later compare actual allocation with a fixed ideal distribution
 ### 10.6 CEFR declaration history
 
 - CEFR belongs to one language board.
-- The user manually declares A1, A2, B1, B2, C1, or C2 with an effective date no later than browser-local today and an optional comment of at most 150 normalized characters.
+- The user manually declares A1, A2, B1, B2, C1, or C2 with an effective date no later than browser-local today.
 - Earlier declarations remain visible; the latest effective declaration is current.
 - The system never infers or promotes the level from hours or vocabulary.
 - Each level has a concise product-authored description based on sourced CEFR can-do descriptors.
@@ -321,8 +321,10 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - MVP uses a light theme only.
 - The primary board screen contains board selection, year navigation, heatmap, summary metrics, the selected day's entries, and an entry form.
 - The primary board screen provides `Study Time` and `Vocabulary` tabs and places year navigation near the top without avoidable empty space.
+- During Phases 1 and 2, `Vocabulary` is visible but disabled with `Coming soon`; it becomes interactive only when Phase 3 is complete.
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
-- The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` may live in detailed statistics.
+- The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.
+- Phase 1 screenshot reviews may use an isolated test-user fixture reading `Current level: B1` and `Estimated B2: in about 6 months at this pace`. This fixture must never be presented as real data to a production user and is replaced by the Phase 4 calculation.
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A settings area manages boards and the global activity catalog.
 - Destructive actions use clear labels and confirmation where historical data would become hidden.
@@ -330,7 +332,7 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 ## 12. Validation and errors
 
 - Validation runs at the UI boundary and again at the trusted server/database boundary.
-- Whitespace-only names and comments are rejected or normalized to empty values as appropriate.
+- Whitespace-only names are rejected after normalization.
 - Duplicate active names are compared case-insensitively after trimming.
 - Invalid, expired, or reused authentication links show a recoverable error state.
 - Failed saves preserve user input and show actionable feedback.

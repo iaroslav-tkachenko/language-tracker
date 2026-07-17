@@ -77,7 +77,7 @@ flowchart LR
 - Up to six active language boards per user.
 - A global activity catalog shared across the user's boards.
 - Seven seeded activities and named custom activities.
-- Study entries with date, activity, exact minutes, and optional comment.
+- Study entries with date, activity, and exact minutes; comments and notes are intentionally excluded.
 - A collapsed, selected-day study-session workflow with explicit create, edit, cancel, update, and confirmed-delete states.
 - Atomic creation of the same study entry across an inclusive range of at most 366 dates within one calendar year.
 - Past, present, and future study dates.

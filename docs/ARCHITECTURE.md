@@ -190,18 +190,17 @@ Required database rules:
 
 ### 5.4 `study_entries`
 
-| Column             | Type           | Constraints and purpose                                                           |
-| ------------------ | -------------- | --------------------------------------------------------------------------------- |
-| `id`               | `uuid`         | Primary key, generated UUID                                                       |
-| `user_id`          | `uuid`         | Required owner; references `profiles(user_id)`                                    |
-| `board_id`         | `uuid`         | Required board                                                                    |
-| `activity_type_id` | `uuid`         | Required activity                                                                 |
-| `study_date`       | `date`         | Required local calendar date; past, present, or future                            |
-| `duration_minutes` | `smallint`     | Integer from 1 through 1,440                                                      |
-| `comment`          | `varchar(150)` | Nullable normalized comment                                                       |
-| `batch_id`         | `uuid`         | Nullable provenance link to `study_entry_batches`; absent for single-day creation |
-| `created_at`       | `timestamptz`  | Audit timestamp                                                                   |
-| `updated_at`       | `timestamptz`  | Audit timestamp                                                                   |
+| Column             | Type          | Constraints and purpose                                                           |
+| ------------------ | ------------- | --------------------------------------------------------------------------------- |
+| `id`               | `uuid`        | Primary key, generated UUID                                                       |
+| `user_id`          | `uuid`        | Required owner; references `profiles(user_id)`                                    |
+| `board_id`         | `uuid`        | Required board                                                                    |
+| `activity_type_id` | `uuid`        | Required activity                                                                 |
+| `study_date`       | `date`        | Required local calendar date; past, present, or future                            |
+| `duration_minutes` | `smallint`    | Integer from 1 through 1,440                                                      |
+| `batch_id`         | `uuid`        | Nullable provenance link to `study_entry_batches`; absent for single-day creation |
+| `created_at`       | `timestamptz` | Audit timestamp                                                                   |
+| `updated_at`       | `timestamptz` | Audit timestamp                                                                   |
 
 Ownership constraints:
 
@@ -217,17 +216,16 @@ Reference: [PostgreSQL date/time types](https://www.postgresql.org/docs/current/
 
 ### 5.5 `study_entry_batches`
 
-| Column             | Type           | Constraints and purpose                               |
-| ------------------ | -------------- | ----------------------------------------------------- |
-| `id`               | `uuid`         | Client-generated operation identifier and primary key |
-| `user_id`          | `uuid`         | Required owner; references `profiles(user_id)`        |
-| `board_id`         | `uuid`         | Required owned board                                  |
-| `activity_type_id` | `uuid`         | Required owned activity                               |
-| `start_date`       | `date`         | Inclusive first date                                  |
-| `end_date`         | `date`         | Inclusive final date                                  |
-| `duration_minutes` | `smallint`     | Integer from 1 through 1,440 copied to each entry     |
-| `comment`          | `varchar(150)` | Nullable shared comment copied to each entry          |
-| `created_at`       | `timestamptz`  | Audit timestamp                                       |
+| Column             | Type          | Constraints and purpose                               |
+| ------------------ | ------------- | ----------------------------------------------------- |
+| `id`               | `uuid`        | Client-generated operation identifier and primary key |
+| `user_id`          | `uuid`        | Required owner; references `profiles(user_id)`        |
+| `board_id`         | `uuid`        | Required owned board                                  |
+| `activity_type_id` | `uuid`        | Required owned activity                               |
+| `start_date`       | `date`        | Inclusive first date                                  |
+| `end_date`         | `date`        | Inclusive final date                                  |
+| `duration_minutes` | `smallint`    | Integer from 1 through 1,440 copied to each entry     |
+| `created_at`       | `timestamptz` | Audit timestamp                                       |
 
 Required rules:
 
@@ -261,16 +259,15 @@ Required rules:
 
 ### 5.7 `cefr_level_events`
 
-| Column           | Type           | Constraints and purpose                                     |
-| ---------------- | -------------- | ----------------------------------------------------------- |
-| `id`             | `uuid`         | Primary key, generated UUID                                 |
-| `user_id`        | `uuid`         | Required owner; references `profiles(user_id)`              |
-| `board_id`       | `uuid`         | Required owned board                                        |
-| `level`          | `text`         | Required check-constrained value: A1, A2, B1, B2, C1, or C2 |
-| `effective_date` | `date`         | User-declared past or current local calendar date           |
-| `comment`        | `varchar(150)` | Nullable normalized context                                 |
-| `created_at`     | `timestamptz`  | Audit timestamp                                             |
-| `updated_at`     | `timestamptz`  | Audit timestamp                                             |
+| Column           | Type          | Constraints and purpose                                     |
+| ---------------- | ------------- | ----------------------------------------------------------- |
+| `id`             | `uuid`        | Primary key, generated UUID                                 |
+| `user_id`        | `uuid`        | Required owner; references `profiles(user_id)`              |
+| `board_id`       | `uuid`        | Required owned board                                        |
+| `level`          | `text`        | Required check-constrained value: A1, A2, B1, B2, C1, or C2 |
+| `effective_date` | `date`        | User-declared past or current local calendar date           |
+| `created_at`     | `timestamptz` | Audit timestamp                                             |
+| `updated_at`     | `timestamptz` | Audit timestamp                                             |
 
 Required rules:
 
@@ -460,11 +457,12 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Board and activity lifecycle.
 - Entry create/edit/delete on past, current, and future dates.
 - Collapsed create form, disabled-save prerequisites, card edit/cancel/update, and confirmed delete.
+- Disabled `Vocabulary — Coming soon`, add-another action on populated days, main-screen `Top activity` absence, and isolated test-fixture handling.
 - Batch creation preview, success, matching-entry preservation, and retry behavior.
 - Vocabulary tab create/edit/delete, heatmap, and streak behavior.
 - CEFR declaration history, approximate forecast disclosures, and zero-pace/C2 states.
 - User A cannot access User B's data.
-- Desktop and mobile heatmap interaction, hover/focus/touch parity, and the 1366×768 above-the-fold contract.
+- Desktop hover/focus actions, two persistently visible mobile entry-action icons, and the 1366×768 above-the-fold contract.
 
 Playwright can launch the local app through its `webServer` configuration and use separate desktop/mobile projects.
 

@@ -53,9 +53,9 @@ Business requirements describe the outcomes and invariant rules the product must
 
 - `BR-RULE-030`: A single-day save operation creates one study entry; a confirmed batch operation creates one independent entry for each date in its range.
 - `BR-RULE-031`: A calendar day may contain any number of study entries.
-- `BR-RULE-032`: A study entry contains one board, one date, one activity, one exact duration, and an optional comment.
+- `BR-RULE-032`: A study entry contains one board, one date, one activity, and one exact duration.
 - `BR-RULE-033`: Duration is an integer from 1 through 1,440 minutes.
-- `BR-RULE-034`: A normalized comment contains at most 150 characters.
+- `BR-RULE-034`: Study entries, batch operations, and CEFR declarations do not contain comments or free-form notes.
 - `BR-RULE-035`: Study dates may be in the past, present, or future.
 - `BR-RULE-036`: Archived boards and activities cannot be assigned to new entries.
 - `BR-RULE-037`: A batch range is inclusive, contains at most 366 dates, and cannot cross a calendar-year boundary.
@@ -82,6 +82,10 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-052`: Editing can change duration and activity and uses explicit `Update` and `Cancel` actions.
 - `BR-RULE-053`: Deleting a study entry requires explicit confirmation.
 - `BR-RULE-054`: At 1366×768 CSS pixels and 100% browser zoom, the primary view shows the heatmap, summary, selected-day heading, and either its first entry or `Add study session` without page scrolling.
+- `BR-RULE-055`: A populated selected day shows `Add study session` below its existing cards.
+- `BR-RULE-056`: On mobile/touch layouts, edit and delete icons remain persistently visible on every study-entry card.
+- `BR-RULE-057`: During Phases 1 and 2, the visible Vocabulary tab is disabled and labelled `Coming soon`.
+- `BR-RULE-058`: `Top activity` does not appear in the primary summary; Phase 1 design review may use an isolated B1-to-B2 six-month test fixture until real Phase 4 CEFR data replaces it.
 
 ### Vocabulary
 
@@ -96,7 +100,7 @@ Business requirements describe the outcomes and invariant rules the product must
 ### CEFR history and forecast
 
 - `BR-RULE-070`: CEFR level is declared manually per language board and the system never promotes it automatically.
-- `BR-RULE-071`: A declaration records A1, A2, B1, B2, C1, or C2, an effective date no later than today, and an optional comment.
+- `BR-RULE-071`: A declaration records A1, A2, B1, B2, C1, or C2 and an effective date no later than today.
 - `BR-RULE-072`: The current CEFR level is the latest effective declaration; earlier declarations remain visible in history.
 - `BR-RULE-073`: Forecasts use an approximate Cambridge English guided-learning-hours model for every language, with a prominent warning that it is guidance rather than an assessment or guarantee.
 - `BR-RULE-074`: Progress toward the next level subtracts eligible study time logged since the effective date of the current declaration from the reference hours between the two levels.

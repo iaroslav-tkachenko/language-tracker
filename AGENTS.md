@@ -57,7 +57,6 @@ If the files conflict, stop and ask the project owner to resolve the conflict. D
 
 - Language board name: 1–50 trimmed characters.
 - Activity name: 1–50 trimmed characters.
-- Comment: at most 150 characters after normalization.
 - Duration: integer from 1 through 1,440 minutes.
 - At most six active language boards per user.
 - At most 30 active activities per user.

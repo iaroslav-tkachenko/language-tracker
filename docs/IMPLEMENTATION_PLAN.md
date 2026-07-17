@@ -46,12 +46,12 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 ### Milestone 1A — Above-the-fold board experience
 
 - Move year navigation close to the top and remove avoidable vertical whitespace.
-- Establish clear `Study Time` and future `Vocabulary` tab placement without enabling unfinished Vocabulary behavior.
+- Show `Study Time` and a disabled `Vocabulary` tab labelled `Coming soon`; do not enable Vocabulary behavior before Phase 3.
 - At 1366×768 and 100% zoom, show navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` without page scrolling.
-- Prioritize selected-year total, selected-year active days, and flame-treated current streak. The fourth card may remain `Top activity` until Phase 4 replaces it with real CEFR/forecast data; do not display invented forecast data.
+- Prioritize selected-year total, selected-year active days, and flame-treated current streak. Remove `Top activity` from the main screen. For screenshot review and the isolated test user only, use `Current level: B1` and `Estimated B2: in about 6 months at this pace`; never expose this fixture as production-user data.
 - Give the statistics destination an explicit text label or icon-and-label treatment.
 
-**Review notification:** provide desktop and mobile screenshots plus a clickable local preview before continuing to Milestone 1B.
+Before changing the application layout, prepare two static screenshot alternatives using the same content and different heatmap color treatments. The project owner selects one direction; only then implement the approved screen. After implementation, provide desktop and mobile screenshots plus a clickable local preview before continuing to Milestone 1B.
 
 ### Milestone 1B — Selected-day session workflow
 
@@ -59,7 +59,8 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 - Reveal quick/custom duration, active activities, `Other`, disabled `Save`, and `Cancel` on demand.
 - Enable `Save` only when duration and activity are valid.
 - Render entry cards with duration, activity, and board name.
-- Provide edit/delete controls with hover, focus, and touch parity.
+- Provide hover/focus edit and delete controls on desktop and keep both icons persistently visible on mobile/touch layouts.
+- Show `Add study session` below existing cards so the user can add another entry to a populated date.
 - Implement edit with `Update`/`Cancel` and deletion with explicit confirmation.
 - Preserve any number of independent entries per date and all past/current/future rules.
 
@@ -78,7 +79,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 
 - Unit: calendar boundaries, all heatmap bands and date states, averages, future exclusions, and streaks.
 - Database: aggregation and ownership fixtures.
-- Playwright: collapsed/expanded form, disabled-save prerequisites, create/edit/cancel/update/delete, desktop 1366×768 visibility, mobile/touch behavior, keyboard flow, and non-color information.
+- Playwright: disabled `Vocabulary — Coming soon`, absence of `Top activity` on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, create/edit/cancel/update/delete, two persistent mobile action icons, desktop 1366×768 visibility, keyboard flow, and non-color information.
 
 ### Phase exit criteria
 
@@ -94,7 +95,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 - Add composite ownership, same-year/ordered/366-date constraints, RLS, and generated database types.
 - Implement one authenticated transaction that expands the inclusive date range.
 - Use a client-generated operation ID so one submission intent is idempotent.
-- Add a date-range mode with activity, duration, optional shared comment, start/end dates, and clear cancellation.
+- Add a date-range mode with activity, duration, start/end dates, and clear cancellation.
 - Display a confirmation summarizing activity, duration, dates, count, and preservation of existing entries.
 - Create one independent entry per date; never overwrite, merge, or skip matching existing entries.
 - Keep generated entries independently editable and deletable.
@@ -140,7 +141,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 
 ### Milestone 4A — CEFR history
 
-- Add `cefr_level_events` with board ownership, A1–C2 constraint, non-future effective-date mutation, optional comment, RLS, and history index.
+- Add `cefr_level_events` with board ownership, A1–C2 constraint, non-future effective-date mutation, RLS, and history index.
 - Add product-authored, sourced summaries of each CEFR level.
 - Implement manual declaration and chronological history; never auto-promote.
 
@@ -152,7 +153,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 - Display approximate remaining hours and estimated date when possible.
 - Handle no declaration, zero pace, completed estimate, and C2 explicitly.
 - Display the Cambridge source, cross-language limitation, and non-assessment warning with every forecast.
-- Replace the temporary fourth summary card with current level and estimated next-level date.
+- Replace the isolated test-user fixture with the real current level and calculated estimated next-level date.
 
 ### Milestone 4C — Statistics integration
 

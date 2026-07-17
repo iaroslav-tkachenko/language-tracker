@@ -33,16 +33,16 @@ Non-functional requirements define the quality, security, operational, and imple
 
 ## 4. Accessibility and usability
 
-| ID             | Requirement                                                                                                                  | Verification                                                                           |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `NFR-A11Y-001` | The application shall target WCAG 2.2 Level AA for in-scope screens and controls.                                            | Automated accessibility checks plus keyboard and screen-reader-oriented manual review. |
-| `NFR-A11Y-002` | Color shall not be the sole means of conveying heatmap information, selection, errors, or status.                            | Visual and accessible-name inspection.                                                 |
-| `NFR-A11Y-003` | Interactive controls shall have accessible names, visible focus, and logical keyboard order.                                 | Keyboard walkthrough and accessibility-tree inspection.                                |
-| `NFR-A11Y-004` | Form errors shall identify the affected field and provide corrective guidance.                                               | Invalid-input use-case tests.                                                          |
-| `NFR-A11Y-005` | Red, yellow, and green heatmap states shall meet applicable contrast targets and expose equivalent text or accessible names. | Contrast measurement, color-vision review, and accessibility-tree inspection.          |
-| `NFR-A11Y-006` | Controls revealed visually on hover shall also be discoverable and operable by keyboard and touch.                           | Keyboard, focus, and touch-device walkthroughs.                                        |
-| `NFR-USE-001`  | The core logging loop shall be completable from the selected board experience without navigating to unrelated screens.       | Manual walkthrough of `UC-05`.                                                         |
-| `NFR-USE-002`  | The UI shall clearly distinguish active, selected, archived, loading, empty, successful, and error states where applicable.  | Design review and state-based component tests.                                         |
+| ID             | Requirement                                                                                                                       | Verification                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `NFR-A11Y-001` | The application shall target WCAG 2.2 Level AA for in-scope screens and controls.                                                 | Automated accessibility checks plus keyboard and screen-reader-oriented manual review. |
+| `NFR-A11Y-002` | Color shall not be the sole means of conveying heatmap information, selection, errors, or status.                                 | Visual and accessible-name inspection.                                                 |
+| `NFR-A11Y-003` | Interactive controls shall have accessible names, visible focus, and logical keyboard order.                                      | Keyboard walkthrough and accessibility-tree inspection.                                |
+| `NFR-A11Y-004` | Form errors shall identify the affected field and provide corrective guidance.                                                    | Invalid-input use-case tests.                                                          |
+| `NFR-A11Y-005` | Red, yellow, and green heatmap states shall meet applicable contrast targets and expose equivalent text or accessible names.      | Contrast measurement, color-vision review, and accessibility-tree inspection.          |
+| `NFR-A11Y-006` | Controls revealed visually on desktop hover shall be keyboard-operable, while both entry actions remain visible on touch layouts. | Keyboard, focus, and touch-device walkthroughs.                                        |
+| `NFR-USE-001`  | The core logging loop shall be completable from the selected board experience without navigating to unrelated screens.            | Manual walkthrough of `UC-05`.                                                         |
+| `NFR-USE-002`  | The UI shall clearly distinguish active, selected, archived, loading, empty, successful, and error states where applicable.       | Design review and state-based component tests.                                         |
 
 ## 5. Responsive behavior and compatibility
 

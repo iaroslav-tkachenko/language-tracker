@@ -171,15 +171,16 @@ This document describes the main MVP interactions from the user's point of view.
 5. The learner selects one active activity type.
 6. The learner selects a quick duration of 10, 15, 20, 30, 45, 60, 90, or 120 minutes, or enters a custom integer duration.
 7. `Save` becomes active after both required values are valid.
-8. The learner optionally enters a comment of up to 150 normalized characters and saves.
+8. The learner saves; the form contains no comment or note field.
 9. The system validates ownership and all values, then stores exactly one entry.
 10. The day card, heatmap intensity, and affected statistics refresh.
+11. `Add study session` remains below the populated card list for another independent entry.
 
 **Alternatives and errors:**
 
 - The date may be in the past, present, or future.
 - Duration outside 1–1,440 minutes or a non-integer value is rejected.
-- A missing activity, invalid comment, archived reference, or ownership mismatch is rejected.
+- A missing activity, archived reference, or ownership mismatch is rejected.
 - A repeated click or retried request must not unintentionally create duplicate entries.
 - Multiple intentional entries may be added to the same date by repeating the flow.
 
@@ -195,11 +196,11 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Trigger:** The learner chooses edit or delete from a day's entry list.
 
-**Control discovery:** Each entry card shows duration, activity, and board name. Edit and delete controls appear on hover and focus and have an equivalent discoverable touch interaction.
+**Control discovery:** Each entry card shows duration, activity, and board name. Edit and delete controls appear on hover and focus on desktop; both icons remain persistently visible on mobile/touch layouts.
 
 **Main success scenario — edit:**
 
-1. The system loads the entry's current date, activity, duration, and comment.
+1. The system loads the entry's current date, activity, and duration.
 2. The learner changes one or more values.
 3. The learner chooses `Update`, or chooses `Cancel` to leave the entry unchanged.
 4. The system validates ownership and the updated values.
@@ -301,7 +302,7 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Main success scenario:**
 
-1. The learner selects an activity, exact duration, optional shared comment, start date, and end date.
+1. The learner selects an activity, exact duration, start date, and end date.
 2. The system validates that the inclusive range is ordered, remains within one calendar year, and contains no more than 366 dates.
 3. The system presents a confirmation summary with the number of entries and explains that existing entries remain.
 4. The learner confirms.
@@ -351,7 +352,7 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Main success scenario:**
 
-1. The learner chooses A1, A2, B1, B2, C1, or C2, an effective past/current date, and an optional comment.
+1. The learner chooses A1, A2, B1, B2, C1, or C2 and an effective past/current date.
 2. The system saves the declaration without deleting earlier history.
 3. The system displays the current level and a concise sourced description.
 4. For A1–C1, the system calculates approximate remaining hours using the fixed Cambridge-based model and logged Study Time since the effective date.
