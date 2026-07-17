@@ -2,7 +2,7 @@
 
 ## Current project status
 
-The project owner explicitly approved `docs/IMPLEMENTATION_PLAN.md` on July 14, 2026. MVP implementation is authorized and in progress. Keep work within the approved specification and phased plan.
+The project owner approved the original implementation plan on July 14, 2026 and an expanded phased product scope on July 16, 2026. The expanded documentation baseline is complete and awaiting product-owner review. Do not implement the July 16 feature expansion until the project owner explicitly authorizes Phase 1 of `docs/IMPLEMENTATION_PLAN.md`.
 
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 
@@ -30,6 +30,9 @@ If the files conflict, stop and ask the project owner to resolve the conflict. D
 - `Other` is a UI action that creates or restores a named custom activity; do not save entries against an unnamed generic `Other` activity.
 - Statistics and heatmaps are always scoped to one language board.
 - Study entries may use past, current, or future calendar dates.
+- Vocabulary uses one editable daily word total per language board and date.
+- CEFR levels are user-declared, board-specific historical events; the system never promotes a user automatically.
+- CEFR forecasts are approximate guidance and must display their methodology and limitations.
 - A used activity or language board must be archived rather than physically deleted.
 - Historical entries and statistics must survive activity archival and restoration.
 - Do not add features listed as out of scope in the product specification.
@@ -47,13 +50,13 @@ If the files conflict, stop and ask the project owner to resolve the conflict. D
 - Generate TypeScript database types from the schema rather than duplicating them manually.
 - Use `date` for `study_date` and `timestamptz` for audit timestamps.
 - Do not create cached or persisted aggregate tables for MVP statistics unless measurements prove they are necessary.
+- Batch entry creation must be atomic, idempotent for one submission intent, and must never overwrite existing study entries.
 - Preserve unrelated user changes in a dirty worktree.
 
 ## Validation defaults
 
 - Language board name: 1–50 trimmed characters.
 - Activity name: 1–50 trimmed characters.
-- Comment: at most 150 characters after normalization.
 - Duration: integer from 1 through 1,440 minutes.
 - At most six active language boards per user.
 - At most 30 active activities per user.
@@ -65,9 +68,9 @@ Run checks proportional to the change. The completed MVP must include:
 
 - formatting and linting;
 - TypeScript type checking;
-- unit tests for calendar, heatmap, averages, and streak rules;
-- pgTAP tests for schema constraints, database functions, and RLS isolation;
-- Playwright tests for critical authentication and study-entry journeys;
+- unit tests for calendar, both heatmaps, batch ranges, averages, streaks, and CEFR forecast rules;
+- pgTAP tests for schema constraints, batch atomicity/idempotency, database functions, and RLS isolation across every user-facing table;
+- Playwright tests for critical authentication, Study Time, batch, Vocabulary, CEFR, and statistics journeys;
 - a production Next.js build;
 - responsive and accessibility checks on desktop and mobile viewports.
 

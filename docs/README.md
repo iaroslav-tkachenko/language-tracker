@@ -2,6 +2,8 @@
 
 This directory is the documentation home for Language Tracker. It is organized so that a product owner, designer, engineer, or tester can start from the same approved product baseline and follow the level of detail relevant to their work.
 
+**Current gate:** the expanded July 16 requirements baseline is complete and awaiting product-owner review. Phase 1 implementation is not authorized until that review is explicitly approved.
+
 ## Start here
 
 | Reader                       | Recommended path                                                                                                                                                                  |
@@ -44,7 +46,7 @@ flowchart TD
 
 - [Product specification](PRODUCT_SPEC.md) — approved narrative baseline for MVP behavior.
 - [Architecture](ARCHITECTURE.md) — system boundaries, security model, data model, and technical decisions.
-- [Implementation plan](IMPLEMENTATION_PLAN.md) — delivery phases, risks, exit criteria, and definition of done.
+- [Implementation plan](IMPLEMENTATION_PLAN.md) — the current Phase 0–4 delivery sequence, review milestones, risks, exit criteria, and definition of done.
 - [Repository instructions](../AGENTS.md) — rules that apply to automated and human contributors.
 
 ## Documentation conventions
@@ -61,6 +63,8 @@ The requirements structure is inspired by ISO/IEC/IEEE 29148 principles: each re
 | `FR-ACT`   | Activity-catalog function             | `FR-ACT-006`   |
 | `FR-ENTRY` | Study-entry function                  | `FR-ENTRY-004` |
 | `FR-HEAT`  | Heatmap function                      | `FR-HEAT-003`  |
+| `FR-VOCAB` | Vocabulary-tracking function          | `FR-VOCAB-003` |
+| `FR-CEFR`  | CEFR history and forecast function    | `FR-CEFR-004`  |
 | `FR-STAT`  | Statistics function                   | `FR-STAT-007`  |
 | `FR-UI`    | Cross-cutting interface function      | `FR-UI-002`    |
 | `NFR`      | Non-functional requirement            | `NFR-SEC-001`  |

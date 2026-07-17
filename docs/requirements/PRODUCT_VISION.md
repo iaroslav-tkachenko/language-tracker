@@ -6,7 +6,7 @@ This document explains why Language Tracker exists, who it serves, and what the 
 
 ## 2. Vision statement
 
-For independent foreign-language learners who want a clear record of consistent practice, Language Tracker is a private responsive web application that records exact study time on separate language boards and turns that history into an understandable yearly heatmap and board-specific statistics.
+For independent foreign-language learners who want a clear record of consistent practice, Language Tracker is a private responsive web application that records exact study time and newly learned vocabulary on separate language boards, turns that history into understandable yearly heatmaps, and provides board-specific progress guidance.
 
 Unlike social habit platforms or generic time trackers, Language Tracker focuses on fast language-study logging, activity-specific history, and motivating visual continuity without public profiles, social pressure, or unrelated project-management features.
 
@@ -18,6 +18,9 @@ Language learners often study through several activities—reading, speaking, gr
 - On which days did I study?
 - Which activities receive most of my time?
 - How consistent is my practice?
+- How many new words did I learn and how consistently did I learn them?
+- What CEFR level did I report at different points in time?
+- At my recent study pace, when might I reach the next level?
 - How has my study pattern changed over days, weeks, months, and years?
 
 ## 4. Target user
@@ -44,7 +47,9 @@ The MVP should enable the user to:
 3. log a study entry with minimal repeated input;
 4. understand yearly consistency through a contribution-style heatmap;
 5. understand totals, averages, active days, streaks, and activity distribution;
-6. retain historical meaning when boards or activities are renamed or removed from active use.
+6. maintain one editable daily vocabulary total and a separate vocabulary streak;
+7. record a self-assessed CEFR history and see a clearly qualified progress forecast;
+8. retain historical meaning when boards or activities are renamed or removed from active use.
 
 ## 6. Product context
 
@@ -53,9 +58,14 @@ flowchart LR
     U["Authenticated learner"] -->|creates and reviews| B["Language boards"]
     U -->|maintains| A["Global activity catalog"]
     B -->|contains| E["Study entries"]
+    B -->|contains| W["Daily vocabulary totals"]
+    B -->|contains| C["CEFR level history"]
     A -->|classifies| E
     E -->|aggregates into| H["Yearly heatmap"]
-    E -->|aggregates into| S["Board statistics"]
+    W -->|aggregates into| V["Vocabulary heatmap"]
+    E -->|aggregates into| S["Board statistics and forecast"]
+    W -->|aggregates into| S
+    C -->|provides baseline for| S
 ```
 
 ## 7. MVP scope
@@ -67,10 +77,15 @@ flowchart LR
 - Up to six active language boards per user.
 - A global activity catalog shared across the user's boards.
 - Seven seeded activities and named custom activities.
-- Study entries with date, activity, exact minutes, and optional comment.
+- Study entries with date, activity, and exact minutes; comments and notes are intentionally excluded.
+- A collapsed, selected-day study-session workflow with explicit create, edit, cancel, update, and confirmed-delete states.
+- Atomic creation of the same study entry across an inclusive range of at most 366 dates within one calendar year.
 - Past, present, and future study dates.
-- Yearly board heatmap with fixed intensity thresholds.
+- Yearly Study Time heatmap with fixed red/yellow/green semantic levels.
+- One editable vocabulary total per board and date, with its own yearly green heatmap and statistics.
+- User-declared CEFR history and an approximate Cambridge-based next-level forecast.
 - Board-specific totals, averages, active days, streaks, activity totals, and time distributions.
+- Actual activity distribution for the latest seven calendar days.
 - Responsive English-language, light-theme interface.
 - Safe archival that preserves historical entries and statistics.
 
@@ -87,6 +102,8 @@ flowchart LR
 - UI localization or language selection.
 - Offline mode.
 - Native mobile applications.
+- Automatic CEFR assessment or promotion.
+- User-editable CEFR hour targets, vocabulary-to-CEFR cutoffs, or ideal activity-distribution targets.
 
 ## 8. Assumptions
 
@@ -94,6 +111,8 @@ flowchart LR
 - The user has an internet connection while using the application.
 - The browser's local date determines today and current calendar periods.
 - A study entry represents a calendar date, not a time-of-day interval.
+- Vocabulary tracking records a user-entered count, not individual words or a word list.
+- CEFR forecasts are motivational estimates rather than assessments or guarantees.
 - The production environment will use Vercel and Supabase unless the architecture is explicitly revised.
 
 ## 9. Constraints
@@ -109,7 +128,7 @@ flowchart LR
 The MVP is successful when a learner can complete the core loop without assistance:
 
 ```text
-Authenticate → select a board → select a date → record study time → see the day and statistics update
+Authenticate → select a board and tracker → select a date → record study time or vocabulary → see the heatmap and statistics update
 ```
 
 Formal acceptance is defined by the requirements and tests linked in the [traceability matrix](TRACEABILITY_MATRIX.md).
