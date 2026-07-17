@@ -1,0 +1,2 @@
+-- Development data is intentionally empty.
+-- Create login-capable users through local Supabase Studio or the application.

@@ -4,13 +4,31 @@ A responsive web application for recording and reviewing foreign-language study 
 
 ## Project status
 
-**Expanded documentation baseline ready for product-owner review; new-scope implementation is not yet authorized.**
+**Phase 0 authentication and security foundation is in progress.**
 
-The project owner approved the original implementation plan on July 14, 2026 and the expanded four-phase direction on July 16, 2026. The requirements, architecture, traceability, and delivery plan now describe that direction. Phase 1 begins only after explicit review approval. The existing responsive prototype remains in-memory demonstration data rather than proof of the expanded functionality.
+The project owner approved the original implementation plan on July 14, 2026, the expanded four-phase direction on July 16, 2026, and Phase 1 visual work on July 17, 2026. Responsive authentication screens, Supabase SSR session utilities, protected-route boundaries, and the initial RLS schema are now versioned. The Study Time prototype remains demonstration data until its Server Actions are connected to Supabase.
 
 ### Current local preview
 
-When the development or production server is running, open [http://localhost:3000](http://localhost:3000). The preview supports year navigation, day selection, in-memory entry creation/deletion, board switching, a statistics preview, and board/activity additions through the settings drawer.
+The current production preview runs at [http://localhost:3001](http://localhost:3001):
+
+- [Sign in](http://localhost:3001/sign-in) — Phase 0 authentication UI and validation.
+- [Create account](http://localhost:3001/sign-up) — registration UI.
+- [Study Time demo](http://localhost:3001/demo) — the approved in-memory Phase 1 prototype.
+
+Authentication screens are clickable without credentials, but real registration, email delivery, and sessions require a connected Supabase project.
+
+## Local setup
+
+1. Keep the repository on drive `D:` and install dependencies there.
+2. Copy `.env.example` to `.env.local`.
+3. Create a Supabase project and add its project URL and publishable key to `.env.local`.
+4. Set `NEXT_PUBLIC_SITE_URL` to the exact local or deployed application origin.
+5. Apply `supabase/migrations/20260717000100_phase_zero_core.sql` through the project migration workflow.
+6. Add the application's `/auth/callback` URLs to the Supabase authentication redirect allow-list.
+7. Run `pnpm dev` for development or `pnpm build` followed by `pnpm start` for a production-like check.
+
+Never commit `.env.local` or a service-role key. The browser receives only the publishable key.
 
 ## MVP summary
 
@@ -55,6 +73,7 @@ The repository and installed dependencies live on drive `D:`. Package caches, br
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Repository instructions](AGENTS.md)
+- [Phase 0 authentication screenshots](docs/design/phase-0/README.md)
 
 ## Source language
 

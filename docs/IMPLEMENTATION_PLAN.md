@@ -2,9 +2,9 @@
 
 ## 1. Approval gate
 
-**Current status: documentation review required before expanded-scope implementation.**
+**Current status: Phase 0 implementation in progress.**
 
-The project owner approved the original MVP plan on July 14, 2026 and the four-phase product direction on July 16, 2026. This document re-baselines delivery around that direction. No July 16 feature expansion may begin until the project owner reviews this completed documentation baseline and explicitly authorizes Phase 1.
+The project owner approved the original MVP plan on July 14, 2026, the four-phase product direction on July 16, 2026, and Phase 1 visual work on July 17, 2026. The responsive Study Time prototype is preserved at `/demo` while Phase 0 authentication, schema, and security are connected to production-backed data.
 
 The existing responsive prototype and any completed foundation work are inputs to this plan, not evidence that the expanded requirements are implemented.
 
