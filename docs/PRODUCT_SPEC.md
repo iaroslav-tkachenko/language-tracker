@@ -326,6 +326,7 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - MVP uses a light theme only.
 - The primary board screen contains board selection, year navigation, heatmap, summary metrics, the selected day's entries, and an entry form.
 - The primary board screen provides `Study Time` and `Vocabulary` tabs and places year navigation near the top without avoidable empty space.
+- The `Study Time` tab uses a clock icon and the `Vocabulary` tab uses an open-book icon. Activating `Study Time` returns to the primary Study Time board view, so the header does not include a separate Home icon.
 - During Phases 1 and 2, `Vocabulary` is visible but disabled with `Coming soon`; it becomes interactive only when Phase 3 is complete.
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
 - The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.

@@ -47,6 +47,7 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 
 - Move year navigation close to the top and remove avoidable vertical whitespace.
 - Show `Study Time` and a disabled `Vocabulary` tab labelled `Coming soon`; do not enable Vocabulary behavior before Phase 3.
+- Use a `Clock` icon for `Study Time` and `BookOpen` for `Vocabulary`. Treat `Study Time` as the route back to the primary board view and remove the redundant Home icon from the header.
 - At 1366×768 and 100% zoom, show navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` without page scrolling.
 - Prioritize selected-year total, selected-year active days, and flame-treated current streak. Remove `Top activity` from the main screen. For screenshot review and the isolated test user only, use `Current level: B1` and `Estimated B2: in about 6 months at this pace`; never expose this fixture as production-user data.
 - Render the current-level value in a circular badge and give the selected-day numeric total the stronger visual treatment approved from the high-contrast concept.
@@ -83,7 +84,7 @@ Before changing the application layout, prepare two static screenshot alternativ
 
 - Unit: calendar boundaries, all heatmap bands and date states, averages, future exclusions, and streaks.
 - Database: aggregation and ownership fixtures.
-- Playwright: disabled `Vocabulary — Coming soon`, absence of `Top activity` and repeated board names on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, previous/next day navigation across calendar boundaries, standard/custom activity icons, create/edit/cancel/update/delete, two persistent mobile action icons, desktop 1366×768 visibility, keyboard flow, and non-color information.
+- Playwright: clock/open-book tracker icons, disabled `Vocabulary — Coming soon`, `Study Time` navigation back to the primary board, absence of the redundant Home icon, `Top activity`, and repeated board names on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, previous/next day navigation across calendar boundaries, standard/custom activity icons, create/edit/cancel/update/delete, two persistent mobile action icons, desktop 1366×768 visibility, keyboard flow, and non-color information.
 
 ### Phase exit criteria
 

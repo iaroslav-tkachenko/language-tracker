@@ -157,6 +157,7 @@ All requirements are **Must / Approved** unless another priority or status is sh
 | `FR-UI-012` | The current CEFR level shall be presented in a circular badge when shown in the primary summary.                                                   | `B1` is centered in a circle rather than a pill or oval, and the surrounding copy remains readable.                                   |
 | `FR-UI-013` | The selected-day total shall receive strong visual emphasis without relying on color alone.                                                        | The numeric duration is visually dominant, the `total` label is secondary, and the complete value has an accessible text equivalent.  |
 | `FR-UI-014` | The Study Time heatmap shall use the approved soft semantic palette.                                                                               | Past-zero red, sub-hour warm yellows, and 60+-minute muted greens remain distinguishable and map to the fixed bands in `FR-HEAT-004`. |
+| `FR-UI-015` | Tracker navigation shall use a clock icon for `Study Time` and an open-book icon for `Vocabulary`, without a separate Home control.                | Activating `Study Time` returns to the primary Study Time board view; the header contains no redundant Home icon.                     |
 
 ## 11. Approved behavior with deferred reference values
 
