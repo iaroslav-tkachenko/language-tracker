@@ -21,14 +21,26 @@ Authentication screens are clickable without credentials, but real registration,
 ## Local setup
 
 1. Keep the repository on drive `D:` and install dependencies there.
-2. Copy `.env.example` to `.env.local`.
-3. Create a Supabase project and add its project URL and publishable key to `.env.local`.
-4. Set `NEXT_PUBLIC_SITE_URL` to the exact local or deployed application origin.
-5. Apply `supabase/migrations/20260717000100_phase_zero_core.sql` through the project migration workflow.
-6. Add the application's `/auth/callback` URLs to the Supabase authentication redirect allow-list.
-7. Run `pnpm dev` for development or `pnpm build` followed by `pnpm start` for a production-like check.
+2. Install Node.js 22, pnpm 10.22, and optionally Docker Desktop for the local Supabase stack.
+3. Run `pnpm install --frozen-lockfile`.
+4. Copy `.env.example` to `.env.local`.
+5. Follow the [Supabase setup guide](docs/development/SUPABASE_SETUP.md) to configure a hosted or local project.
+6. Run `pnpm dev` for development or `pnpm build` followed by `pnpm start` for a production-like check.
 
 Never commit `.env.local` or a service-role key. The browser receives only the publishable key.
+
+## Quality commands
+
+- `pnpm format:check` checks source formatting.
+- `pnpm lint` runs ESLint.
+- `pnpm typecheck` runs strict TypeScript checks.
+- `pnpm test` runs Vitest unit tests.
+- `pnpm test:e2e` runs Playwright desktop and mobile checks.
+- `pnpm db:reset` rebuilds a local Supabase database from migrations.
+- `pnpm db:test` runs pgTAP database and RLS tests.
+- `pnpm db:types` regenerates TypeScript types from the local schema.
+
+The local database commands require a Docker-compatible runtime. The Windows Supabase wrapper stores its CLI home under the repository's ignored `.cache` directory on drive `D:`.
 
 ## MVP summary
 
@@ -73,6 +85,7 @@ The repository and installed dependencies live on drive `D:`. Package caches, br
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Repository instructions](AGENTS.md)
+- [Supabase setup and verification](docs/development/SUPABASE_SETUP.md)
 - [Phase 0 authentication screenshots](docs/design/phase-0/README.md)
 
 ## Source language

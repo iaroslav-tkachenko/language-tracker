@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 .pnp/
 .pnp.*
 
@@ -26,6 +27,7 @@ blob-report/
 # Supabase local state
 supabase/.branches/
 supabase/.temp/
+.cache/
 
 # Logs
 *.log
