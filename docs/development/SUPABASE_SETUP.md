@@ -48,12 +48,18 @@ Email confirmation remains enabled. Production launch also requires a production
 Authenticate the Supabase CLI and link the repository to the project:
 
 ```powershell
-node scripts/run-supabase.mjs login
-node scripts/run-supabase.mjs link --project-ref YOUR_PROJECT_REF
-node scripts/run-supabase.mjs db push
+pnpm db:login
+pnpm db:link --project-ref YOUR_PROJECT_REF
+pnpm db:migrations
+pnpm db:push
 ```
 
-Review the migration list before confirming a remote push. Never use `db reset` against the hosted project.
+Review the migration list before running `pnpm db:push`. Never use `db reset` against the hosted project.
+
+These package scripts intentionally run the repository wrapper instead of relying on a
+global `node` or Supabase CLI command. On Windows, the wrapper keeps Supabase CLI cache
+and login state under the repository's ignored `.cache/supabase-home` directory on drive
+`D:`.
 
 ## 6. Run the local database verification
 
