@@ -52,6 +52,7 @@ pnpm db:login
 pnpm db:link --project-ref YOUR_PROJECT_REF
 pnpm db:migrations
 pnpm db:push
+pnpm db:types:linked
 ```
 
 Review the migration list before running `pnpm db:push`. Never use `db reset` against the hosted project.
@@ -60,6 +61,10 @@ These package scripts intentionally run the repository wrapper instead of relyin
 global `node` or Supabase CLI command. On Windows, the wrapper keeps Supabase CLI cache
 and login state under the repository's ignored `.cache/supabase-home` directory on drive
 `D:`.
+
+`pnpm db:types:linked` regenerates `src/lib/database.types.ts` from the linked
+development project after its migrations have been applied. Use `pnpm db:types`
+instead when verifying against the local Docker database.
 
 ## 6. Run the local database verification
 

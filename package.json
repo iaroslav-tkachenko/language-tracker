@@ -25,7 +25,8 @@
     "db:stop": "node scripts/run-supabase.mjs stop",
     "db:reset": "node scripts/run-supabase.mjs db reset",
     "db:test": "node scripts/run-supabase.mjs test db",
-    "db:types": "node scripts/run-supabase.mjs gen types typescript --local --schema public > src/lib/database.types.ts"
+    "db:types": "node scripts/run-supabase.mjs gen types typescript --local --schema public > src/lib/database.types.ts",
+    "db:types:linked": "node scripts/run-supabase.mjs gen types typescript --linked --schema public > src/lib/database.types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
