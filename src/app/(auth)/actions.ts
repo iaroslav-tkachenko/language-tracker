@@ -39,6 +39,17 @@ function authError(message: string): AuthActionState {
   return { status: "error", message };
 }
 
+function logAuthProviderError(
+  operation: string,
+  error: { code?: string; message: string; status?: number },
+) {
+  console.error(`Supabase Auth ${operation} failed`, {
+    code: error.code,
+    message: error.message,
+    status: error.status,
+  });
+}
+
 export async function signIn(
   _state: AuthActionState,
   formData: FormData,
@@ -71,7 +82,10 @@ export async function signUp(
       emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/dashboard`,
     },
   });
-  if (error) return authError("Account creation failed. Please try again.");
+  if (error) {
+    logAuthProviderError("sign-up", error);
+    return authError("Account creation failed. Please try again.");
+  }
   if (data.session) redirect("/dashboard");
 
   return {
@@ -90,9 +104,13 @@ export async function requestPasswordReset(
   if (configError) return configError;
 
   const supabase = await createClient();
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${getSiteUrl()}/auth/callback?next=/update-password`,
-  });
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    parsed.data.email,
+    {
+      redirectTo: `${getSiteUrl()}/auth/callback?next=/update-password`,
+    },
+  );
+  if (error) logAuthProviderError("password reset", error);
 
   return {
     status: "success",

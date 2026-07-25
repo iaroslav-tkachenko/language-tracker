@@ -43,17 +43,64 @@ In the Supabase authentication URL configuration:
 
 Email confirmation remains enabled. Production launch also requires a production SMTP provider; Supabase's development email delivery is not a production mail service.
 
+For the hosted development project, enable custom SMTP and verify:
+
+- the sender address is verified by the SMTP provider;
+- the host is the provider's SMTP relay host;
+- the port is the provider's supported submission port (`587` for Brevo);
+- the username is the provider's SMTP login, not the application name;
+- the password is an SMTP key, not an account password or API key.
+
+Never commit SMTP credentials to this repository.
+
+For cookie-based SSR confirmation, update the following templates in
+**Authentication > Email Templates**:
+
+- **Confirm signup** link:
+
+  ```html
+  <a
+    href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard"
+    >Confirm email address</a
+  >
+  ```
+
+- **Reset password** link:
+
+  ```html
+  <a
+    href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/update-password"
+    >Reset password</a
+  >
+  ```
+
+The `/auth/confirm` Route Handler verifies the token hash and establishes the
+cookie session. Do not use the default `{{ .ConfirmationURL }}` link for these
+SSR flows because the email may be opened in a browser that does not have the
+PKCE verifier cookie created by the original request.
+
 ## 5. Apply version-controlled migrations
 
 Authenticate the Supabase CLI and link the repository to the project:
 
 ```powershell
-node scripts/run-supabase.mjs login
-node scripts/run-supabase.mjs link --project-ref YOUR_PROJECT_REF
-node scripts/run-supabase.mjs db push
+pnpm db:login
+pnpm db:link --project-ref YOUR_PROJECT_REF
+pnpm db:migrations
+pnpm db:push
+pnpm db:types:linked
 ```
 
-Review the migration list before confirming a remote push. Never use `db reset` against the hosted project.
+Review the migration list before running `pnpm db:push`. Never use `db reset` against the hosted project.
+
+These package scripts intentionally run the repository wrapper instead of relying on a
+global `node` or Supabase CLI command. On Windows, the wrapper keeps Supabase CLI cache
+and login state under the repository's ignored `.cache/supabase-home` directory on drive
+`D:`.
+
+`pnpm db:types:linked` regenerates `src/lib/database.types.ts` from the linked
+development project after its migrations have been applied. Use `pnpm db:types`
+instead when verifying against the local Docker database.
 
 ## 6. Run the local database verification
 
@@ -92,7 +139,11 @@ pnpm test:e2e
 pnpm build
 ```
 
-The authentication Playwright baseline covers desktop and mobile sign-in navigation, sign-up, recovery, and accessible validation. Connected-project journeys for confirmation email, authenticated redirects, sign-out, and password recovery are added after hosted credentials and an email test path are available.
+The authentication Playwright baseline covers desktop and mobile sign-in
+navigation, sign-up, recovery, accessible validation, and recoverable
+authentication-link errors. On July 25, 2026, the hosted development project
+also passed manual end-to-end verification for sign-up, email confirmation,
+authenticated redirect, sign-out, sign-in, recovery email, and password update.
 
 ## 8. Phase 0 completion evidence
 
