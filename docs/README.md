@@ -2,7 +2,10 @@
 
 This directory is the documentation home for Language Tracker. It is organized so that a product owner, designer, engineer, or tester can start from the same approved product baseline and follow the level of detail relevant to their work.
 
-**Current status:** the requirements baseline and Phase 1 visual direction are approved. Phase 0 authentication, schema, and security implementation is in progress; production Supabase connection and database verification remain pending.
+**Current status:** Phase 0 is complete and merged. The product owner approved
+the production-backed Phase 1 Study Time experience on desktop and a physical
+mobile browser. Phase 1 implementation is awaiting pull-request CI verification
+and merge; Phase 2 batch entry creation is next.
 
 ## Start here
 

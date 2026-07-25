@@ -53,6 +53,9 @@ A user can:
 ## 5. Language boards
 
 - A user can have at most six active language boards.
+- A new user starts without a language board. The authenticated empty state
+  prompts them to create their first board; the product never assumes a
+  language or creates `German` automatically.
 - A board name contains 1–50 trimmed characters.
 - Active board names are unique per user, case-insensitively.
 - Example names include `German`, `English`, and `Italian`.
@@ -252,6 +255,10 @@ All statistics are scoped to the selected board.
 - Current-week total includes non-future dates in the current Monday–Sunday week.
 - Current-month total includes non-future dates in the current calendar month.
 - Activity totals include active and archived activities with historical entries.
+- The statistics screen visually separates selected-year metrics from live
+  metrics that remain independent of the selected year. Selected-year total,
+  active days, and both averages belong to `Selected year`; current and longest
+  streak plus current day, week, and month belong to `Current progress`.
 
 ### 10.2 Active days and averages
 
@@ -286,7 +293,12 @@ Future entries can appear in selected-year and selected-month distributions, but
 
 ### 10.5 Recent activity analysis
 
-Detailed statistics show actual Study Time grouped by activity across the latest seven calendar dates ending today. The window includes zero-study dates and excludes future entries. The user can distinguish activity, minutes, and period represented by the chart.
+Detailed statistics show actual Study Time grouped by activity across the
+selected year and across the latest seven calendar dates ending today. Both
+activity allocations use circular charts and a legend that shows absolute
+duration and percentage of the period total. The seven-date window includes
+zero-study dates and excludes future entries; its heading is
+`Activity totals latest 7 days`.
 
 The product will later compare actual allocation with a fixed ideal distribution for each CEFR level. The model will not be user-editable, but its percentages and methodology remain deferred until separate product-owner approval and must not be implemented with provisional values.
 
@@ -334,6 +346,10 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - The primary board screen provides `Study Time` and `Vocabulary` tabs and places year navigation near the top without avoidable empty space.
 - The `Study Time` tab uses a clock icon and the `Vocabulary` tab uses an open-book icon. Activating `Study Time` returns to the primary Study Time board view, so the header does not include a separate Home icon.
 - During Phases 1 and 2, `Vocabulary` is visible but disabled with `Coming soon`; it becomes interactive only when Phase 3 is complete.
+- Mobile keeps `Study Time`, disabled `Vocabulary — Coming soon`, and
+  `Statistics` visible in a dedicated primary-navigation row. `Statistics`
+  remains interactive and `Sign out` remains available without opening
+  Settings.
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
 - The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.
 - When the current CEFR level appears in the primary summary, its value uses a circular badge rather than a pill or oval.
@@ -342,6 +358,8 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A settings area manages boards and the global activity catalog.
 - Destructive actions use clear labels and confirmation where historical data would become hidden.
+- Signing out always requires explicit confirmation; cancellation preserves the
+  current authenticated screen.
 
 ## 12. Validation and errors
 

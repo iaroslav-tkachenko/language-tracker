@@ -82,7 +82,9 @@ This document describes the main MVP interactions from the user's point of view.
 1. The visitor submits an email address and password.
 2. The system authenticates the credentials.
 3. The system establishes a secure session and opens the learner's application.
-4. The learner can sign out, after which protected pages and mutations are inaccessible.
+4. The learner activates sign out and receives a confirmation.
+5. Cancelling preserves the authenticated screen; confirming ends the session,
+   after which protected pages and mutations are inaccessible.
 
 **Recovery scenario:**
 
@@ -256,10 +258,13 @@ This document describes the main MVP interactions from the user's point of view.
 
 1. The system calculates statistics directly from owned study entries for the selected board.
 2. The learner sees total time for the selected year, current month, current Monday-based week, and current day.
-3. The learner sees totals by activity, including historically used archived activities.
+3. The learner sees selected-year activity allocation as a circular chart with
+   absolute duration and percentage, including historically used archived
+   activities.
 4. The learner sees active-day count, calendar-day average, active-day average, current streak, and longest streak.
 5. The learner switches distribution granularity among day, week, month, and year.
-6. The learner reviews actual time by activity for the latest seven calendar dates.
+6. The learner reviews `Activity totals latest 7 days` as a circular chart with
+   absolute duration and percentage.
 7. The learner reviews Study Time, Vocabulary, and CEFR information with clearly identified units and periods.
 8. The interface explains the period and methodology represented by each distribution or forecast.
 

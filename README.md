@@ -4,19 +4,29 @@ A responsive web application for recording and reviewing foreign-language study 
 
 ## Project status
 
-**Phase 0 authentication and security foundation is in progress.**
+**Phase 1 Study Time implementation is complete and awaiting pull-request
+verification and merge.**
 
-The project owner approved the original implementation plan on July 14, 2026, the expanded four-phase direction on July 16, 2026, and Phase 1 visual work on July 17, 2026. Responsive authentication screens, Supabase SSR session utilities, protected-route boundaries, and the initial RLS schema are now versioned. The Study Time prototype remains demonstration data until its Server Actions are connected to Supabase.
+Phase 0 authentication, hosted Supabase schema, RLS, email confirmation, and
+password recovery are complete. Phase 1 provides production-backed language
+boards, the responsive Study Time heatmap, single-day study-session CRUD,
+activity management, streaks, period statistics, distributions, and
+desktop/mobile navigation. Phase 2 batch entry creation is next.
 
 ### Current local preview
 
-The current production preview runs at [http://localhost:3001](http://localhost:3001):
+The current local application runs at
+[http://localhost:3000](http://localhost:3000):
 
-- [Sign in](http://localhost:3001/sign-in) — Phase 0 authentication UI and validation.
-- [Create account](http://localhost:3001/sign-up) — registration UI.
-- [Study Time demo](http://localhost:3001/demo) — the approved in-memory Phase 1 prototype.
+- [Sign in](http://localhost:3000/sign-in) — production-backed authentication.
+- [Dashboard](http://localhost:3000/dashboard) — responsive Study Time tracker.
+- [Statistics](http://localhost:3000/statistics) — board-scoped Study Time
+  analytics.
+- [Study Time demo](http://localhost:3000/demo) — preserved design prototype.
 
-Authentication screens are clickable without credentials, but real registration, email delivery, and sessions require a connected Supabase project.
+`pnpm dev` automatically exposes the development server to private LAN
+addresses for same-network mobile review. The LAN IP may change when the
+computer reconnects to Wi-Fi or a phone hotspot.
 
 ## Local setup
 
@@ -41,6 +51,11 @@ Never commit `.env.local` or a service-role key. The browser receives only the p
 - `pnpm db:types` regenerates TypeScript types from the local schema.
 
 The local database commands require a Docker-compatible runtime. The Windows Supabase wrapper stores its CLI home under the repository's ignored `.cache` directory on drive `D:`.
+
+The GitHub browser job starts an isolated local Supabase stack, creates a
+confirmed E2E-only user, and runs protected Study Time CRUD in desktop and
+mobile Chromium. Without those generated credentials, protected local E2E
+tests skip rather than touching a hosted account.
 
 ## MVP summary
 

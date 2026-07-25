@@ -301,6 +301,10 @@ A tested database trigger on `auth.users` creates the application profile and th
 - be idempotent where possible;
 - be covered by database tests because an error could block signup.
 
+The trigger does not create a language board. After authentication, a user with
+no active boards receives an application empty state and creates the first board
+through `create_or_restore_language_board`.
+
 An application-level recovery path should detect and repair an incomplete profile if operational intervention ever leaves one behind.
 
 ## 7. Data access and mutations
@@ -329,9 +333,14 @@ Batch creation uses a single authenticated database function. The function deriv
 
 ## 8. Aggregation design
 
-MVP stores source entries only. Heatmap and statistics are derived in PostgreSQL.
+MVP stores source entries only and derives heatmap/statistics on demand. Phase 1
+reads RLS-filtered source entries for one board and calculates calendar,
+distribution, activity-allocation, average, and streak rules through pure,
+unit-tested TypeScript functions. This is proportionate to the expected MVP
+load and avoids persisted aggregate state.
 
-Planned `security invoker` functions:
+The following `security invoker` functions remain the target if measurement
+shows that later phases should move aggregation into PostgreSQL:
 
 - `get_board_year_heatmap(board_id, year)` returns daily totals and intensity levels.
 - `get_board_statistics(board_id, selected_year, local_today)` returns totals, averages, active days, activity breakdown, current streak, and longest streak.
@@ -465,6 +474,12 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Desktop hover/focus actions, two persistently visible mobile entry-action icons, and the 1366×768 above-the-fold contract.
 
 Playwright can launch the local app through its `webServer` configuration and use separate desktop/mobile projects.
+
+The Phase 1 protected browser journey uses a clean local Supabase stack in CI.
+The setup script creates a confirmed E2E-only user through the local admin API,
+passes only public project values to Next.js, and never sends a service-role key
+to browser code. Hosted accounts and production data are not used by browser
+automation.
 
 References: [Playwright web server](https://playwright.dev/docs/test-webserver), [Playwright projects](https://playwright.dev/docs/test-projects).
 
