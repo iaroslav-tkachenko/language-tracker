@@ -41,9 +41,10 @@ test.describe("Phase 1 Study Time", () => {
     await expect(
       primaryNavigation.locator('[aria-disabled="true"]'),
     ).toContainText("Coming soon");
-    await expect(
-      primaryNavigation.getByRole("link", { name: "Statistics" }),
-    ).toBeVisible();
+    const statisticsLink = mobile
+      ? primaryNavigation.getByRole("link", { name: "Statistics" })
+      : page.getByRole("link", { name: "Statistics" });
+    await expect(statisticsLink).toBeVisible();
 
     if (mobile) {
       await expect(
@@ -89,7 +90,7 @@ test.describe("Phase 1 Study Time", () => {
       page.locator("article").filter({ hasText: activityName }),
     ).toContainText("15m");
 
-    await primaryNavigation.getByRole("link", { name: "Statistics" }).click();
+    await statisticsLink.click();
     await expect(
       page.getByRole("heading", { name: "Study Time statistics" }),
     ).toBeVisible();
