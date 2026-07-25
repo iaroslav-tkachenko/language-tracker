@@ -56,21 +56,21 @@ test.describe("Phase 1 Study Time", () => {
     }
 
     await page.getByRole("button", { name: "Add study session" }).click();
-    await page.getByRole("button", { name: "30 min" }).click();
-    await page.getByRole("button", { name: "Reading" }).click();
+    await page.getByRole("button", { name: "30 min", exact: true }).click();
+    await page.getByRole("button", { name: "Reading", exact: true }).click();
     await page.getByRole("button", { name: "Save" }).click();
     const readingCard = page.locator("article").filter({ hasText: "Reading" });
     await expect(readingCard).toContainText("30m");
 
     await readingCard.getByRole("button", { name: "Edit Reading" }).click();
-    await expect(page.getByRole("button", { name: "30 min" })).toHaveClass(
-      /border-blue-600/,
-    );
-    await expect(page.getByRole("button", { name: "Reading" })).toHaveClass(
-      /border-blue-600/,
-    );
-    await page.getByRole("button", { name: "45 min" }).click();
-    await page.getByRole("button", { name: "Podcast" }).click();
+    await expect(
+      page.getByRole("button", { name: "30 min", exact: true }),
+    ).toHaveClass(/border-blue-600/);
+    await expect(
+      page.getByRole("button", { name: "Reading", exact: true }),
+    ).toHaveClass(/border-blue-600/);
+    await page.getByRole("button", { name: "45 min", exact: true }).click();
+    await page.getByRole("button", { name: "Podcast", exact: true }).click();
     await page.getByRole("button", { name: "Update" }).click();
 
     const podcastCard = page.locator("article").filter({ hasText: "Podcast" });
@@ -80,11 +80,11 @@ test.describe("Phase 1 Study Time", () => {
     await expect(podcastCard).toHaveCount(0);
 
     await page.getByRole("button", { name: "Add study session" }).click();
-    await page.getByRole("button", { name: "15 min" }).click();
-    await page.getByRole("button", { name: "Other" }).click();
+    await page.getByRole("button", { name: "15 min", exact: true }).click();
+    await page.getByRole("button", { name: "Other", exact: true }).click();
     await page.getByPlaceholder("Custom activity name").fill(activityName);
     await page.getByRole("button", { name: "Add", exact: true }).click();
-    await page.getByRole("button", { name: activityName }).click();
+    await page.getByRole("button", { name: activityName, exact: true }).click();
     await page.getByRole("button", { name: "Save" }).click();
     await expect(
       page.locator("article").filter({ hasText: activityName }),
@@ -105,7 +105,14 @@ test.describe("Phase 1 Study Time", () => {
         name: "Activity totals latest 7 days",
       }),
     ).toBeVisible();
-    await expect(page.getByText("100%")).toBeVisible();
+    const recentActivitySection = page.locator("section").filter({
+      has: page.getByRole("heading", {
+        name: "Activity totals latest 7 days",
+      }),
+    });
+    await expect(
+      recentActivitySection.getByText("100%", { exact: true }),
+    ).toBeVisible();
 
     await page.getByLabel("Settings").click();
     page.once("dialog", (dialog) => dialog.accept());
