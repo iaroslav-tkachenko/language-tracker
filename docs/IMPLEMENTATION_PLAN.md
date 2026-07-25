@@ -2,9 +2,14 @@
 
 ## 1. Approval gate
 
-**Current status: Phase 0 implementation in progress.**
+**Current status: Phase 1 Milestone 1A implementation in progress.**
 
-The project owner approved the original MVP plan on July 14, 2026, the four-phase product direction on July 16, 2026, and Phase 1 visual work on July 17, 2026. The responsive Study Time prototype is preserved at `/demo` while Phase 0 authentication, schema, and security are connected to production-backed data.
+The project owner approved the original MVP plan on July 14, 2026, the
+four-phase product direction on July 16, 2026, and Phase 1 visual work on July
+17, 2026. Phase 0 authentication, schema, security, hosted email confirmation,
+and password recovery passed automated and manual verification and were merged
+on July 25, 2026. The responsive Study Time prototype remains preserved at
+`/demo` while Phase 1 replaces fixtures with production-backed data.
 
 The existing responsive prototype and any completed foundation work are inputs to this plan, not evidence that the expanded requirements are implemented.
 
@@ -45,6 +50,8 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 
 ### Milestone 1A — Above-the-fold board experience
 
+- Show `Create your first language board` when an authenticated user has no
+  active board. Never create or assume `German` automatically.
 - Move year navigation close to the top and remove avoidable vertical whitespace.
 - Show `Study Time` and a disabled `Vocabulary` tab labelled `Coming soon`; do not enable Vocabulary behavior before Phase 3.
 - Use a `Clock` icon for `Study Time` and `BookOpen` for `Vocabulary`. Treat `Study Time` as the route back to the primary board view and remove the redundant Home icon from the header.

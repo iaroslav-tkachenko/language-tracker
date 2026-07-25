@@ -1,0 +1,283 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import {
+  resourceIdSchema,
+  resourceNameSchema,
+  studyEntrySchema,
+  studyEntryUpdateSchema,
+} from "@/lib/resources/validation";
+import { createClient } from "@/lib/supabase/server";
+
+export type ResourceActionState = {
+  status: "idle" | "error" | "success";
+  message?: string;
+  resourceId?: string;
+  resourceName?: string;
+};
+
+function parseName(formData: FormData) {
+  return resourceNameSchema.safeParse(formData.get("name"));
+}
+
+function providerMessage(
+  resource: "board" | "activity",
+  error: { code?: string; message: string },
+) {
+  if (error.code === "23505") {
+    return `An active ${resource} with this name already exists.`;
+  }
+
+  if (error.code === "23514" && error.message.includes("limit")) {
+    return resource === "board"
+      ? "You can have at most 6 active language boards."
+      : "You can have at most 30 active activities.";
+  }
+
+  console.error(`Supabase ${resource} mutation failed`, {
+    code: error.code,
+    message: error.message,
+  });
+  return `The ${resource} could not be saved. Please try again.`;
+}
+
+async function verifiedClient() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getClaims();
+
+  if (error || !data?.claims?.sub) return null;
+  return supabase;
+}
+
+export async function createFirstLanguageBoard(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = parseName(formData);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase.rpc(
+    "create_or_restore_language_board",
+    { p_name: parsed.data },
+  );
+
+  if (error) {
+    return { status: "error", message: providerMessage("board", error) };
+  }
+
+  revalidatePath("/dashboard");
+  redirect(`/dashboard?board=${data.id}`);
+}
+
+export async function createLanguageBoard(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = parseName(formData);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { error } = await supabase.rpc("create_or_restore_language_board", {
+    p_name: parsed.data,
+  });
+
+  if (error) {
+    return { status: "error", message: providerMessage("board", error) };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/settings");
+  return { status: "success", message: `${parsed.data} is ready.` };
+}
+
+export async function createActivityType(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = parseName(formData);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase.rpc(
+    "create_or_restore_activity_type",
+    {
+      p_name: parsed.data,
+    },
+  );
+
+  if (error) {
+    return { status: "error", message: providerMessage("activity", error) };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/settings");
+  return {
+    status: "success",
+    message: `${parsed.data} is available.`,
+    resourceId: data.id,
+    resourceName: data.name,
+  };
+}
+
+export async function createStudyEntry(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = studyEntrySchema.safeParse({
+    boardId: formData.get("boardId"),
+    activityTypeId: formData.get("activityTypeId"),
+    studyDate: formData.get("studyDate"),
+    durationMinutes: formData.get("durationMinutes"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await createClient();
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+  if (claimsError || !userId) {
+    return { status: "error", message: "Please sign in again." };
+  }
+
+  const { error } = await supabase.from("study_entries").insert({
+    user_id: userId,
+    board_id: parsed.data.boardId,
+    activity_type_id: parsed.data.activityTypeId,
+    study_date: parsed.data.studyDate,
+    duration_minutes: parsed.data.durationMinutes,
+  });
+
+  if (error) {
+    console.error("Supabase study entry creation failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return {
+      status: "error",
+      message: "The study session could not be saved. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  return { status: "success", message: "Study session saved." };
+}
+
+export async function updateStudyEntry(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = studyEntryUpdateSchema.safeParse({
+    entryId: formData.get("entryId"),
+    activityTypeId: formData.get("activityTypeId"),
+    durationMinutes: formData.get("durationMinutes"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase
+    .from("study_entries")
+    .update({
+      activity_type_id: parsed.data.activityTypeId,
+      duration_minutes: parsed.data.durationMinutes,
+    })
+    .eq("id", parsed.data.entryId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    if (error) {
+      console.error("Supabase study entry update failed", {
+        code: error.code,
+        message: error.message,
+      });
+    }
+    return {
+      status: "error",
+      message: "The study session could not be updated. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  return { status: "success", message: "Study session updated." };
+}
+
+export async function deleteStudyEntry(formData: FormData) {
+  const parsed = resourceIdSchema.safeParse(formData.get("entryId"));
+  if (!parsed.success) throw new Error("Invalid study session.");
+
+  const supabase = await verifiedClient();
+  if (!supabase) redirect("/sign-in");
+
+  const { data, error } = await supabase
+    .from("study_entries")
+    .delete()
+    .eq("id", parsed.data)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data)
+    throw new Error("The study session could not be deleted.");
+  revalidatePath("/dashboard");
+}
+
+export async function archiveLanguageBoard(formData: FormData) {
+  const parsed = resourceIdSchema.safeParse(formData.get("boardId"));
+  if (!parsed.success) throw new Error("Invalid language board.");
+
+  const supabase = await verifiedClient();
+  if (!supabase) redirect("/sign-in");
+
+  const { data, error } = await supabase
+    .from("language_boards")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", parsed.data)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data)
+    throw new Error("The language board could not be removed.");
+  revalidatePath("/dashboard");
+  revalidatePath("/settings");
+}
+
+export async function archiveActivityType(formData: FormData) {
+  const parsed = resourceIdSchema.safeParse(formData.get("activityTypeId"));
+  if (!parsed.success) throw new Error("Invalid activity.");
+
+  const supabase = await verifiedClient();
+  if (!supabase) redirect("/sign-in");
+
+  const { data, error } = await supabase
+    .from("activity_types")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", parsed.data)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) throw new Error("The activity could not be removed.");
+  revalidatePath("/dashboard");
+  revalidatePath("/settings");
+}

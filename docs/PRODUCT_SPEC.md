@@ -53,6 +53,9 @@ A user can:
 ## 5. Language boards
 
 - A user can have at most six active language boards.
+- A new user starts without a language board. The authenticated empty state
+  prompts them to create their first board; the product never assumes a
+  language or creates `German` automatically.
 - A board name contains 1–50 trimmed characters.
 - Active board names are unique per user, case-insensitively.
 - Example names include `German`, `English`, and `Italian`.

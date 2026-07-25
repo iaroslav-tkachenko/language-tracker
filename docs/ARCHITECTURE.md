@@ -301,6 +301,10 @@ A tested database trigger on `auth.users` creates the application profile and th
 - be idempotent where possible;
 - be covered by database tests because an error could block signup.
 
+The trigger does not create a language board. After authentication, a user with
+no active boards receives an application empty state and creates the first board
+through `create_or_restore_language_board`.
+
 An application-level recovery path should detect and repair an incomplete profile if operational intervention ever leaves one behind.
 
 ## 7. Data access and mutations
