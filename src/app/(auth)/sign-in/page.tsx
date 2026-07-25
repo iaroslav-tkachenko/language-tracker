@@ -3,7 +3,21 @@ import Link from "next/link";
 import { signIn } from "@/app/(auth)/actions";
 import { AuthForm } from "@/components/auth/auth-form";
 
-export default function SignInPage() {
+type SignInPageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+const errorMessages: Record<string, string> = {
+  callback:
+    "The authentication link could not be completed. Request a new link and try again.",
+  confirmation:
+    "This confirmation link is invalid or expired. Request a new link and try again.",
+};
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { error } = await searchParams;
+  const errorMessage = error ? errorMessages[error] : undefined;
+
   return (
     <>
       <header className="text-center">
@@ -14,6 +28,14 @@ export default function SignInPage() {
           Sign in to continue tracking your language learning.
         </p>
       </header>
+      {errorMessage && (
+        <p
+          role="alert"
+          className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800"
+        >
+          {errorMessage}
+        </p>
+      )}
       <AuthForm
         action={signIn}
         submitLabel="Sign in"

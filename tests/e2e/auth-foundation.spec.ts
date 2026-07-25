@@ -52,4 +52,13 @@ test.describe("authentication foundation", () => {
       page.getByRole("button", { name: "Send recovery link" }),
     ).toBeVisible();
   });
+
+  test("shows recoverable authentication-link errors", async ({ page }) => {
+    await page.goto("/sign-in?error=confirmation");
+
+    await expect(page.getByRole("alert")).toContainText(
+      "This confirmation link is invalid or expired.",
+    );
+    await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+  });
 });
