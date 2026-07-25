@@ -2,11 +2,11 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { signOut } from "@/app/(auth)/actions";
 import {
   createActivityType,
   createLanguageBoard,
 } from "@/app/dashboard/actions";
+import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import { ResourceCreateForm } from "@/components/resources/resource-create-form";
 import {
   ActivitySettingsList,
@@ -61,14 +61,14 @@ export default async function SettingsPage() {
             <ArrowLeft aria-hidden="true" className="size-5" />
             Study Time
           </Link>
-          <form action={signOut}>
+          <ConfirmSignOutForm>
             <button
               type="submit"
               className="min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
               Sign out
             </button>
-          </form>
+          </ConfirmSignOutForm>
         </div>
       </header>
 

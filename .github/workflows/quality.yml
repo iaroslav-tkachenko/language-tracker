@@ -53,4 +53,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm db:start
+      - run: pnpm db:reset
+      - run: node scripts/configure-local-e2e.mjs
       - run: pnpm test:e2e

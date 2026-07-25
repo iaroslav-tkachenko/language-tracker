@@ -61,7 +61,15 @@ export async function signIn(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return authError("Email or password is incorrect.");
+  if (error) {
+    logAuthProviderError("sign-in", error);
+    if (error.status === 0 || error.message === "fetch failed") {
+      return authError(
+        "Authentication service is temporarily unreachable. Please try again.",
+      );
+    }
+    return authError("Email or password is incorrect.");
+  }
 
   redirect("/dashboard");
 }

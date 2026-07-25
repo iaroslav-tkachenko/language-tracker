@@ -2,10 +2,12 @@
 
 import {
   BookOpen,
+  BarChart3,
   ChevronLeft,
   ChevronRight,
   Clock3,
   Flame,
+  LogOut,
   Pencil,
   Plus,
   Settings,
@@ -15,7 +17,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
-import { signOut } from "@/app/(auth)/actions";
 import {
   createActivityType,
   createStudyEntry,
@@ -24,9 +25,11 @@ import {
   updateStudyEntry,
 } from "@/app/dashboard/actions";
 import { ActivityIcon } from "@/components/activities/activity-icon";
+import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import {
   fromDateKey,
   getCalendarCells,
+  getCalendarRangeCells,
   shiftDate,
   studyHeatLevel,
   toDateKey,
@@ -51,6 +54,7 @@ type BoardWorkspaceProps = {
   activities: ActivitySummary[];
   entries: StudyEntrySummary[];
   earliestEntryDate: string | null;
+  activeDateKeys: string[];
   selectedDate: string;
   year: number;
   todayKey: string;
@@ -85,6 +89,7 @@ export function BoardWorkspace({
   activities,
   entries,
   earliestEntryDate,
+  activeDateKeys,
   selectedDate,
   year,
   todayKey,
@@ -196,17 +201,13 @@ export function BoardWorkspace({
       .filter((entry) => entry.studyDate <= todayKey)
       .map((entry) => entry.studyDate),
   ).size;
-  const activeDateKeys = new Set(
-    entries
-      .filter((entry) => entry.studyDate <= todayKey)
-      .map((entry) => entry.studyDate),
-  );
-  const latestEligibleDate = activeDateKeys.has(todayKey)
+  const activeDateKeySet = new Set(activeDateKeys);
+  const latestEligibleDate = activeDateKeySet.has(todayKey)
     ? todayKey
     : shiftDate(todayKey, -1);
   let currentStreak = 0;
   let streakDate = latestEligibleDate;
-  while (activeDateKeys.has(streakDate)) {
+  while (activeDateKeySet.has(streakDate)) {
     currentStreak += 1;
     streakDate = shiftDate(streakDate, -1);
   }
@@ -256,6 +257,41 @@ export function BoardWorkspace({
       Math.min(current.getDate(), 28),
     );
     navigateToDate(toDateKey(next));
+  }
+
+  function renderHeatCell(
+    cell: { dateKey: string; visible: boolean },
+    compact: boolean,
+  ) {
+    const minutes = totalsByDate.get(cell.dateKey) ?? 0;
+    const isMissed =
+      minutes === 0 &&
+      earliestEntryDate !== null &&
+      cell.dateKey >= earliestEntryDate &&
+      cell.dateKey < todayKey;
+    const background =
+      minutes > 0
+        ? heatColors.levels[studyHeatLevel(minutes) - 1]
+        : isMissed
+          ? heatColors.missed
+          : heatColors.empty;
+
+    return (
+      <button
+        key={cell.dateKey}
+        type="button"
+        disabled={!cell.visible}
+        onClick={() => navigateToDate(cell.dateKey)}
+        aria-label={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
+        title={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
+        className={`${compact ? "size-2.5 rounded-[2px]" : "size-3.5 rounded-[3px] sm:size-4"} border ${
+          cell.dateKey === selectedDate
+            ? "border-slate-950 ring-1 ring-slate-950"
+            : "border-white"
+        } disabled:invisible`}
+        style={{ backgroundColor: background }}
+      />
+    );
   }
 
   return (
@@ -308,22 +344,64 @@ export function BoardWorkspace({
 
           <div className="flex items-center gap-1">
             <Link
+              href={`/statistics?board=${selectedBoard.id}&year=${year}&today=${todayKey}`}
+              className="hidden min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
+            >
+              <BarChart3 aria-hidden="true" className="size-5" />
+              Statistics
+            </Link>
+            <Link
               href="/settings"
               aria-label="Settings"
               className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
               <Settings aria-hidden="true" className="size-5" />
             </Link>
-            <form action={signOut} className="hidden sm:block">
+            <ConfirmSignOutForm className="sm:hidden">
+              <button
+                type="submit"
+                aria-label="Sign out"
+                className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+              >
+                <LogOut aria-hidden="true" className="size-5" />
+              </button>
+            </ConfirmSignOutForm>
+            <ConfirmSignOutForm className="hidden sm:block">
               <button
                 type="submit"
                 className="min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 Sign out
               </button>
-            </form>
+            </ConfirmSignOutForm>
           </div>
         </div>
+        <nav
+          aria-label="Mobile primary"
+          className="grid grid-cols-3 border-t border-slate-100 sm:hidden"
+        >
+          <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
+            <Clock3 aria-hidden="true" className="size-4.5" />
+            Study Time
+          </span>
+          <span
+            aria-disabled="true"
+            className="flex min-h-14 flex-col items-center justify-center text-slate-400"
+          >
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+              <BookOpen aria-hidden="true" className="size-4.5" />
+              Vocabulary
+            </span>
+            <span className="text-[10px]">Coming soon</span>
+          </span>
+          <Link
+            href={`/statistics?board=${selectedBoard.id}&year=${year}&today=${todayKey}`}
+            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+          >
+            <BarChart3 aria-hidden="true" className="size-4.5" />
+            Statistics
+          </Link>
+        </nav>
       </header>
 
       <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
@@ -353,7 +431,7 @@ export function BoardWorkspace({
             </button>
           </div>
 
-          <div className="mt-6 overflow-x-auto pb-2">
+          <div className="mt-6 hidden overflow-x-auto pb-2 sm:block">
             <div className="mx-auto w-max">
               <div className="mb-2 flex justify-between px-1 text-xs text-slate-500">
                 {[
@@ -374,38 +452,53 @@ export function BoardWorkspace({
                 ))}
               </div>
               <div className="grid grid-flow-col grid-rows-7 gap-1">
-                {calendarCells.map((cell) => {
-                  const minutes = totalsByDate.get(cell.dateKey) ?? 0;
-                  const isMissed =
-                    minutes === 0 &&
-                    earliestEntryDate !== null &&
-                    cell.dateKey >= earliestEntryDate &&
-                    cell.dateKey < todayKey;
-                  const background =
-                    minutes > 0
-                      ? heatColors.levels[studyHeatLevel(minutes) - 1]
-                      : isMissed
-                        ? heatColors.missed
-                        : heatColors.empty;
-                  return (
-                    <button
-                      key={cell.dateKey}
-                      type="button"
-                      disabled={!cell.inYear}
-                      onClick={() => navigateToDate(cell.dateKey)}
-                      aria-label={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
-                      title={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
-                      className={`size-3.5 rounded-[3px] border sm:size-4 ${
-                        cell.dateKey === selectedDate
-                          ? "border-slate-950 ring-1 ring-slate-950"
-                          : "border-white"
-                      } disabled:invisible`}
-                      style={{ backgroundColor: background }}
-                    />
-                  );
-                })}
+                {calendarCells.map((cell) =>
+                  renderHeatCell(
+                    { dateKey: cell.dateKey, visible: cell.inYear },
+                    false,
+                  ),
+                )}
               </div>
             </div>
+          </div>
+
+          <div className="mt-6 space-y-5 sm:hidden">
+            {[
+              {
+                label: "Jan–Jun",
+                months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                cells: getCalendarRangeCells(`${year}-01-01`, `${year}-06-30`),
+              },
+              {
+                label: "Jul–Dec",
+                months: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                cells: getCalendarRangeCells(`${year}-07-01`, `${year}-12-31`),
+              },
+            ].map((halfYear) => (
+              <div key={halfYear.label}>
+                <h2 className="text-center text-sm font-semibold text-slate-600">
+                  {halfYear.label}
+                </h2>
+                <div className="mx-auto mt-2 w-max max-w-full">
+                  <div className="mb-1.5 flex justify-between px-0.5 text-[9px] text-slate-500">
+                    {halfYear.months.map((month) => (
+                      <span key={month}>{month}</span>
+                    ))}
+                  </div>
+                  <div className="grid grid-flow-col grid-rows-7 gap-0.5">
+                    {halfYear.cells.map((cell) =>
+                      renderHeatCell(
+                        {
+                          dateKey: cell.dateKey,
+                          visible: cell.inRange,
+                        },
+                        true,
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">

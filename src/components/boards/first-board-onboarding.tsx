@@ -1,7 +1,7 @@
 import { Languages } from "lucide-react";
 
-import { signOut } from "@/app/(auth)/actions";
 import { createFirstLanguageBoard } from "@/app/dashboard/actions";
+import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import { ResourceCreateForm } from "@/components/resources/resource-create-form";
 
 export function FirstBoardOnboarding() {
@@ -12,14 +12,14 @@ export function FirstBoardOnboarding() {
           <span className="text-lg font-bold text-slate-950">
             Language Tracker
           </span>
-          <form action={signOut}>
+          <ConfirmSignOutForm>
             <button
               type="submit"
               className="min-h-11 rounded-lg px-3 text-sm font-semibold text-slate-600 hover:bg-white hover:text-slate-950"
             >
               Sign out
             </button>
-          </form>
+          </ConfirmSignOutForm>
         </div>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">

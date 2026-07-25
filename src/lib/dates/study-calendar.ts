@@ -3,6 +3,11 @@ export type CalendarCell = {
   inYear: boolean;
 };
 
+export type CalendarRangeCell = {
+  dateKey: string;
+  inRange: boolean;
+};
+
 export function toDateKey(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -35,6 +40,32 @@ export function getCalendarCells(year: number): CalendarCell[] {
     return {
       dateKey: toDateKey(date),
       inYear: date.getFullYear() === year,
+    };
+  });
+}
+
+export function getCalendarRangeCells(
+  startDateKey: string,
+  endDateKey: string,
+): CalendarRangeCell[] {
+  const startDate = fromDateKey(startDateKey);
+  const endDate = fromDateKey(endDateKey);
+  const mondayOffset = (startDate.getDay() + 6) % 7;
+  const rangeStart = new Date(startDate);
+  rangeStart.setDate(rangeStart.getDate() - mondayOffset);
+  const sundayOffset = (7 - ((endDate.getDay() + 6) % 7) - 1) % 7;
+  const rangeEnd = new Date(endDate);
+  rangeEnd.setDate(rangeEnd.getDate() + sundayOffset);
+  const cellCount =
+    Math.round((rangeEnd.getTime() - rangeStart.getTime()) / 86_400_000) + 1;
+
+  return Array.from({ length: cellCount }, (_, index) => {
+    const date = new Date(rangeStart);
+    date.setDate(rangeStart.getDate() + index);
+    const dateKey = toDateKey(date);
+    return {
+      dateKey,
+      inRange: dateKey >= startDateKey && dateKey <= endDateKey,
     };
   });
 }

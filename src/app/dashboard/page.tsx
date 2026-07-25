@@ -62,39 +62,51 @@ export default async function DashboardPage({
   }
 
   const year = Number(requestedDate.slice(0, 4));
-  const [activitiesResult, entriesResult, earliestEntryResult] =
-    await Promise.all([
-      supabase
-        .from("activity_types")
-        .select("id, name, system_key, archived_at")
-        .order("position")
-        .order("created_at"),
-      supabase
-        .from("study_entries")
-        .select("id, study_date, duration_minutes, activity_type_id")
-        .eq("board_id", selectedBoard.id)
-        .gte("study_date", `${year}-01-01`)
-        .lte("study_date", `${year}-12-31`)
-        .order("study_date")
-        .order("created_at"),
-      supabase
-        .from("study_entries")
-        .select("study_date")
-        .eq("board_id", selectedBoard.id)
-        .order("study_date")
-        .limit(1)
-        .maybeSingle(),
-    ]);
+  const [
+    activitiesResult,
+    entriesResult,
+    earliestEntryResult,
+    activeDateResult,
+  ] = await Promise.all([
+    supabase
+      .from("activity_types")
+      .select("id, name, system_key, archived_at")
+      .order("position")
+      .order("created_at"),
+    supabase
+      .from("study_entries")
+      .select("id, study_date, duration_minutes, activity_type_id")
+      .eq("board_id", selectedBoard.id)
+      .gte("study_date", `${year}-01-01`)
+      .lte("study_date", `${year}-12-31`)
+      .order("study_date")
+      .order("created_at"),
+    supabase
+      .from("study_entries")
+      .select("study_date")
+      .eq("board_id", selectedBoard.id)
+      .order("study_date")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("study_entries")
+      .select("study_date")
+      .eq("board_id", selectedBoard.id)
+      .lte("study_date", localToday)
+      .order("study_date"),
+  ]);
 
   if (
     activitiesResult.error ||
     entriesResult.error ||
-    earliestEntryResult.error
+    earliestEntryResult.error ||
+    activeDateResult.error
   ) {
     console.error("Supabase board workspace read failed", {
       activities: activitiesResult.error?.message,
       entries: entriesResult.error?.message,
       earliestEntry: earliestEntryResult.error?.message,
+      activeDates: activeDateResult.error?.message,
     });
     throw new Error("The language board could not be loaded.");
   }
@@ -116,6 +128,9 @@ export default async function DashboardPage({
         activityTypeId: entry.activity_type_id,
       }))}
       earliestEntryDate={earliestEntryResult.data?.study_date ?? null}
+      activeDateKeys={[
+        ...new Set(activeDateResult.data.map((entry) => entry.study_date)),
+      ]}
       selectedDate={requestedDate}
       year={year}
       todayKey={localToday}
