@@ -231,6 +231,102 @@ export type Database = {
           },
         ]
       }
+      vocabulary_daily_totals: {
+        Row: {
+          board_id: string
+          created_at: string
+          id: string
+          study_date: string
+          updated_at: string
+          user_id: string
+          words_learned: number
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          id?: string
+          study_date: string
+          updated_at?: string
+          user_id: string
+          words_learned: number
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          id?: string
+          study_date?: string
+          updated_at?: string
+          user_id?: string
+          words_learned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_daily_totals_board_owner_fkey"
+            columns: ["board_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "language_boards"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "vocabulary_daily_totals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      vocabulary_total_batches: {
+        Row: {
+          board_id: string
+          created_at: string
+          end_date: string
+          id: string
+          inserted_count: number
+          preserved_count: number
+          start_date: string
+          user_id: string
+          words_learned: number
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          end_date: string
+          id: string
+          inserted_count?: number
+          preserved_count?: number
+          start_date: string
+          user_id: string
+          words_learned: number
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          inserted_count?: number
+          preserved_count?: number
+          start_date?: string
+          user_id?: string
+          words_learned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_total_batches_board_owner_fkey"
+            columns: ["board_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "language_boards"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "vocabulary_total_batches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -295,6 +391,54 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "study_entry_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_vocabulary_total_batch: {
+        Args: {
+          p_board_id: string
+          p_end_date: string
+          p_operation_id: string
+          p_start_date: string
+          p_words_learned: number
+        }
+        Returns: {
+          board_id: string
+          created_at: string
+          end_date: string
+          id: string
+          inserted_count: number
+          preserved_count: number
+          start_date: string
+          user_id: string
+          words_learned: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vocabulary_total_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      upsert_vocabulary_daily_total: {
+        Args: {
+          p_board_id: string
+          p_study_date: string
+          p_words_learned: number
+        }
+        Returns: {
+          board_id: string
+          created_at: string
+          id: string
+          study_date: string
+          updated_at: string
+          user_id: string
+          words_learned: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vocabulary_daily_totals"
           isOneToOne: true
           isSetofReturn: false
         }

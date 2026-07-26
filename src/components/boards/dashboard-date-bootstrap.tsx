@@ -10,13 +10,22 @@ function localDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-export function DashboardDateBootstrap({ boardId }: { boardId: string }) {
+export function DashboardDateBootstrap({
+  boardId,
+  tracker,
+}: {
+  boardId: string;
+  tracker?: "vocabulary";
+}) {
   const router = useRouter();
 
   useEffect(() => {
     const today = localDateKey(new Date());
-    router.replace(`/dashboard?board=${boardId}&date=${today}&today=${today}`);
-  }, [boardId, router]);
+    const trackerQuery = tracker ? `&tracker=${tracker}` : "";
+    router.replace(
+      `/dashboard?board=${boardId}&date=${today}&today=${today}${trackerQuery}`,
+    );
+  }, [boardId, router, tracker]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white">

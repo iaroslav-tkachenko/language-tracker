@@ -9,6 +9,8 @@ import {
   studyEntryBatchSchema,
   studyEntrySchema,
   studyEntryUpdateSchema,
+  vocabularyDailyTotalSchema,
+  vocabularyTotalBatchSchema,
 } from "@/lib/resources/validation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,6 +19,8 @@ export type ResourceActionState = {
   message?: string;
   resourceId?: string;
   resourceName?: string;
+  insertedCount?: number;
+  preservedCount?: number;
 };
 
 function parseName(formData: FormData) {
@@ -290,6 +294,117 @@ export async function deleteStudyEntry(formData: FormData) {
   if (error || !data)
     throw new Error("The study session could not be deleted.");
   revalidatePath("/dashboard");
+}
+
+export async function saveVocabularyDailyTotal(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = vocabularyDailyTotalSchema.safeParse({
+    boardId: formData.get("boardId"),
+    studyDate: formData.get("studyDate"),
+    wordsLearned: formData.get("wordsLearned"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { error } = await supabase.rpc("upsert_vocabulary_daily_total", {
+    p_board_id: parsed.data.boardId,
+    p_study_date: parsed.data.studyDate,
+    p_words_learned: parsed.data.wordsLearned,
+  });
+
+  if (error) {
+    console.error("Supabase vocabulary total save failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return {
+      status: "error",
+      message: "The vocabulary total could not be saved. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  return { status: "success", message: "Vocabulary total saved." };
+}
+
+export async function createVocabularyTotalBatch(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = vocabularyTotalBatchSchema.safeParse({
+    operationId: formData.get("operationId"),
+    boardId: formData.get("boardId"),
+    startDate: formData.get("startDate"),
+    endDate: formData.get("endDate"),
+    wordsLearned: formData.get("wordsLearned"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase.rpc("create_vocabulary_total_batch", {
+    p_operation_id: parsed.data.operationId,
+    p_board_id: parsed.data.boardId,
+    p_start_date: parsed.data.startDate,
+    p_end_date: parsed.data.endDate,
+    p_words_learned: parsed.data.wordsLearned,
+  });
+
+  if (error) {
+    console.error("Supabase vocabulary batch creation failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return {
+      status: "error",
+      message:
+        error.code === "23514"
+          ? error.message
+          : "The vocabulary date range could not be saved. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  return {
+    status: "success",
+    message: "Vocabulary date range saved.",
+    insertedCount: data.inserted_count,
+    preservedCount: data.preserved_count,
+  };
+}
+
+export async function deleteVocabularyDailyTotal(formData: FormData) {
+  const parsed = resourceIdSchema.safeParse(formData.get("vocabularyTotalId"));
+  if (!parsed.success) throw new Error("Invalid vocabulary total.");
+
+  const supabase = await verifiedClient();
+  if (!supabase) redirect("/sign-in");
+
+  const { data, error } = await supabase
+    .from("vocabulary_daily_totals")
+    .delete()
+    .eq("id", parsed.data)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error("The vocabulary total could not be deleted.");
+  }
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
 }
 
 export async function archiveLanguageBoard(formData: FormData) {

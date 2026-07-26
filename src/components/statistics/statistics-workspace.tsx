@@ -30,6 +30,15 @@ import {
   type ChartPoint,
   type StudyStatisticsEntry,
 } from "@/lib/statistics/study-statistics";
+import {
+  calculateVocabularyStatistics,
+  getVocabularyDayDistribution,
+  getVocabularyMonthDistribution,
+  getVocabularyWeekDistribution,
+  getVocabularyYearDistribution,
+  type VocabularyChartPoint,
+  type VocabularyDailyTotal,
+} from "@/lib/vocabulary/vocabulary-statistics";
 
 type BoardSummary = { id: string; name: string };
 type ActivitySummary = {
@@ -44,6 +53,7 @@ type StatisticsWorkspaceProps = {
   selectedBoard: BoardSummary;
   activities: ActivitySummary[];
   entries: StudyStatisticsEntry[];
+  vocabularyTotals: VocabularyDailyTotal[];
   selectedYear: number;
   todayKey: string;
 };
@@ -67,15 +77,23 @@ function MetricCard({
   icon,
   value,
   label,
+  accent = "blue",
 }: {
   icon: React.ReactNode;
   value: string | number;
   label: string;
+  accent?: "blue" | "green";
 }) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <span
+          className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
+            accent === "green"
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-blue-50 text-blue-600"
+          }`}
+        >
           {icon}
         </span>
         <div>
@@ -254,18 +272,68 @@ function DistributionChart({ points }: { points: ChartPoint[] }) {
   );
 }
 
+function VocabularyDistributionChart({
+  points,
+}: {
+  points: VocabularyChartPoint[];
+}) {
+  const maximum = Math.max(...points.map((point) => point.words), 1);
+  return (
+    <div className="mt-6 overflow-x-auto pb-2">
+      <div
+        className="flex min-w-max items-end gap-2"
+        role="img"
+        aria-label="New-words distribution chart"
+      >
+        {points.map((point) => (
+          <div
+            key={point.key}
+            className="flex w-9 flex-col items-center gap-2 sm:w-11"
+          >
+            <span className="text-[11px] font-medium text-slate-500">
+              {point.words > 0 ? point.words.toLocaleString("en") : ""}
+            </span>
+            <div className="flex h-40 w-full items-end rounded-lg bg-emerald-50 p-1">
+              <div
+                title={`${point.label}: ${point.words.toLocaleString("en")} words`}
+                className="w-full rounded-md bg-emerald-500"
+                style={{
+                  height:
+                    point.words === 0
+                      ? "0%"
+                      : `${Math.max((point.words / maximum) * 100, 3)}%`,
+                }}
+              />
+            </div>
+            <span className="text-xs text-slate-500">{point.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function StatisticsWorkspace({
   boards,
   selectedBoard,
   activities,
   entries,
+  vocabularyTotals,
   selectedYear,
   todayKey,
 }: StatisticsWorkspaceProps) {
   const router = useRouter();
   const todayMonth = Number(todayKey.slice(5, 7));
+  const vocabularyDate =
+    selectedYear === Number(todayKey.slice(0, 4))
+      ? todayKey
+      : `${selectedYear}-01-01`;
   const [granularity, setGranularity] = useState<Granularity>("month");
   const [selectedMonth, setSelectedMonth] = useState(todayMonth);
+  const [vocabularyGranularity, setVocabularyGranularity] =
+    useState<Granularity>("month");
+  const [vocabularySelectedMonth, setVocabularySelectedMonth] =
+    useState(todayMonth);
   const statistics = useMemo(
     () => calculateStudyStatistics(entries, selectedYear, todayKey),
     [entries, selectedYear, todayKey],
@@ -278,6 +346,11 @@ export function StatisticsWorkspace({
     () => getRecentActivityTotals(entries, todayKey),
     [entries, todayKey],
   );
+  const vocabularyStatistics = useMemo(
+    () =>
+      calculateVocabularyStatistics(vocabularyTotals, selectedYear, todayKey),
+    [selectedYear, todayKey, vocabularyTotals],
+  );
   const chartPoints = useMemo(() => {
     if (granularity === "day") {
       return getDayDistribution(entries, selectedYear, selectedMonth);
@@ -288,6 +361,27 @@ export function StatisticsWorkspace({
     if (granularity === "year") return getYearDistribution(entries);
     return getMonthDistribution(entries, selectedYear);
   }, [entries, granularity, selectedMonth, selectedYear]);
+  const vocabularyChartPoints = useMemo(() => {
+    if (vocabularyGranularity === "day") {
+      return getVocabularyDayDistribution(
+        vocabularyTotals,
+        selectedYear,
+        vocabularySelectedMonth,
+      );
+    }
+    if (vocabularyGranularity === "week") {
+      return getVocabularyWeekDistribution(vocabularyTotals, selectedYear);
+    }
+    if (vocabularyGranularity === "year") {
+      return getVocabularyYearDistribution(vocabularyTotals);
+    }
+    return getVocabularyMonthDistribution(vocabularyTotals, selectedYear);
+  }, [
+    selectedYear,
+    vocabularyGranularity,
+    vocabularySelectedMonth,
+    vocabularyTotals,
+  ]);
 
   function navigateYear(offset: number) {
     router.replace(
@@ -338,16 +432,13 @@ export function StatisticsWorkspace({
               <Clock3 aria-hidden="true" className="size-5" />
               Study Time
             </Link>
-            <span
-              aria-disabled="true"
-              className="flex items-center gap-2 px-5 text-slate-400"
+            <Link
+              href={`/dashboard?board=${selectedBoard.id}&date=${vocabularyDate}&today=${todayKey}&tracker=vocabulary`}
+              className="flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-emerald-700"
             >
               <BookOpen aria-hidden="true" className="size-5" />
               Vocabulary
-              <span className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs">
-                Coming soon
-              </span>
-            </span>
+            </Link>
           </nav>
 
           <div className="flex items-center gap-1">
@@ -390,16 +481,13 @@ export function StatisticsWorkspace({
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </Link>
-          <span
-            aria-disabled="true"
-            className="flex min-h-14 flex-col items-center justify-center text-slate-400"
+          <Link
+            href={`/dashboard?board=${selectedBoard.id}&date=${vocabularyDate}&today=${todayKey}&tracker=vocabulary`}
+            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
           >
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium">
-              <BookOpen aria-hidden="true" className="size-4.5" />
-              Vocabulary
-            </span>
-            <span className="text-[10px]">Coming soon</span>
-          </span>
+            <BookOpen aria-hidden="true" className="size-4.5" />
+            Vocabulary
+          </Link>
           <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
@@ -414,7 +502,7 @@ export function StatisticsWorkspace({
               {selectedBoard.name}
             </p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-              Study Time statistics
+              Learning statistics
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -452,27 +540,71 @@ export function StatisticsWorkspace({
               These values change when you select another year.
             </p>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <MetricCard
-              icon={<Clock3 aria-hidden="true" className="size-5" />}
-              value={formatDuration(statistics.selectedYearTotal)}
-              label={`Total in ${selectedYear}`}
-            />
-            <MetricCard
-              icon={<CalendarDays aria-hidden="true" className="size-5" />}
-              value={statistics.selectedYearActiveDays}
-              label={`Days studied in ${selectedYear}`}
-            />
-            <MetricCard
-              icon={<Gauge aria-hidden="true" className="size-5" />}
-              value={formatDuration(statistics.calendarDayAverage, true)}
-              label="Average / calendar day"
-            />
-            <MetricCard
-              icon={<Gauge aria-hidden="true" className="size-5" />}
-              value={formatDuration(statistics.activeDayAverage, true)}
-              label="Average / active day"
-            />
+          <div className="mt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-blue-700 uppercase">
+              <Clock3 aria-hidden="true" className="size-4" />
+              Study Time
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <MetricCard
+                icon={<Clock3 aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.selectedYearTotal)}
+                label={`Total in ${selectedYear}`}
+              />
+              <MetricCard
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={statistics.selectedYearActiveDays}
+                label={`Days studied in ${selectedYear}`}
+              />
+              <MetricCard
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.calendarDayAverage, true)}
+                label="Average / calendar day"
+              />
+              <MetricCard
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.activeDayAverage, true)}
+                label="Average / active day"
+              />
+            </div>
+          </div>
+          <div className="mt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
+              <BookOpen aria-hidden="true" className="size-4" />
+              New words
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <MetricCard
+                accent="green"
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.totalWords.toLocaleString("en")} words`}
+                label={`Total in ${selectedYear}`}
+              />
+              <MetricCard
+                accent="green"
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={vocabularyStatistics.activeDays}
+                label={`Active days in ${selectedYear}`}
+              />
+              <MetricCard
+                accent="green"
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.calendarDayAverage.toLocaleString(
+                  "en",
+                  { maximumFractionDigits: 1 },
+                )} words`}
+                label="Average / calendar day"
+              />
+              <MetricCard
+                accent="green"
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.activeDayAverage.toLocaleString(
+                  "en",
+                  { maximumFractionDigits: 1 },
+                )} words`}
+                label="Average / study day"
+              />
+            </div>
           </div>
         </section>
 
@@ -488,36 +620,84 @@ export function StatisticsWorkspace({
               Live values through today, independent of the selected year.
             </p>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <MetricCard
-              icon={<Flame aria-hidden="true" className="size-5" />}
-              value={`${statistics.currentStreak} ${
-                statistics.currentStreak === 1 ? "day" : "days"
-              }`}
-              label="Current streak"
-            />
-            <MetricCard
-              icon={<Trophy aria-hidden="true" className="size-5" />}
-              value={`${statistics.longestStreak} ${
-                statistics.longestStreak === 1 ? "day" : "days"
-              }`}
-              label="Longest streak"
-            />
-            <MetricCard
-              icon={<Clock3 aria-hidden="true" className="size-5" />}
-              value={formatDuration(statistics.currentDayTotal)}
-              label="Today"
-            />
-            <MetricCard
-              icon={<CalendarDays aria-hidden="true" className="size-5" />}
-              value={formatDuration(statistics.currentWeekTotal)}
-              label="Current week"
-            />
-            <MetricCard
-              icon={<CalendarDays aria-hidden="true" className="size-5" />}
-              value={formatDuration(statistics.currentMonthTotal)}
-              label="Current month"
-            />
+          <div className="mt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-blue-700 uppercase">
+              <Clock3 aria-hidden="true" className="size-4" />
+              Study Time
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <MetricCard
+                icon={<Flame aria-hidden="true" className="size-5" />}
+                value={`${statistics.currentStreak} ${
+                  statistics.currentStreak === 1 ? "day" : "days"
+                }`}
+                label="Current streak"
+              />
+              <MetricCard
+                icon={<Trophy aria-hidden="true" className="size-5" />}
+                value={`${statistics.longestStreak} ${
+                  statistics.longestStreak === 1 ? "day" : "days"
+                }`}
+                label="Longest streak"
+              />
+              <MetricCard
+                icon={<Clock3 aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.currentDayTotal)}
+                label="Today"
+              />
+              <MetricCard
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.currentWeekTotal)}
+                label="Current week"
+              />
+              <MetricCard
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.currentMonthTotal)}
+                label="Current month"
+              />
+            </div>
+          </div>
+          <div className="mt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
+              <BookOpen aria-hidden="true" className="size-4" />
+              New words
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <MetricCard
+                accent="green"
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.allTimeWords.toLocaleString("en")} words`}
+                label="All-time total"
+              />
+              <MetricCard
+                accent="green"
+                icon={<Flame aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.currentStreak} ${
+                  vocabularyStatistics.currentStreak === 1 ? "day" : "days"
+                }`}
+                label="Current streak"
+              />
+              <MetricCard
+                accent="green"
+                icon={<Trophy aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.longestStreak} ${
+                  vocabularyStatistics.longestStreak === 1 ? "day" : "days"
+                }`}
+                label="Longest streak"
+              />
+              <MetricCard
+                accent="green"
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.currentWeekWords.toLocaleString("en")} words`}
+                label="Current week"
+              />
+              <MetricCard
+                accent="green"
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.currentMonthWords.toLocaleString("en")} words`}
+                label="Current month"
+              />
+            </div>
           </div>
         </section>
 
@@ -567,6 +747,55 @@ export function StatisticsWorkspace({
             </label>
           )}
           <DistributionChart points={chartPoints} />
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-emerald-200 bg-white p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-slate-950">
+                New words distribution
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Compare the number of actively learned words across calendar
+                periods.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(["day", "week", "month", "year"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setVocabularyGranularity(option)}
+                  className={`min-h-10 rounded-xl px-3 text-sm font-semibold capitalize ${
+                    vocabularyGranularity === option
+                      ? "bg-emerald-600 text-white"
+                      : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          {vocabularyGranularity === "day" && (
+            <label className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+              Month
+              <select
+                value={vocabularySelectedMonth}
+                onChange={(event) =>
+                  setVocabularySelectedMonth(Number(event.target.value))
+                }
+                className="min-h-10 rounded-xl border border-emerald-300 bg-white px-3"
+              >
+                {monthNames.map((month, index) => (
+                  <option key={month} value={index + 1}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <VocabularyDistributionChart points={vocabularyChartPoints} />
         </section>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">

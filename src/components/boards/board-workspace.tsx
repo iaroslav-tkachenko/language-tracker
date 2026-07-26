@@ -402,7 +402,7 @@ export function BoardWorkspace({
               {boards.map((board) => (
                 <Link
                   key={board.id}
-                  href={`/dashboard?board=${board.id}`}
+                  href={`/dashboard?board=${board.id}&date=${selectedDate}&today=${todayKey}`}
                   className={`block rounded-xl px-3 py-2.5 text-sm font-medium ${
                     board.id === selectedBoard.id
                       ? "bg-blue-50 text-blue-700"
@@ -420,16 +420,13 @@ export function BoardWorkspace({
               <Clock3 aria-hidden="true" className="size-5" />
               Study Time
             </span>
-            <span
-              aria-disabled="true"
-              className="flex min-h-17 items-center gap-2 px-5 text-slate-400"
+            <Link
+              href={`/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}&tracker=vocabulary`}
+              className="flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
             >
               <BookOpen aria-hidden="true" className="size-5" />
               Vocabulary
-              <span className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs">
-                Coming soon
-              </span>
-            </span>
+            </Link>
           </nav>
 
           <div className="flex items-center gap-1">
@@ -474,16 +471,13 @@ export function BoardWorkspace({
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </span>
-          <span
-            aria-disabled="true"
-            className="flex min-h-14 flex-col items-center justify-center text-slate-400"
+          <Link
+            href={`/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}&tracker=vocabulary`}
+            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
           >
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium">
-              <BookOpen aria-hidden="true" className="size-4.5" />
-              Vocabulary
-            </span>
-            <span className="text-[10px]">Coming soon</span>
-          </span>
+            <BookOpen aria-hidden="true" className="size-4.5" />
+            Vocabulary
+          </Link>
           <Link
             href={`/statistics?board=${selectedBoard.id}&year=${year}&today=${todayKey}`}
             className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
