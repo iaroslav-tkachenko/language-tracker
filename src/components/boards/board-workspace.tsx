@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock3,
   Flame,
+  Gauge,
   LogOut,
   Pencil,
   Plus,
@@ -37,6 +38,7 @@ import {
   toDateKey,
 } from "@/lib/dates/study-calendar";
 import { getInclusiveDateCount } from "@/lib/resources/validation";
+import { calculateStudyStatistics } from "@/lib/statistics/study-statistics";
 
 type BoardSummary = { id: string; name: string };
 type ActivitySummary = {
@@ -70,10 +72,11 @@ const heatColors = {
   empty: "#f8fafc",
   levels: ["#fff1b8", "#ffe18a", "#f7c95e", "#b8d79c", "#78b76d", "#3f8249"],
 };
-function formatDuration(minutes: number) {
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const remainder = minutes % 60;
+function formatDuration(minutes: number, precise = false) {
+  const roundedMinutes = precise ? Math.round(minutes) : minutes;
+  if (roundedMinutes < 60) return `${roundedMinutes}m`;
+  const hours = Math.floor(roundedMinutes / 60);
+  const remainder = roundedMinutes % 60;
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
@@ -248,6 +251,10 @@ export function BoardWorkspace({
       .filter((entry) => entry.studyDate <= todayKey)
       .map((entry) => entry.studyDate),
   ).size;
+  const statistics = useMemo(
+    () => calculateStudyStatistics(entries, year, todayKey),
+    [entries, year, todayKey],
+  );
   const activeDateKeySet = new Set(activeDateKeys);
   const latestEligibleDate = activeDateKeySet.has(todayKey)
     ? todayKey
@@ -625,6 +632,34 @@ export function BoardWorkspace({
               {currentStreak}
             </strong>
             <span className="block text-sm text-slate-500">Current streak</span>
+          </div>
+          <div className="col-span-2 grid grid-cols-2 gap-3 sm:col-span-3">
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 p-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <Gauge aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0">
+                <strong className="block text-xl text-slate-950 sm:text-2xl">
+                  {formatDuration(statistics.calendarDayAverage, true)}
+                </strong>
+                <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
+                  Average / calendar day
+                </span>
+              </span>
+            </div>
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 p-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <Gauge aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0">
+                <strong className="block text-xl text-slate-950 sm:text-2xl">
+                  {formatDuration(statistics.activeDayAverage, true)}
+                </strong>
+                <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
+                  Average / active day
+                </span>
+              </span>
+            </div>
           </div>
         </section>
 

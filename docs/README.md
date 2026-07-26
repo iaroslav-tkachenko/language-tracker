@@ -2,10 +2,10 @@
 
 This directory is the documentation home for Language Tracker. It is organized so that a product owner, designer, engineer, or tester can start from the same approved product baseline and follow the level of detail relevant to their work.
 
-**Current status:** Phases 0 and 1 are complete and merged. The product owner
-approved the production-backed Phase 1 Study Time experience on desktop and a
-physical mobile browser. The Phase 2 atomic batch entry flow was approved on
-July 26, 2026 and awaits automated pull-request verification and merge.
+**Current status:** Phases 0, 1, and 2 are complete and merged. The
+production-backed Study Time experience and atomic batch entry flow passed
+product-owner review and all automated pull-request checks. Phase 3 Vocabulary
+is next.
 
 ## Start here
 

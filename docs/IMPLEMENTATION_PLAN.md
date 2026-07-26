@@ -2,9 +2,8 @@
 
 ## 1. Approval gate
 
-**Current status: Phases 0 and 1 complete and merged; Phase 2 implemented and
-visually approved, with automated pull-request verification and merge
-remaining.**
+**Current status: Phases 0, 1, and 2 complete and merged; Phase 3 Vocabulary is
+next.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -117,9 +116,9 @@ Before changing the application layout, prepare two static screenshot alternativ
 
 ## 5. Phase 2 — Batch study-entry creation
 
-**Status:** implemented and approved by the project owner through the clickable
-desktop flow on July 26, 2026. Final completion is gated on green application,
-database, and desktop/mobile browser jobs plus pull-request merge.
+**Status:** complete, approved by the project owner through the clickable
+desktop flow, verified by green application, database, and desktop/mobile
+browser jobs, and merged on July 26, 2026.
 
 ### Work
 
