@@ -89,6 +89,8 @@ test.describe("Phase 1 Study Time", () => {
     await expect(
       page.locator("article").filter({ hasText: activityName }),
     ).toContainText("15m");
+    await expect(page.getByText("Average / calendar day")).toBeVisible();
+    await expect(page.getByText("Average / active day")).toBeVisible();
 
     await statisticsLink.click();
     await expect(
