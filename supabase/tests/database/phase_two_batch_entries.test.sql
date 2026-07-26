@@ -118,7 +118,7 @@ select throws_ok(
       id,
       date '2026-07-01',
       date '2026-07-02',
-      30
+      30::smallint
     from public.activity_types
     where system_key = 'reading'
   $$,
@@ -135,7 +135,7 @@ select lives_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-07-01',
       date '2026-07-01',
-      30
+      30::smallint
     )
   $$,
   'a one-day batch creates successfully'
@@ -162,7 +162,7 @@ select
   '31000000-0000-4000-8000-000000000001',
   id,
   date '2026-07-02',
-  30
+  30::smallint
 from public.activity_types
 where system_key = 'reading';
 
@@ -174,7 +174,7 @@ select lives_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-07-02',
       date '2026-07-04',
-      30
+      30::smallint
     )
   $$,
   'a multi-day batch creates successfully beside matching entries'
@@ -207,7 +207,7 @@ select lives_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-07-02',
       date '2026-07-04',
-      30
+      30::smallint
     )
   $$,
   'retrying the same operation and payload succeeds'
@@ -230,7 +230,7 @@ select throws_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-07-02',
       date '2026-07-04',
-      45
+      45::smallint
     )
   $$,
   '23505',
@@ -246,7 +246,7 @@ select lives_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2028-01-01',
       date '2028-12-31',
-      10
+      10::smallint
     )
   $$,
   'a leap-year 366-day batch succeeds'
@@ -269,7 +269,7 @@ select lives_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2027-01-01',
       date '2027-12-31',
-      10
+      10::smallint
     )
   $$,
   'a regular full-year 365-day batch succeeds'
@@ -292,7 +292,7 @@ select throws_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-07-10',
       date '2026-07-01',
-      30
+      30::smallint
     )
   $$,
   '23514',
@@ -308,7 +308,7 @@ select throws_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-12-31',
       date '2027-01-01',
-      30
+      30::smallint
     )
   $$,
   '23514',
@@ -324,7 +324,7 @@ select throws_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-08-01',
       date '2026-08-03',
-      30
+      30::smallint
     )
   $$,
   'P0001',
@@ -373,7 +373,7 @@ select throws_ok(
       ),
       date '2026-09-01',
       date '2026-09-02',
-      30
+      30::smallint
     )
   $$,
   '23514',
@@ -399,7 +399,7 @@ select throws_ok(
       (select id from public.activity_types where system_key = 'podcast'),
       date '2026-09-01',
       date '2026-09-02',
-      30
+      30::smallint
     )
   $$,
   '23514',
@@ -419,7 +419,7 @@ select throws_ok(
       (select id from public.activity_types where system_key = 'reading'),
       date '2026-09-01',
       date '2026-09-02',
-      30
+      30::smallint
     )
   $$,
   '23514',
