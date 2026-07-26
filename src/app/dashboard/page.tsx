@@ -3,13 +3,19 @@ import { redirect } from "next/navigation";
 import { BoardWorkspace } from "@/components/boards/board-workspace";
 import { DashboardDateBootstrap } from "@/components/boards/dashboard-date-bootstrap";
 import { FirstBoardOnboarding } from "@/components/boards/first-board-onboarding";
+import { VocabularyWorkspace } from "@/components/vocabulary/vocabulary-workspace";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 type DashboardPageProps = {
-  searchParams: Promise<{ board?: string; date?: string; today?: string }>;
+  searchParams: Promise<{
+    board?: string;
+    date?: string;
+    today?: string;
+    tracker?: string;
+  }>;
 };
 
 function isDateKey(value: string | undefined): value is string {
@@ -53,15 +59,54 @@ export default async function DashboardPage({
     board: requestedBoardId,
     date: requestedDate,
     today: localToday,
+    tracker: requestedTracker,
   } = await searchParams;
   const selectedBoard =
     boards.find((board) => board.id === requestedBoardId) ?? boards[0];
+  const tracker = requestedTracker === "vocabulary" ? "vocabulary" : "study";
 
   if (!isDateKey(requestedDate) || !isDateKey(localToday)) {
-    return <DashboardDateBootstrap boardId={selectedBoard.id} />;
+    return (
+      <DashboardDateBootstrap
+        boardId={selectedBoard.id}
+        tracker={tracker === "vocabulary" ? "vocabulary" : undefined}
+      />
+    );
   }
 
   const year = Number(requestedDate.slice(0, 4));
+
+  if (tracker === "vocabulary") {
+    const { data: vocabularyTotals, error: vocabularyError } = await supabase
+      .from("vocabulary_daily_totals")
+      .select("id, study_date, words_learned")
+      .eq("board_id", selectedBoard.id)
+      .order("study_date");
+
+    if (vocabularyError) {
+      console.error("Supabase vocabulary workspace read failed", {
+        code: vocabularyError.code,
+        message: vocabularyError.message,
+      });
+      throw new Error("Vocabulary could not be loaded.");
+    }
+
+    return (
+      <VocabularyWorkspace
+        boards={boards}
+        selectedBoard={selectedBoard}
+        totals={vocabularyTotals.map((total) => ({
+          id: total.id,
+          studyDate: total.study_date,
+          wordsLearned: total.words_learned,
+        }))}
+        selectedDate={requestedDate}
+        year={year}
+        todayKey={localToday}
+      />
+    );
+  }
+
   const [
     activitiesResult,
     entriesResult,

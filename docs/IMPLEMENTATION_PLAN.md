@@ -3,7 +3,7 @@
 ## 1. Approval gate
 
 **Current status: Phases 0, 1, and 2 complete and merged; Phase 3 Vocabulary is
-next.**
+implemented and visually approved, with pull-request verification in progress.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -145,22 +145,36 @@ browser jobs, and merged on July 26, 2026.
 
 ## 6. Phase 3 — Vocabulary tracker
 
+**Status:** implementation and desktop/mobile visual review approved by the
+project owner on July 26, 2026; automated pull-request verification is the
+remaining exit gate.
+
 ### Work
 
-- Add `vocabulary_daily_totals` with one owned positive integer per board/date, unique under concurrency.
+- Add `vocabulary_daily_totals` with one owned non-negative integer per board/date, unique under concurrency.
 - Add RLS, composite board ownership, indexes, generated types, and pgTAP coverage.
 - Enable the `Study Time`/`Vocabulary` tracker switch while preserving board and year.
 - Implement create, edit, and confirmed delete for the single daily final word total.
+- Implement atomic, idempotent date-range creation that fills only empty dates
+  and preserves existing daily totals.
 - Implement the green Vocabulary heatmap with fixed levels: 0, 1–2, 3–5, 6–9, 10–14, 15–19, 20–39, and 40+.
-- Implement selected-year total, non-future active days, current streak, and longest streak.
+- Implement selected-year and all-time word totals, non-future active days,
+  averages, current-week/current-month totals, current streak, and longest
+  streak.
+- Integrate green Vocabulary metrics and independent day/week/month/year word
+  distribution into the shared board-scoped Statistics screen.
 - Apply the approved future-date inclusion/exclusion rules.
 - Provide accessible date/count labels and responsive heatmap behavior.
 
 ### Critical verification
 
 - Concurrent writes cannot create two values for one board/date.
+- Date-range retries cannot duplicate totals, and existing dates remain
+  unchanged.
 - A second save updates the existing record; deletion returns the date to zero.
 - Every threshold boundary, year navigation, future total, active-day rule, and vocabulary streak is covered.
+- Shared Statistics navigation, metrics, and both period-distribution controls
+  work on desktop and mobile.
 - User A cannot read or mutate User B's vocabulary.
 
 ### Phase exit criteria
@@ -188,7 +202,8 @@ browser jobs, and merged on July 26, 2026.
 
 ### Milestone 4C — Statistics integration
 
-- Combine Study Time, Vocabulary, CEFR history, and forecast information on the labelled Statistics destination.
+- Add CEFR history and forecast information to the existing combined Study Time
+  and Vocabulary Statistics destination.
 - Present units, periods, and methodologies unambiguously.
 - Keep `Top activity` and latest-seven-day actual allocation in detailed statistics.
 

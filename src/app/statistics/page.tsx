@@ -63,24 +63,35 @@ export default async function StatisticsPage({
       ? parsedYear
       : Number(localToday.slice(0, 4));
 
-  const [activitiesResult, entriesResult] = await Promise.all([
-    supabase
-      .from("activity_types")
-      .select("id, name, system_key")
-      .order("position")
-      .order("created_at"),
-    supabase
-      .from("study_entries")
-      .select("study_date, duration_minutes, activity_type_id")
-      .eq("board_id", selectedBoard.id)
-      .order("study_date")
-      .order("created_at"),
-  ]);
+  const [activitiesResult, entriesResult, vocabularyTotalsResult] =
+    await Promise.all([
+      supabase
+        .from("activity_types")
+        .select("id, name, system_key")
+        .order("position")
+        .order("created_at"),
+      supabase
+        .from("study_entries")
+        .select("study_date, duration_minutes, activity_type_id")
+        .eq("board_id", selectedBoard.id)
+        .order("study_date")
+        .order("created_at"),
+      supabase
+        .from("vocabulary_daily_totals")
+        .select("study_date, words_learned")
+        .eq("board_id", selectedBoard.id)
+        .order("study_date"),
+    ]);
 
-  if (activitiesResult.error || entriesResult.error) {
+  if (
+    activitiesResult.error ||
+    entriesResult.error ||
+    vocabularyTotalsResult.error
+  ) {
     console.error("Supabase statistics read failed", {
       activities: activitiesResult.error?.message,
       entries: entriesResult.error?.message,
+      vocabularyTotals: vocabularyTotalsResult.error?.message,
     });
     throw new Error("Statistics could not be loaded.");
   }
@@ -98,6 +109,10 @@ export default async function StatisticsPage({
         studyDate: entry.study_date,
         durationMinutes: entry.duration_minutes,
         activityTypeId: entry.activity_type_id,
+      }))}
+      vocabularyTotals={vocabularyTotalsResult.data.map((total) => ({
+        studyDate: total.study_date,
+        wordsLearned: total.words_learned,
       }))}
       selectedYear={selectedYear}
       todayKey={localToday}

@@ -4,14 +4,18 @@ A responsive web application for recording and reviewing foreign-language study 
 
 ## Project status
 
-**Phases 0, 1, and 2 are complete and merged. Phase 3 Vocabulary is next.**
+**Phases 0, 1, and 2 are complete and merged. Phase 3 Vocabulary is implemented,
+visually approved, and awaiting pull-request verification.**
 
 Phase 0 authentication, hosted Supabase schema, RLS, email confirmation, and
 password recovery are complete. Phase 1 provides production-backed language
 boards, the responsive Study Time heatmap, single-day study-session CRUD,
 activity management, streaks, period statistics, distributions, and
 desktop/mobile navigation. Phase 2 adds an atomic, idempotent, confirmed date
-range flow that preserves existing entries.
+range flow that preserves existing entries. Phase 3 adds production-backed
+single-day and non-overwriting date-range Vocabulary totals, a responsive
+green/red yearly heatmap, word averages and streaks, and board-scoped word
+analytics on the shared Statistics screen.
 
 ### Current local preview
 
@@ -19,9 +23,10 @@ The current local application runs at
 [http://localhost:3000](http://localhost:3000):
 
 - [Sign in](http://localhost:3000/sign-in) — production-backed authentication.
-- [Dashboard](http://localhost:3000/dashboard) — responsive Study Time tracker.
-- [Statistics](http://localhost:3000/statistics) — board-scoped Study Time
-  analytics.
+- [Dashboard](http://localhost:3000/dashboard) — responsive Study Time and
+  Vocabulary trackers.
+- [Statistics](http://localhost:3000/statistics) — board-scoped Study Time and
+  Vocabulary analytics.
 - [Study Time demo](http://localhost:3000/demo) — preserved design prototype.
 
 `pnpm dev` automatically exposes the development server to private LAN
@@ -67,7 +72,8 @@ tests skip rather than touching a hosted account.
 - Exact durations from 1 to 1,440 minutes, with fixed quick-select values.
 - Separate Study Time and Vocabulary yearly heatmaps with fixed, comparable intensity thresholds.
 - One editable final vocabulary total per board and date.
-- Board-specific totals, averages, active days, streaks, recent activity allocation, and time distributions.
+- Board-specific Study Time and Vocabulary totals, averages, active days,
+  streaks, period distributions, and recent activity allocation.
 - User-declared CEFR history and a clearly qualified Cambridge-based next-level forecast.
 - Responsive English-language interface for desktop and mobile.
 

@@ -246,7 +246,7 @@ An authenticated database function validates the complete payload and inserts th
 | `user_id`       | `uuid`        | Required owner; references `profiles(user_id)`         |
 | `board_id`      | `uuid`        | Required owned board                                   |
 | `study_date`    | `date`        | Required local calendar date; past, present, or future |
-| `words_learned` | `integer`     | Required positive final daily total                    |
+| `words_learned` | `integer`     | Required non-negative final daily total                |
 | `created_at`    | `timestamptz` | Audit timestamp                                        |
 | `updated_at`    | `timestamptz` | Audit timestamp                                        |
 
@@ -254,7 +254,7 @@ Required rules:
 
 - `(board_id, user_id)` references `language_boards(id, user_id)`.
 - Unique `(user_id, board_id, study_date)` guarantees one record per board/date under concurrency.
-- `words_learned > 0`; zero is represented by deleting or omitting the row.
+- `words_learned >= 0`; zero may be stored as an explicit editable daily total.
 - Create-on-existing becomes an explicit update/upsert of the owned record, never a second row.
 
 ### 5.7 `cefr_level_events`
@@ -279,7 +279,26 @@ Required rules:
 
 CEFR descriptions and Cambridge target ranges are immutable versioned application reference data rather than user-editable rows. If the reference model changes, its version and methodology must change explicitly so historical interpretation remains reviewable.
 
-### 5.8 Indexes
+### 5.8 `vocabulary_total_batches`
+
+| Column            | Type          | Constraints and purpose                               |
+| ----------------- | ------------- | ----------------------------------------------------- |
+| `id`              | `uuid`        | Client-generated operation identifier and primary key |
+| `user_id`         | `uuid`        | Required owner; references `profiles(user_id)`        |
+| `board_id`        | `uuid`        | Required owned board                                  |
+| `start_date`      | `date`        | Inclusive first date                                  |
+| `end_date`        | `date`        | Inclusive final date                                  |
+| `words_learned`   | `integer`     | Non-negative total for each previously empty date     |
+| `inserted_count`  | `smallint`    | Dates created by the operation                        |
+| `preserved_count` | `smallint`    | Existing dates retained unchanged                     |
+| `created_at`      | `timestamptz` | Audit timestamp                                       |
+
+An authenticated database function validates the owned active board and the
+same-year range of at most 366 dates. A client-generated operation ID makes
+retries idempotent. One transaction creates totals only for empty dates with
+`on conflict do nothing`, preserving every existing daily total.
+
+### 5.9 Indexes
 
 Initial indexes:
 
@@ -288,6 +307,8 @@ Initial indexes:
 - `vocabulary_daily_totals (user_id, board_id, study_date)` for yearly heatmaps and statistics; the uniqueness constraint may provide this index.
 - `cefr_level_events (user_id, board_id, effective_date desc)` for current level and history.
 - `study_entry_batches (user_id, board_id, created_at)` for owned operation lookup.
+- `vocabulary_total_batches (user_id, board_id, created_at)` for owned
+  operation lookup.
 - Partial active-name indexes described above.
 
 Primary and unique constraints provide their own supporting indexes. Additional indexes require query-plan evidence.
@@ -331,12 +352,18 @@ Board/activity creation and restoration use database functions so name restorati
 
 Batch creation uses a single authenticated database function. The function derives the owner from `auth.uid()`, validates the owned board/activity and the complete range, records the operation ID, and inserts all generated entries atomically. Vocabulary uses an owned upsert constrained by the board/date uniqueness rule. CEFR declaration uses an owned mutation that validates the browser-local effective date at both the server boundary and constrained database function boundary.
 
+Vocabulary date-range creation similarly uses one authenticated transaction. It
+derives ownership from `auth.uid()`, preserves existing totals, inserts only
+empty dates, records inserted/preserved counts, and returns the original result
+when the same operation identifier and payload are retried.
+
 ## 8. Aggregation design
 
-MVP stores source entries only and derives heatmap/statistics on demand. Phase 1
-reads RLS-filtered source entries for one board and calculates calendar,
-distribution, activity-allocation, average, and streak rules through pure,
-unit-tested TypeScript functions. This is proportionate to the expected MVP
+MVP stores source entries only and derives heatmap/statistics on demand. The
+Statistics Server Component reads RLS-filtered study entries and Vocabulary
+daily totals for one selected board. Pure, unit-tested TypeScript functions
+calculate both trackers' selected-year/current-period totals, distributions,
+averages, active days, and streaks. This is proportionate to the expected MVP
 load and avoids persisted aggregate state.
 
 The following `security invoker` functions remain the target if measurement
@@ -346,7 +373,9 @@ shows that later phases should move aggregation into PostgreSQL:
 - `get_board_statistics(board_id, selected_year, local_today)` returns totals, averages, active days, activity breakdown, current streak, and longest streak.
 - `get_board_distribution(board_id, granularity, period)` returns chart buckets.
 - `get_board_recent_activity(board_id, local_today)` returns minutes grouped by activity for the seven calendar dates ending at `local_today`.
-- `get_board_vocabulary_year(board_id, year, local_today)` returns daily word totals, selected-year total, active days, and vocabulary streaks.
+- `get_board_vocabulary_year(board_id, year, local_today)` returns daily word
+  totals, selected-year and current-period totals, averages, active days,
+  distributions, and vocabulary streaks.
 - `get_board_cefr_forecast(board_id, local_today)` returns the current declaration, eligible minutes, seven-day pace, remaining reference minutes, and estimated date inputs.
 
 Rules:
@@ -400,6 +429,10 @@ No aggregate table or materialized view is planned. Index-backed aggregation ove
 - Derive the zero-minute semantic state from the cell date: past is red; today/future is white.
 - Map the three positive sub-hour levels to yellow-family tokens and the three 60+ levels to progressively darker green tokens.
 - Map Vocabulary totals independently to `0`, `1–2`, `3–5`, `6–9`, `10–14`, `15–19`, `20–39`, and `40+` green-family levels.
+- Render empty and explicit-zero Vocabulary dates from the first positive
+  total through `local_today` in muted red. Keep dates before the first
+  positive total and future empty dates white unless an explicit zero total
+  exists; an explicit zero is always red.
 - Expose a full accessible label such as `July 14, 2026: 30 minutes`.
 - Expose equivalent vocabulary labels such as `July 14, 2026: 12 new words`.
 - Use horizontal overflow on narrow screens rather than shrinking controls below a usable size.
@@ -466,9 +499,11 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Board and activity lifecycle.
 - Entry create/edit/delete on past, current, and future dates.
 - Collapsed create form, disabled-save prerequisites, card edit/cancel/update, and confirmed delete.
-- Disabled `Vocabulary — Coming soon`, add-another action on populated days, main-screen `Top activity` absence, and isolated test-fixture handling.
+- Study Time/Vocabulary/Statistics navigation preserves the selected board and
+  year.
 - Batch creation preview, success, matching-entry preservation, and retry behavior.
-- Vocabulary tab create/edit/delete, heatmap, and streak behavior.
+- Vocabulary tab create/edit/delete, explicit zero, non-overwriting batch,
+  heatmap, streak, distribution, and combined-statistics behavior.
 - CEFR declaration history, approximate forecast disclosures, and zero-pace/C2 states.
 - User A cannot access User B's data.
 - Desktop hover/focus actions, two persistently visible mobile entry-action icons, and the 1366×768 above-the-fold contract.

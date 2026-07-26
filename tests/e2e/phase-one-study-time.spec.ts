@@ -12,7 +12,7 @@ test.describe("Phase 1 Study Time", () => {
   test("completes the private Study Time lifecycle", async ({
     page,
   }, testInfo) => {
-    const suffix = `${testInfo.project.name}-${Date.now()}`;
+    const suffix = testInfo.project.name;
     const boardName = `E2E ${suffix}`;
     const activityName = `Review ${suffix}`;
     const mobile = testInfo.project.name.includes("mobile");
@@ -39,8 +39,8 @@ test.describe("Phase 1 Study Time", () => {
     });
     await expect(primaryNavigation.getByText("Vocabulary")).toBeVisible();
     await expect(
-      primaryNavigation.locator('[aria-disabled="true"]'),
-    ).toContainText("Coming soon");
+      primaryNavigation.getByRole("link", { name: "Vocabulary" }),
+    ).toHaveAttribute("href", /tracker=vocabulary/);
     const statisticsLink = mobile
       ? primaryNavigation.getByRole("link", { name: "Statistics" })
       : page.getByRole("link", { name: "Statistics" });
@@ -94,7 +94,7 @@ test.describe("Phase 1 Study Time", () => {
 
     await statisticsLink.click();
     await expect(
-      page.getByRole("heading", { name: "Study Time statistics" }),
+      page.getByRole("heading", { name: "Learning statistics" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Selected year" }),

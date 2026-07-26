@@ -91,3 +91,61 @@ export const studyEntryUpdateSchema = z.object({
     .min(1, "Enter at least 1 minute.")
     .max(1440, "Enter no more than 1,440 minutes."),
 });
+
+export const vocabularyDailyTotalSchema = z.object({
+  boardId: z.string().uuid(),
+  studyDate: dateKeySchema,
+  wordsLearned: z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? Number.NaN : value,
+    z.coerce
+      .number()
+      .int("Enter a whole number of words.")
+      .min(0, "Enter 0 or more words.")
+      .max(2_147_483_647, "Enter a smaller word total."),
+  ),
+});
+
+export const vocabularyTotalBatchSchema = z
+  .object({
+    operationId: z.string().uuid(),
+    boardId: z.string().uuid(),
+    startDate: dateKeySchema,
+    endDate: dateKeySchema,
+    wordsLearned: z.preprocess(
+      (value) =>
+        typeof value === "string" && value.trim() === "" ? Number.NaN : value,
+      z.coerce
+        .number()
+        .int("Enter a whole number of words.")
+        .min(0, "Enter 0 or more words.")
+        .max(2_147_483_647, "Enter a smaller word total."),
+    ),
+  })
+  .superRefine(({ startDate, endDate }, context) => {
+    if (startDate > endDate) {
+      context.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message: "End date must be on or after the start date.",
+      });
+      return;
+    }
+
+    if (startDate.slice(0, 4) !== endDate.slice(0, 4)) {
+      context.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message: "The date range must stay within one calendar year.",
+      });
+      return;
+    }
+
+    if (getInclusiveDateCount(startDate, endDate) > 366) {
+      context.addIssue({
+        code: "custom",
+        path: ["endDate"],
+        message: "The date range can contain at most 366 days.",
+      });
+    }
+  });
