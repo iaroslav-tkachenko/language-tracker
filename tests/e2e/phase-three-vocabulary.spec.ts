@@ -108,7 +108,8 @@ test.describe("Phase 3 Vocabulary", () => {
     await expect(
       selectedYearSection
         .locator("article")
-        .filter({ hasText: "Total in 2026" }),
+        .filter({ hasText: "Total in 2026" })
+        .filter({ hasText: "8 words" }),
     ).toContainText("8 words");
     await expect(
       selectedYearSection.getByText("Active days in 2026"),

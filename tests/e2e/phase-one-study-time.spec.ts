@@ -94,7 +94,7 @@ test.describe("Phase 1 Study Time", () => {
 
     await statisticsLink.click();
     await expect(
-      page.getByRole("heading", { name: "Study Time statistics" }),
+      page.getByRole("heading", { name: "Learning statistics" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Selected year" }),
