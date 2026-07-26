@@ -154,17 +154,17 @@ export type Database = {
             referencedColumns: ["id", "user_id"]
           },
           {
-            foreignKeyName: "study_entries_board_owner_fkey"
-            columns: ["board_id", "user_id"]
-            isOneToOne: false
-            referencedRelation: "language_boards"
-            referencedColumns: ["id", "user_id"]
-          },
-          {
             foreignKeyName: "study_entries_batch_owner_fkey"
             columns: ["batch_id", "user_id"]
             isOneToOne: false
             referencedRelation: "study_entry_batches"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "study_entries_board_owner_fkey"
+            columns: ["board_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "language_boards"
             referencedColumns: ["id", "user_id"]
           },
           {
@@ -236,32 +236,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_study_entry_batch: {
-        Args: {
-          p_activity_type_id: string
-          p_board_id: string
-          p_duration_minutes: number
-          p_end_date: string
-          p_operation_id: string
-          p_start_date: string
-        }
-        Returns: {
-          activity_type_id: string
-          board_id: string
-          created_at: string
-          duration_minutes: number
-          end_date: string
-          id: string
-          start_date: string
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "study_entry_batches"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       create_or_restore_activity_type: {
         Args: { p_name: string }
         Returns: {
@@ -295,6 +269,32 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "language_boards"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_study_entry_batch: {
+        Args: {
+          p_activity_type_id: string
+          p_board_id: string
+          p_duration_minutes: number
+          p_end_date: string
+          p_operation_id: string
+          p_start_date: string
+        }
+        Returns: {
+          activity_type_id: string
+          board_id: string
+          created_at: string
+          duration_minutes: number
+          end_date: string
+          id: string
+          start_date: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "study_entry_batches"
           isOneToOne: true
           isSetofReturn: false
         }
