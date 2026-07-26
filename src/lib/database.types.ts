@@ -114,6 +114,7 @@ export type Database = {
       study_entries: {
         Row: {
           activity_type_id: string
+          batch_id: string | null
           board_id: string
           created_at: string
           duration_minutes: number
@@ -124,6 +125,7 @@ export type Database = {
         }
         Insert: {
           activity_type_id: string
+          batch_id?: string | null
           board_id: string
           created_at?: string
           duration_minutes: number
@@ -134,6 +136,7 @@ export type Database = {
         }
         Update: {
           activity_type_id?: string
+          batch_id?: string | null
           board_id?: string
           created_at?: string
           duration_minutes?: number
@@ -158,7 +161,69 @@ export type Database = {
             referencedColumns: ["id", "user_id"]
           },
           {
+            foreignKeyName: "study_entries_batch_owner_fkey"
+            columns: ["batch_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "study_entry_batches"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
             foreignKeyName: "study_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      study_entry_batches: {
+        Row: {
+          activity_type_id: string
+          board_id: string
+          created_at: string
+          duration_minutes: number
+          end_date: string
+          id: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          activity_type_id: string
+          board_id: string
+          created_at?: string
+          duration_minutes: number
+          end_date: string
+          id: string
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          activity_type_id?: string
+          board_id?: string
+          created_at?: string
+          duration_minutes?: number
+          end_date?: string
+          id?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_entry_batches_activity_owner_fkey"
+            columns: ["activity_type_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "activity_types"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "study_entry_batches_board_owner_fkey"
+            columns: ["board_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "language_boards"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "study_entry_batches_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -171,6 +236,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_study_entry_batch: {
+        Args: {
+          p_activity_type_id: string
+          p_board_id: string
+          p_duration_minutes: number
+          p_end_date: string
+          p_operation_id: string
+          p_start_date: string
+        }
+        Returns: {
+          activity_type_id: string
+          board_id: string
+          created_at: string
+          duration_minutes: number
+          end_date: string
+          id: string
+          start_date: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "study_entry_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_or_restore_activity_type: {
         Args: { p_name: string }
         Returns: {

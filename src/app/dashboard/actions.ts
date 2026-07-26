@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import {
   resourceIdSchema,
   resourceNameSchema,
+  studyEntryBatchSchema,
   studyEntrySchema,
   studyEntryUpdateSchema,
 } from "@/lib/resources/validation";
@@ -178,6 +179,54 @@ export async function createStudyEntry(
 
   revalidatePath("/dashboard");
   return { status: "success", message: "Study session saved." };
+}
+
+export async function createStudyEntryBatch(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = studyEntryBatchSchema.safeParse({
+    operationId: formData.get("operationId"),
+    boardId: formData.get("boardId"),
+    activityTypeId: formData.get("activityTypeId"),
+    startDate: formData.get("startDate"),
+    endDate: formData.get("endDate"),
+    durationMinutes: formData.get("durationMinutes"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { error } = await supabase.rpc("create_study_entry_batch", {
+    p_operation_id: parsed.data.operationId,
+    p_board_id: parsed.data.boardId,
+    p_activity_type_id: parsed.data.activityTypeId,
+    p_start_date: parsed.data.startDate,
+    p_end_date: parsed.data.endDate,
+    p_duration_minutes: parsed.data.durationMinutes,
+  });
+
+  if (error) {
+    console.error("Supabase study entry batch creation failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return {
+      status: "error",
+      message:
+        error.code === "23514"
+          ? error.message
+          : "The date-range sessions could not be saved. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  return { status: "success", message: "Date-range sessions saved." };
 }
 
 export async function updateStudyEntry(

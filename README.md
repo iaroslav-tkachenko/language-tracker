@@ -4,14 +4,15 @@ A responsive web application for recording and reviewing foreign-language study 
 
 ## Project status
 
-**Phase 1 Study Time implementation is complete and awaiting pull-request
-verification and merge.**
+**Phases 0 and 1 are complete and merged. Phase 2 batch study-entry creation is
+in progress.**
 
 Phase 0 authentication, hosted Supabase schema, RLS, email confirmation, and
 password recovery are complete. Phase 1 provides production-backed language
 boards, the responsive Study Time heatmap, single-day study-session CRUD,
 activity management, streaks, period statistics, distributions, and
-desktop/mobile navigation. Phase 2 batch entry creation is next.
+desktop/mobile navigation. Phase 2 adds an atomic, idempotent, confirmed date
+range flow that preserves existing entries.
 
 ### Current local preview
 
