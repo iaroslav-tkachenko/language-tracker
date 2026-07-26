@@ -233,16 +233,40 @@ The Phase 1 visual direction uses a soft, approachable version of the semantic p
 
 Every language board provides a `Vocabulary` tab alongside `Study Time`.
 
-- A board/date has either no vocabulary record or one final positive-integer total of newly learned words.
+- A board/date has either no vocabulary record or one final non-negative-integer total of newly learned words.
 - The record stores only a count, not individual words.
 - The user can create the total for a past, current, or future date, edit it, or delete it after confirmation.
 - A second save for the same board/date updates the existing daily record rather than creating another row.
-- Zero is represented by no daily record.
+- Zero may be stored explicitly so the user can record, edit, and delete a
+  zero-word day.
 - The Vocabulary heatmap uses a green visual scale and independent year navigation while preserving the selected board.
 - Its fixed thresholds are `0`, `1–2`, `3–5`, `6–9`, `10–14`, `15–19`, `20–39`, and `40+` words.
 - Each cell exposes its date and word count without requiring color perception.
+- Empty and explicit-zero dates from the board's first positive vocabulary
+  total through browser-local today are shown as missed days in muted red.
+  An explicitly saved zero is always red, including before the first positive
+  total or on a future date. Earlier and future dates without a record remain
+  white.
 
-Vocabulary summary statistics include selected-year word total, non-future active days, current streak, and longest streak. A vocabulary active day has at least one word. Future totals appear in the selected-year heatmap and total immediately but do not affect active-day counts or streaks until their date arrives.
+Vocabulary summary statistics include selected-year word total, non-future
+active days, calendar-day and study-day averages, all-time word total, current
+week and month word totals, current streak, and longest streak. A vocabulary
+active day has at least one word. Future totals appear in the selected-year
+heatmap and total immediately but do not affect active-day counts, averages,
+current-period totals, or streaks until their date arrives.
+
+### 9.5 Vocabulary date-range creation
+
+The user can save the same final word total across an inclusive date range.
+
+- The range must remain inside one calendar year and contain at most 366 dates.
+- Existing daily vocabulary totals are preserved unchanged.
+- The new value is created only for dates without a vocabulary record.
+- The confirmation shows the inclusive range, requested word total, empty-date
+  count, and existing-date count before submission.
+- The database operation is atomic and idempotent for one client-generated
+  operation identifier.
+- Zero is a valid batch value and creates explicit red zero-word dates.
 
 ## 10. Statistics
 
@@ -259,6 +283,10 @@ All statistics are scoped to the selected board.
   metrics that remain independent of the selected year. Selected-year total,
   active days, and both averages belong to `Selected year`; current and longest
   streak plus current day, week, and month belong to `Current progress`.
+- The same screen shows Vocabulary metrics for the selected board. Selected-year
+  word total, active days, calendar-day average, and study-day average belong to
+  `Selected year`. All-time words, current and longest vocabulary streak, and
+  current-week/current-month word totals belong to `Current progress`.
 
 ### 10.2 Active days and averages
 
@@ -282,9 +310,10 @@ A streak is a sequence of consecutive active calendar days.
 
 ### 10.4 Distributions
 
-Statistics include a bar chart with a granularity selector:
+Statistics include separate blue Study Time and green Vocabulary bar charts.
+Each chart has its own granularity selector:
 
-- `Day`: daily minute totals for a selected month.
+- `Day`: daily minute or word totals for a selected month.
 - `Week`: Monday–Sunday weekly totals for a selected year.
 - `Month`: monthly totals for a selected year.
 - `Year`: yearly totals across the board's complete history.

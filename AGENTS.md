@@ -9,6 +9,12 @@ the clickable Phase 2 atomic batch entry flow on July 26, 2026, and all
 pull-request checks passed. Continue to use explicit visual review gates before
 advancing between product milestones.
 
+Phase 3 Vocabulary was implemented and visually approved on July 26, 2026. It
+includes production-backed daily totals (including explicit zero), atomic
+non-overwriting date-range creation, the responsive Vocabulary heatmap, and
+combined board/year Study Time and Vocabulary analytics. Pull-request checks
+remain the final Phase 3 gate.
+
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 
 ## Sources of truth

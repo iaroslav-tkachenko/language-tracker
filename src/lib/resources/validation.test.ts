@@ -6,6 +6,8 @@ import {
   studyEntryBatchSchema,
   studyEntrySchema,
   studyEntryUpdateSchema,
+  vocabularyDailyTotalSchema,
+  vocabularyTotalBatchSchema,
 } from "@/lib/resources/validation";
 
 describe("resourceNameSchema", () => {
@@ -88,6 +90,83 @@ describe("studyEntryBatchSchema", () => {
   ])("rejects invalid range %s through %s", (startDate, endDate) => {
     expect(
       studyEntryBatchSchema.safeParse({
+        ...validBatch,
+        startDate,
+        endDate,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("vocabularyDailyTotalSchema", () => {
+  const validTotal = {
+    boardId: "10000000-0000-4000-8000-000000000001",
+    studyDate: "2026-07-26",
+    wordsLearned: "18",
+  };
+
+  it("parses a non-negative whole-number total", () => {
+    expect(vocabularyDailyTotalSchema.parse(validTotal).wordsLearned).toBe(18);
+    expect(
+      vocabularyDailyTotalSchema.parse({
+        ...validTotal,
+        wordsLearned: "0",
+      }).wordsLearned,
+    ).toBe(0);
+  });
+
+  it.each(["", -1, 1.5, "not-a-number"])(
+    "rejects invalid vocabulary total %s",
+    (wordsLearned) => {
+      expect(
+        vocabularyDailyTotalSchema.safeParse({
+          ...validTotal,
+          wordsLearned,
+        }).success,
+      ).toBe(false);
+    },
+  );
+
+  it("accepts future local calendar dates", () => {
+    expect(
+      vocabularyDailyTotalSchema.safeParse({
+        ...validTotal,
+        studyDate: "2030-02-28",
+      }).success,
+    ).toBe(true);
+  });
+});
+
+describe("vocabularyTotalBatchSchema", () => {
+  const validBatch = {
+    operationId: "70000000-0000-4000-8000-000000000001",
+    boardId: "10000000-0000-4000-8000-000000000001",
+    startDate: "2026-07-01",
+    endDate: "2026-07-31",
+    wordsLearned: "0",
+  };
+
+  it("accepts zero words across an inclusive range", () => {
+    expect(vocabularyTotalBatchSchema.parse(validBatch).wordsLearned).toBe(0);
+  });
+
+  it("accepts a full leap year", () => {
+    expect(
+      vocabularyTotalBatchSchema.safeParse({
+        ...validBatch,
+        startDate: "2028-01-01",
+        endDate: "2028-12-31",
+      }).success,
+    ).toBe(true);
+  });
+
+  it.each([
+    ["2026-07-31", "2026-07-01"],
+    ["2026-12-31", "2027-01-01"],
+    ["2026-02-30", "2026-03-01"],
+  ])("rejects invalid range %s through %s", (startDate, endDate) => {
+    expect(
+      vocabularyTotalBatchSchema.safeParse({
         ...validBatch,
         startDate,
         endDate,
