@@ -12,7 +12,7 @@ test.describe("Phase 3 Vocabulary", () => {
   test("completes vocabulary, batch, navigation, and statistics journeys", async ({
     page,
   }, testInfo) => {
-    const suffix = `${testInfo.project.name}-${Date.now()}`;
+    const suffix = testInfo.project.name;
     const boardName = `Vocabulary ${suffix}`;
     const today = "2026-07-26";
     const firstDate = "2026-07-20";
@@ -32,9 +32,13 @@ test.describe("Phase 3 Vocabulary", () => {
       `${boardName} is ready.`,
     );
     await page.reload();
-    await page.getByRole("link", { name: boardName }).click();
-    const boardId = new URL(page.url()).searchParams.get("board");
+    const boardLink = page.getByRole("link", { name: boardName });
+    const boardHref = await boardLink.getAttribute("href");
+    const boardId = boardHref
+      ? new URL(boardHref, "http://127.0.0.1:3000").searchParams.get("board")
+      : null;
     expect(boardId).toBeTruthy();
+    await boardLink.click();
 
     const vocabularyUrl = (studyDate: string) =>
       `/dashboard?board=${boardId}&date=${studyDate}&today=${today}&tracker=vocabulary`;

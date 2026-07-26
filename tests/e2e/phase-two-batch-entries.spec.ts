@@ -12,7 +12,7 @@ test.describe("Phase 2 date-range sessions", () => {
   test("reviews and creates independent sessions without replacing matches", async ({
     page,
   }, testInfo) => {
-    const suffix = `${testInfo.project.name}-${Date.now()}`;
+    const suffix = testInfo.project.name;
     const boardName = `Batch ${suffix}`;
     const startDate = "2026-07-20";
     const endDate = "2026-07-22";
