@@ -49,7 +49,7 @@ test.describe("Phase 2 date-range sessions", () => {
           "Existing sessions, including matching ones, will be kept.",
         ),
       ).toBeVisible();
-      await page.getByRole("button", { name: "Confirm and add 3" }).click();
+      await page.getByRole("button", { name: "Confirm and add" }).click();
       await expect(
         page.getByRole("button", { name: "Add study session" }),
       ).toBeVisible();

@@ -855,9 +855,7 @@ export function BoardWorkspace({
                       disabled={batchPending}
                       className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:bg-blue-300"
                     >
-                      {batchPending
-                        ? "Adding sessions..."
-                        : `Confirm and add ${rangeCount}`}
+                      {batchPending ? "Adding sessions..." : "Confirm and add"}
                     </button>
                     <button
                       type="button"
