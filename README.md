@@ -4,8 +4,9 @@ A responsive web application for recording and reviewing foreign-language study 
 
 ## Project status
 
-**Phases 0 and 1 are complete and merged. Phase 2 batch study-entry creation is
-in progress.**
+**Phases 0 and 1 are complete and merged. The Phase 2 batch study-entry flow is
+implemented and visually approved; automated pull-request verification and
+merge remain.**
 
 Phase 0 authentication, hosted Supabase schema, RLS, email confirmation, and
 password recovery are complete. Phase 1 provides production-backed language
