@@ -3,6 +3,7 @@
 import {
   BookOpen,
   BarChart3,
+  CalendarRange,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -19,6 +20,7 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 
 import {
   createActivityType,
+  createStudyEntryBatch,
   createStudyEntry,
   deleteStudyEntry,
   type ResourceActionState,
@@ -34,6 +36,7 @@ import {
   studyHeatLevel,
   toDateKey,
 } from "@/lib/dates/study-calendar";
+import { getInclusiveDateCount } from "@/lib/resources/validation";
 
 type BoardSummary = { id: string; name: string };
 type ActivitySummary = {
@@ -83,6 +86,24 @@ function formatLongDate(dateKey: string) {
   }).format(fromDateKey(dateKey));
 }
 
+function createOperationId() {
+  if (typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+
+  const bytes = window.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10).join(""),
+  ].join("-");
+}
+
 export function BoardWorkspace({
   boards,
   selectedBoard,
@@ -96,17 +117,26 @@ export function BoardWorkspace({
 }: BoardWorkspaceProps) {
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
+  const [createMode, setCreateMode] = useState<"single" | "range">("single");
   const [duration, setDuration] = useState<number | null>(null);
   const [customDuration, setCustomDuration] = useState("");
   const [activityId, setActivityId] = useState("");
   const [otherOpen, setOtherOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [rangeStart, setRangeStart] = useState(selectedDate);
+  const [rangeEnd, setRangeEnd] = useState(selectedDate);
+  const [rangeReviewOpen, setRangeReviewOpen] = useState(false);
+  const [batchOperationId, setBatchOperationId] = useState<string | null>(null);
   const [entryState, entryAction, entryPending] = useActionState(
     createStudyEntry,
     initialActionState,
   );
   const [updateState, updateAction, updatePending] = useActionState(
     updateStudyEntry,
+    initialActionState,
+  );
+  const [batchState, batchAction, batchPending] = useActionState(
+    createStudyEntryBatch,
     initialActionState,
   );
   const [activityState, activityAction, activityPending] = useActionState(
@@ -139,6 +169,23 @@ export function BoardWorkspace({
     }, 0);
     return () => window.clearTimeout(resetId);
   }, [updateState, router]);
+
+  useEffect(() => {
+    if (batchState.status !== "success") return;
+    const resetId = window.setTimeout(() => {
+      setFormOpen(false);
+      setEditingEntryId(null);
+      setDuration(null);
+      setCustomDuration("");
+      setActivityId("");
+      setOtherOpen(false);
+      setCreateMode("single");
+      setRangeReviewOpen(false);
+      setBatchOperationId(null);
+      router.refresh();
+    }, 0);
+    return () => window.clearTimeout(resetId);
+  }, [batchState, router]);
 
   useEffect(() => {
     if (!activityState.resourceId) return;
@@ -217,6 +264,18 @@ export function BoardWorkspace({
     Number.isInteger(resolvedDuration) &&
     Number(resolvedDuration) >= 1 &&
     Number(resolvedDuration) <= 1440;
+  const rangeCount =
+    rangeStart && rangeEnd ? getInclusiveDateCount(rangeStart, rangeEnd) : 0;
+  const rangeError =
+    !rangeStart || !rangeEnd
+      ? "Choose both dates."
+      : rangeStart > rangeEnd
+        ? "End date must be on or after the start date."
+        : rangeStart.slice(0, 4) !== rangeEnd.slice(0, 4)
+          ? "The date range must stay within one calendar year."
+          : rangeCount > 366
+            ? "The date range can contain at most 366 days."
+            : null;
 
   function navigateToDate(dateKey: string) {
     router.replace(
@@ -232,6 +291,11 @@ export function BoardWorkspace({
     setCustomDuration("");
     setActivityId("");
     setOtherOpen(false);
+    setCreateMode("single");
+    setRangeStart(selectedDate);
+    setRangeEnd(selectedDate);
+    setRangeReviewOpen(false);
+    setBatchOperationId(null);
   }
 
   function beginEdit(entry: StudyEntrySummary) {
@@ -245,7 +309,26 @@ export function BoardWorkspace({
       setCustomDuration(String(entry.durationMinutes));
     }
     setOtherOpen(false);
+    setCreateMode("single");
+    setRangeReviewOpen(false);
+    setBatchOperationId(null);
     setFormOpen(true);
+  }
+
+  function selectCreateMode(mode: "single" | "range") {
+    setCreateMode(mode);
+    setRangeReviewOpen(false);
+    setBatchOperationId(null);
+    if (mode === "range") {
+      setRangeStart(selectedDate);
+      setRangeEnd(selectedDate);
+    }
+  }
+
+  function openRangeReview() {
+    if (!canSave || rangeError) return;
+    setBatchOperationId(createOperationId());
+    setRangeReviewOpen(true);
   }
 
   function navigateYear(offset: number) {
@@ -650,6 +733,11 @@ export function BoardWorkspace({
                 setDuration(null);
                 setCustomDuration("");
                 setActivityId("");
+                setCreateMode("single");
+                setRangeStart(selectedDate);
+                setRangeEnd(selectedDate);
+                setRangeReviewOpen(false);
+                setBatchOperationId(null);
                 setFormOpen(true);
               }}
               className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-400 font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
@@ -659,109 +747,92 @@ export function BoardWorkspace({
             </button>
           ) : (
             <div className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
-              <h3 className="font-semibold text-slate-950">
-                {editingEntryId ? "Edit study session" : "How long?"}
-              </h3>
-              <div className="mt-3 grid grid-cols-4 gap-2">
-                {quickDurations.map((minutes) => (
+              {!editingEntryId && (
+                <div
+                  role="group"
+                  aria-label="Study session date mode"
+                  className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
+                >
                   <button
-                    key={minutes}
                     type="button"
-                    onClick={() => {
-                      setDuration(minutes);
-                      setCustomDuration("");
-                    }}
-                    className={`min-h-11 rounded-xl border px-2 text-sm font-medium ${
-                      duration === minutes && !customDuration
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                    onClick={() => selectCreateMode("single")}
+                    aria-pressed={createMode === "single"}
+                    className={`min-h-10 rounded-lg px-3 text-sm font-semibold ${
+                      createMode === "single"
+                        ? "bg-white text-blue-700 shadow-sm"
+                        : "text-slate-600 hover:text-slate-950"
                     }`}
                   >
-                    {minutes} min
+                    Single day
                   </button>
-                ))}
-              </div>
-              <input
-                type="number"
-                min={1}
-                max={1440}
-                inputMode="numeric"
-                value={customDuration}
-                onChange={(event) => {
-                  setCustomDuration(event.target.value);
-                  setDuration(null);
-                }}
-                placeholder="Custom minutes"
-                aria-label="Custom minutes"
-                className="mt-3 min-h-11 w-full rounded-xl border border-dashed border-slate-400 px-4"
-              />
-
-              <h3 className="mt-5 font-semibold text-slate-950">Activity</h3>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {availableActivities.map((activity) => {
-                  return (
-                    <button
-                      key={activity.id}
-                      type="button"
-                      onClick={() => setActivityId(activity.id)}
-                      className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-medium ${
-                        activityId === activity.id
-                          ? "border-blue-600 bg-blue-50 text-blue-700"
-                          : "border-slate-300 text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      <ActivityIcon
-                        systemKey={activity.systemKey}
-                        aria-hidden="true"
-                        className="size-4"
-                      />
-                      {activity.name}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={() => setOtherOpen((current) => !current)}
-                  className="inline-flex min-h-10 items-center gap-1 rounded-full border border-dashed border-slate-400 px-3 text-sm font-medium text-slate-600 hover:border-blue-500 hover:text-blue-700"
-                >
-                  <Plus aria-hidden="true" className="size-4" />
-                  Other
-                </button>
-              </div>
-
-              {otherOpen && (
-                <form action={activityAction} className="mt-3 flex gap-2">
-                  <input
-                    name="name"
-                    required
-                    maxLength={50}
-                    autoComplete="off"
-                    placeholder="Custom activity name"
-                    className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 px-4"
-                  />
                   <button
-                    type="submit"
-                    disabled={activityPending}
-                    className="rounded-xl bg-slate-900 px-4 font-semibold text-white disabled:bg-slate-400"
+                    type="button"
+                    onClick={() => selectCreateMode("range")}
+                    aria-pressed={createMode === "range"}
+                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold ${
+                      createMode === "range"
+                        ? "bg-white text-blue-700 shadow-sm"
+                        : "text-slate-600 hover:text-slate-950"
+                    }`}
                   >
-                    {activityPending ? "Adding..." : "Add"}
+                    <CalendarRange aria-hidden="true" className="size-4" />
+                    Date range
                   </button>
-                </form>
-              )}
-              {activityState.status === "error" && (
-                <p role="alert" className="mt-2 text-sm text-red-700">
-                  {activityState.message}
-                </p>
+                </div>
               )}
 
-              <form
-                action={editingEntryId ? updateAction : entryAction}
-                className="mt-6 flex gap-2"
-              >
-                {editingEntryId ? (
-                  <input type="hidden" name="entryId" value={editingEntryId} />
-                ) : (
-                  <>
+              {rangeReviewOpen && !editingEntryId ? (
+                <div aria-labelledby="range-review-heading">
+                  <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5">
+                    <p className="text-sm font-semibold text-blue-700">
+                      REVIEW DATE RANGE
+                    </p>
+                    <h3
+                      id="range-review-heading"
+                      className="mt-1 text-xl font-bold text-slate-950"
+                    >
+                      Add {rangeCount} study{" "}
+                      {rangeCount === 1 ? "session" : "sessions"}?
+                    </h3>
+                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                      <div>
+                        <dt className="text-slate-500">Activity</dt>
+                        <dd className="mt-0.5 font-semibold text-slate-900">
+                          {activityById.get(activityId)?.name ??
+                            availableActivities.find(
+                              (activity) => activity.id === activityId,
+                            )?.name}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Daily duration</dt>
+                        <dd className="mt-0.5 font-semibold text-slate-900">
+                          {formatDuration(Number(resolvedDuration))}
+                        </dd>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <dt className="text-slate-500">Inclusive dates</dt>
+                        <dd className="mt-0.5 font-semibold text-slate-900">
+                          {formatLongDate(rangeStart)} –{" "}
+                          {formatLongDate(rangeEnd)}
+                        </dd>
+                      </div>
+                    </dl>
+                    <p className="mt-4 text-sm leading-6 text-slate-600">
+                      One independent session will be added to every date.
+                      Existing sessions, including matching ones, will be kept.
+                    </p>
+                  </div>
+
+                  <form
+                    action={batchAction}
+                    className="mt-5 flex flex-wrap gap-2"
+                  >
+                    <input
+                      type="hidden"
+                      name="operationId"
+                      value={batchOperationId ?? ""}
+                    />
                     <input
                       type="hidden"
                       name="boardId"
@@ -769,49 +840,287 @@ export function BoardWorkspace({
                     />
                     <input
                       type="hidden"
-                      name="studyDate"
-                      value={selectedDate}
+                      name="activityTypeId"
+                      value={activityId}
                     />
-                  </>
-                )}
-                <input type="hidden" name="activityTypeId" value={activityId} />
-                <input
-                  type="hidden"
-                  name="durationMinutes"
-                  value={resolvedDuration ?? ""}
-                />
-                <button
-                  type="submit"
-                  disabled={
-                    !canSave || (editingEntryId ? updatePending : entryPending)
-                  }
-                  className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
-                >
-                  {editingEntryId
-                    ? updatePending
-                      ? "Updating..."
-                      : "Update"
-                    : entryPending
-                      ? "Saving..."
-                      : "Save"}
-                </button>
-                <button
-                  type="button"
-                  onClick={resetEntryForm}
-                  className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-              </form>
-              {entryState.status === "error" && (
-                <p role="alert" className="mt-2 text-sm text-red-700">
-                  {entryState.message}
-                </p>
-              )}
-              {updateState.status === "error" && (
-                <p role="alert" className="mt-2 text-sm text-red-700">
-                  {updateState.message}
-                </p>
+                    <input
+                      type="hidden"
+                      name="durationMinutes"
+                      value={resolvedDuration ?? ""}
+                    />
+                    <input type="hidden" name="startDate" value={rangeStart} />
+                    <input type="hidden" name="endDate" value={rangeEnd} />
+                    <button
+                      type="submit"
+                      disabled={batchPending}
+                      className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:bg-blue-300"
+                    >
+                      {batchPending ? "Adding sessions..." : "Confirm and add"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={batchPending}
+                      onClick={() => {
+                        setRangeReviewOpen(false);
+                        setBatchOperationId(null);
+                      }}
+                      className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-white disabled:text-slate-400"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      disabled={batchPending}
+                      onClick={resetEntryForm}
+                      className="min-h-12 rounded-xl px-4 font-semibold text-slate-600 hover:bg-white disabled:text-slate-400"
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                  {batchState.status === "error" && (
+                    <p role="alert" className="mt-2 text-sm text-red-700">
+                      {batchState.message}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-semibold text-slate-950">
+                    {editingEntryId ? "Edit study session" : "How long?"}
+                  </h3>
+                  <div className="mt-3 grid grid-cols-4 gap-2">
+                    {quickDurations.map((minutes) => (
+                      <button
+                        key={minutes}
+                        type="button"
+                        onClick={() => {
+                          setDuration(minutes);
+                          setCustomDuration("");
+                        }}
+                        className={`min-h-11 rounded-xl border px-2 text-sm font-medium ${
+                          duration === minutes && !customDuration
+                            ? "border-blue-600 bg-blue-50 text-blue-700"
+                            : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {minutes} min
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1440}
+                    inputMode="numeric"
+                    value={customDuration}
+                    onChange={(event) => {
+                      setCustomDuration(event.target.value);
+                      setDuration(null);
+                    }}
+                    placeholder="Custom minutes"
+                    aria-label="Custom minutes"
+                    className="mt-3 min-h-11 w-full rounded-xl border border-dashed border-slate-400 px-4"
+                  />
+
+                  {createMode === "range" && !editingEntryId && (
+                    <fieldset className="mt-5">
+                      <legend className="font-semibold text-slate-950">
+                        Date range
+                      </legend>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Both dates are included. The range must stay within one
+                        calendar year.
+                      </p>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <label className="text-sm font-medium text-slate-700">
+                          Start date
+                          <input
+                            type="date"
+                            value={rangeStart}
+                            onChange={(event) => {
+                              setRangeStart(event.target.value);
+                              setRangeReviewOpen(false);
+                              setBatchOperationId(null);
+                            }}
+                            className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3"
+                          />
+                        </label>
+                        <label className="text-sm font-medium text-slate-700">
+                          End date
+                          <input
+                            type="date"
+                            value={rangeEnd}
+                            onChange={(event) => {
+                              setRangeEnd(event.target.value);
+                              setRangeReviewOpen(false);
+                              setBatchOperationId(null);
+                            }}
+                            className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3"
+                          />
+                        </label>
+                      </div>
+                      {rangeError ? (
+                        <p className="mt-2 text-sm text-red-700">
+                          {rangeError}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-sm font-medium text-slate-600">
+                          {rangeCount} {rangeCount === 1 ? "date" : "dates"}{" "}
+                          selected
+                        </p>
+                      )}
+                    </fieldset>
+                  )}
+
+                  <h3 className="mt-5 font-semibold text-slate-950">
+                    Activity
+                  </h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {availableActivities.map((activity) => {
+                      return (
+                        <button
+                          key={activity.id}
+                          type="button"
+                          onClick={() => setActivityId(activity.id)}
+                          className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-medium ${
+                            activityId === activity.id
+                              ? "border-blue-600 bg-blue-50 text-blue-700"
+                              : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <ActivityIcon
+                            systemKey={activity.systemKey}
+                            aria-hidden="true"
+                            className="size-4"
+                          />
+                          {activity.name}
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => setOtherOpen((current) => !current)}
+                      className="inline-flex min-h-10 items-center gap-1 rounded-full border border-dashed border-slate-400 px-3 text-sm font-medium text-slate-600 hover:border-blue-500 hover:text-blue-700"
+                    >
+                      <Plus aria-hidden="true" className="size-4" />
+                      Other
+                    </button>
+                  </div>
+
+                  {otherOpen && (
+                    <form action={activityAction} className="mt-3 flex gap-2">
+                      <input
+                        name="name"
+                        required
+                        maxLength={50}
+                        autoComplete="off"
+                        placeholder="Custom activity name"
+                        className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 px-4"
+                      />
+                      <button
+                        type="submit"
+                        disabled={activityPending}
+                        className="rounded-xl bg-slate-900 px-4 font-semibold text-white disabled:bg-slate-400"
+                      >
+                        {activityPending ? "Adding..." : "Add"}
+                      </button>
+                    </form>
+                  )}
+                  {activityState.status === "error" && (
+                    <p role="alert" className="mt-2 text-sm text-red-700">
+                      {activityState.message}
+                    </p>
+                  )}
+
+                  {createMode === "range" && !editingEntryId ? (
+                    <div className="mt-6 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={openRangeReview}
+                        disabled={!canSave || Boolean(rangeError)}
+                        className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
+                      >
+                        Review range
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetEntryForm}
+                        className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <form
+                      action={editingEntryId ? updateAction : entryAction}
+                      className="mt-6 flex gap-2"
+                    >
+                      {editingEntryId ? (
+                        <input
+                          type="hidden"
+                          name="entryId"
+                          value={editingEntryId}
+                        />
+                      ) : (
+                        <>
+                          <input
+                            type="hidden"
+                            name="boardId"
+                            value={selectedBoard.id}
+                          />
+                          <input
+                            type="hidden"
+                            name="studyDate"
+                            value={selectedDate}
+                          />
+                        </>
+                      )}
+                      <input
+                        type="hidden"
+                        name="activityTypeId"
+                        value={activityId}
+                      />
+                      <input
+                        type="hidden"
+                        name="durationMinutes"
+                        value={resolvedDuration ?? ""}
+                      />
+                      <button
+                        type="submit"
+                        disabled={
+                          !canSave ||
+                          (editingEntryId ? updatePending : entryPending)
+                        }
+                        className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
+                      >
+                        {editingEntryId
+                          ? updatePending
+                            ? "Updating..."
+                            : "Update"
+                          : entryPending
+                            ? "Saving..."
+                            : "Save"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetEntryForm}
+                        className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    </form>
+                  )}
+                  {entryState.status === "error" && (
+                    <p role="alert" className="mt-2 text-sm text-red-700">
+                      {entryState.message}
+                    </p>
+                  )}
+                  {updateState.status === "error" && (
+                    <p role="alert" className="mt-2 text-sm text-red-700">
+                      {updateState.message}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           )}

@@ -2,8 +2,9 @@
 
 ## 1. Approval gate
 
-**Current status: Phase 1 implementation complete; pull-request verification
-and merge pending.**
+**Current status: Phases 0 and 1 complete and merged; Phase 2 implemented and
+visually approved, with automated pull-request verification and merge
+remaining.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -12,11 +13,12 @@ and password recovery passed automated and manual verification and were merged
 on July 25, 2026. The responsive Study Time prototype remains preserved at
 `/demo` while Phase 1 replaces fixtures with production-backed data.
 
-The production-backed Phase 1 implementation now includes language-board and
+The production-backed Phase 1 implementation includes language-board and
 activity lifecycle management, single-day entry create/edit/delete, the
 responsive yearly heatmap, complete Study Time statistics, mobile LAN review,
 and protected desktop/mobile Playwright coverage backed by an isolated local
-Supabase stack in CI.
+Supabase stack in CI. Its pull request passed all application, database, and
+browser jobs and was merged on July 25, 2026.
 
 ## 2. Delivery principles
 
@@ -53,9 +55,9 @@ Phase 0 consolidates the original technical foundation. Completed items are veri
 
 ## 4. Phase 1 — Study Time core and revised daily UX
 
-**Status:** implemented and approved by the project owner on desktop and a
-physical mobile browser on July 25, 2026. Final completion is gated on green
-pull-request application, database, and browser jobs.
+**Status:** complete, approved by the project owner on desktop and a physical
+mobile browser, verified by green pull-request application, database, and
+browser jobs, and merged on July 25, 2026.
 
 ### Milestone 1A — Above-the-fold board experience
 
@@ -114,6 +116,10 @@ Before changing the application layout, prepare two static screenshot alternativ
 - The project owner approves the Phase 1 visual and interaction milestone.
 
 ## 5. Phase 2 — Batch study-entry creation
+
+**Status:** implemented and approved by the project owner through the clickable
+desktop flow on July 26, 2026. Final completion is gated on green application,
+database, and desktop/mobile browser jobs plus pull-request merge.
 
 ### Work
 
