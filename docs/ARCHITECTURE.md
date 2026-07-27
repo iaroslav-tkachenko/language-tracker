@@ -259,25 +259,39 @@ Required rules:
 
 ### 5.7 `cefr_level_events`
 
-| Column           | Type          | Constraints and purpose                                     |
-| ---------------- | ------------- | ----------------------------------------------------------- |
-| `id`             | `uuid`        | Primary key, generated UUID                                 |
-| `user_id`        | `uuid`        | Required owner; references `profiles(user_id)`              |
-| `board_id`       | `uuid`        | Required owned board                                        |
-| `level`          | `text`        | Required check-constrained value: A1, A2, B1, B2, C1, or C2 |
-| `effective_date` | `date`        | User-declared past or current local calendar date           |
-| `created_at`     | `timestamptz` | Audit timestamp                                             |
-| `updated_at`     | `timestamptz` | Audit timestamp                                             |
+| Column           | Type          | Constraints and purpose                                         |
+| ---------------- | ------------- | --------------------------------------------------------------- |
+| `id`             | `uuid`        | Primary key, generated UUID                                     |
+| `user_id`        | `uuid`        | Required owner; references `profiles(user_id)`                  |
+| `board_id`       | `uuid`        | Required owned board                                            |
+| `level`          | `text`        | Required check-constrained value: A0, A1, A2, B1, B2, C1, or C2 |
+| `effective_date` | `date`        | User-declared past or current local calendar date               |
+| `created_at`     | `timestamptz` | Audit timestamp                                                 |
+| `updated_at`     | `timestamptz` | Audit timestamp                                                 |
 
 Required rules:
 
 - `(board_id, user_id)` references `language_boards(id, user_id)`.
-- Unique `(user_id, board_id, effective_date)` allows one effective declaration per board/date; changing it on the same date updates that event.
+- Unique `(user_id, board_id, effective_date)` allows one effective declaration
+  per board/date. Creating or moving another event onto an occupied date is
+  rejected rather than upserting over the existing event.
 - A trusted mutation validates `effective_date <= local_today`; database ownership and value constraints remain authoritative.
 - Current level is the event with the greatest effective date, with deterministic timestamp/ID tie-breaking.
-- Forecast calculations read events and study entries but never mutate level history.
+- A trusted mutation locks the board's relevant history and rejects a create or
+  edit that would leave two chronologically adjacent events at the same level.
+  A non-adjacent return such as `B1 → B2 → B1` remains valid.
+- Deletion requires explicit UI confirmation. Deleting the current event makes
+  the preceding event current; deleting the final event restores the no-level
+  state.
+- Forecast calculations read events, study entries, and vocabulary daily totals
+  but never mutate level history.
 
-CEFR descriptions and Cambridge target ranges are immutable versioned application reference data rather than user-editable rows. If the reference model changes, its version and methodology must change explicitly so historical interpretation remains reviewable.
+Level descriptions, Study Time transition targets, and Vocabulary ranges are
+immutable versioned application reference data rather than user-editable rows.
+A0 is application-defined and is disclosed as non-official; sourced CEFR
+descriptions apply to A1–C2. If either reference model changes, its version and
+methodology must change explicitly so historical interpretation remains
+reviewable.
 
 ### 5.8 `vocabulary_total_batches`
 
@@ -333,7 +347,10 @@ An application-level recovery path should detect and repair an incomplete profil
 ### 7.1 Reads
 
 - A Server Component verifies the user and requests only data required by the route.
-- The board screen reads the board, selected tracker/year aggregates, summary statistics, selected-day data, current CEFR declaration, and forecast inputs.
+- The board screen reads the board, selected tracker/year aggregates, summary
+  statistics, selected-day data, current CEFR declaration, and the
+  tracker-appropriate forecast summary. The board-scoped CEFR management screen
+  reads the complete ordered declaration history and both forecast models.
 - DTOs prevent accidental exposure of internal or unrelated fields.
 - Authenticated reads are dynamic and not shared across users.
 
@@ -350,7 +367,7 @@ Each Server Action follows this sequence:
 
 Board/activity creation and restoration use database functions so name restoration and active-count limits remain atomic under concurrent requests.
 
-Batch creation uses a single authenticated database function. The function derives the owner from `auth.uid()`, validates the owned board/activity and the complete range, records the operation ID, and inserts all generated entries atomically. Vocabulary uses an owned upsert constrained by the board/date uniqueness rule. CEFR declaration uses an owned mutation that validates the browser-local effective date at both the server boundary and constrained database function boundary.
+Batch creation uses a single authenticated database function. The function derives the owner from `auth.uid()`, validates the owned board/activity and the complete range, records the operation ID, and inserts all generated entries atomically. Vocabulary uses an owned upsert constrained by the board/date uniqueness rule. CEFR create/edit/delete operations use owned constrained database functions that validate the browser-local effective date, reject an occupied effective date, serialize changes for one board, and preserve the no-adjacent-duplicate-level invariant.
 
 Vocabulary date-range creation similarly uses one authenticated transaction. It
 derives ownership from `auth.uid()`, preserves existing totals, inserts only
@@ -376,7 +393,10 @@ shows that later phases should move aggregation into PostgreSQL:
 - `get_board_vocabulary_year(board_id, year, local_today)` returns daily word
   totals, selected-year and current-period totals, averages, active days,
   distributions, and vocabulary streaks.
-- `get_board_cefr_forecast(board_id, local_today)` returns the current declaration, eligible minutes, seven-day pace, remaining reference minutes, and estimated date inputs.
+- `get_board_cefr_forecast(board_id, local_today)` returns the current
+  declaration; Study Time and Vocabulary baselines, eligible progress, and
+  remaining references; seven- and thirty-day pace inputs; estimated dates; and
+  both reference-model keys.
 
 Rules:
 
@@ -387,36 +407,104 @@ Rules:
 - Current-period averages and streaks exclude dates after `local_today`.
 - Weeks begin on Monday.
 - Vocabulary uses one source row per board/date and the same non-future active-day/streak cutoffs.
-- CEFR pace uses exactly seven calendar dates ending at `local_today`, including zero-study dates.
+- CEFR pace uses exactly seven or thirty calendar dates ending at `local_today`,
+  including zero-value dates. Future Study Time and Vocabulary entries never
+  participate in CEFR progress, estimated totals, or pace.
 
 ### 8.1 CEFR reference model and calculation
 
-The first forecast model is versioned immutable application reference data named `cambridge-midpoint-v1`. It uses these published cumulative ranges and canonical midpoint hours:
+The first approved Study Time model is versioned immutable application
+reference data. It stores transition ranges and exact calculation differences:
 
-| Level | Published range | Canonical midpoint |
-| ----- | --------------: | -----------------: |
-| A1    |          90–100 |                 95 |
-| A2    |         180–200 |                190 |
-| B1    |         350–400 |                375 |
-| B2    |         500–600 |                550 |
-| C1    |         700–800 |                750 |
-| C2    |     1,000–1,200 |              1,100 |
+| Transition | Indicative hours | Calculation hours |
+| ---------- | ---------------: | ----------------: |
+| A0 → A1    |           80–120 |               100 |
+| A1 → A2    |           90–140 |               110 |
+| A2 → B1    |          140–200 |               170 |
+| B1 → B2    |          160–240 |               200 |
+| B2 → C1    |          200–300 |               250 |
+| C1 → C2    |          280–450 |               350 |
 
 For the latest effective declaration below C2:
 
 ```text
-referenceMinutes = (nextMidpointHours - currentMidpointHours) * 60
+levelBaselineMinutes =
+  sum(calculation hours for transitions from A0 through currentLevel) * 60
+referenceMinutes = calculation hours for currentLevel → nextLevel * 60
 eligibleMinutes = sum(study entries from effectiveDate through localToday)
+estimatedTotalLearningMinutes = levelBaselineMinutes + eligibleMinutes
 remainingMinutes = max(0, referenceMinutes - eligibleMinutes)
 sevenDayMinutes = sum(study entries from localToday - 6 days through localToday)
-averageMinutesPerDay = sevenDayMinutes / 7
-daysRemaining = ceil(remainingMinutes / averageMinutesPerDay)
-estimatedDate = localToday + daysRemaining
+thirtyDayMinutes = sum(study entries from localToday - 29 days through localToday)
+sevenDayAverage = sevenDayMinutes / 7
+thirtyDayAverage = thirtyDayMinutes / 30
+sevenDayRemaining = ceil(remainingMinutes / sevenDayAverage)
+thirtyDayRemaining = ceil(remainingMinutes / thirtyDayAverage)
 ```
 
-`estimatedDate` is absent when there is no current declaration, the current level is C2, or `averageMinutesPerDay` is zero. When `remainingMinutes` is zero, the UI asks the learner to reassess rather than changing their level. The query returns the model key and calculation inputs so UI copy and tests can disclose and reproduce the result.
+The Vocabulary model is separately versioned immutable reference data:
 
-The model deliberately applies Cambridge English guidance across all boards for the first version. It must be labelled approximate and non-diagnostic. Reference: [Cambridge English guided learning hours](https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours).
+| Level | Indicative cumulative words | Calculation midpoint |
+| ----- | --------------------------: | -------------------: |
+| A0    |                           0 |                    0 |
+| A1    |                   700–1,200 |                  900 |
+| A2    |                 1,200–2,000 |                1,600 |
+| B1    |                 2,000–3,000 |                2,500 |
+| B2    |                 3,000–4,500 |                3,700 |
+| C1    |                 4,000–6,000 |                5,000 |
+| C2    |                5,000–8,000+ |                7,000 |
+
+```text
+levelBaselineWords = midpoint(currentLevel)
+referenceWords = midpoint(nextLevel) - midpoint(currentLevel)
+eligibleWords = sum(vocabulary totals from effectiveDate through localToday)
+estimatedVocabularySize = levelBaselineWords + eligibleWords
+remainingWords = max(0, referenceWords - eligibleWords)
+sevenDayWords = sum(vocabulary totals from localToday - 6 days through localToday)
+thirtyDayWords = sum(vocabulary totals from localToday - 29 days through localToday)
+sevenDayWordAverage = sevenDayWords / 7
+thirtyDayWordAverage = thirtyDayWords / 30
+```
+
+Each positive pace produces an independent estimated date by adding the ceiling
+of remaining units divided by average units per calendar day to `localToday`.
+Presentation derives an approximate calendar duration in years, months, and
+days plus an estimated month/year from that date. A forecast is absent for a
+zero pace, no current declaration, or C2. A zero remaining value prompts
+reassessment without changing the level. Progress presentation may cap at 100%
+while retaining the uncapped eligible total.
+
+The query returns raw calculation inputs and both model keys so UI copy and
+tests can reproduce every result. All user-facing Vocabulary values use
+`words`, including the reference model, estimated totals, and remaining
+progress.
+
+Study Time disclosure:
+
+> This estimate is based on averaged data from Cambridge English, the
+> Goethe-Institut, and European language institutes. It is an approximate guide,
+> not a guaranteed timeframe for reaching a level.
+
+Vocabulary disclosure:
+
+> The indicative ranges are based on research into vocabulary size across CEFR
+> levels (Milton; Finlayson, Marsden & Hawkes) and are not official CEFR
+> standards.
+
+### 8.2 Weekly recommendation model
+
+The approved weekly recommendation model is immutable versioned application
+reference data in `lib/cefr`. Each A0–C1 record contains its next-level target,
+a 600-minute reference week, category allocations totaling 100%, and
+product-authored advice items. C2 has no record because the model has no next
+level.
+
+The UI derives weekly hours from `percentage * 600 / 100` and never stores them
+as user data. The circular chart uses the same category colors in every level,
+while its accessible name and adjacent legend expose category, percentage, and
+hours without relying on color. The recommendation appears in both the CEFR
+screen and detailed Statistics. It remains suggested reference guidance and is
+not compared with actual user activity in Phase 4.
 
 No aggregate table or materialized view is planned. Index-backed aggregation over a single user's board is appropriate for the stated scale.
 
@@ -478,7 +566,10 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Future-entry exclusions.
 - Current and longest streak behavior.
 - Batch range validation, leap-year 366-day ranges, and cross-year rejection.
-- CEFR midpoint differences, remaining-minute floor, seven-day zero-inclusive pace, rounding, C2, and unavailable forecasts.
+- CEFR Study Time transition differences and derived baselines; Vocabulary
+  midpoint differences; estimated totals; seven- and thirty-day zero-inclusive
+  pace; calendar-duration presentation; rounding; A0; C2; and unavailable
+  forecasts.
 
 ### Database tests
 
@@ -490,7 +581,8 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Aggregation correctness with archived activities and future entries.
 - Batch atomicity/idempotency and preservation of matching existing entries.
 - Vocabulary board/date uniqueness, upsert behavior, ownership, and RLS.
-- CEFR event ownership, valid levels, effective-date mutation validation, history, and RLS.
+- CEFR event ownership, A0–C2 values, effective-date mutation validation,
+  occupied-date rejection, adjacent-level invariant, deletion, history, and RLS.
 
 ### Playwright tests
 
@@ -504,7 +596,9 @@ Reference: [Vercel environments](https://vercel.com/docs/deployments/environment
 - Batch creation preview, success, matching-entry preservation, and retry behavior.
 - Vocabulary tab create/edit/delete, explicit zero, non-overwriting batch,
   heatmap, streak, distribution, and combined-statistics behavior.
-- CEFR declaration history, approximate forecast disclosures, and zero-pace/C2 states.
+- CEFR declaration history, level regression and non-adjacent return, Study Time
+  and Vocabulary forecast disclosures, seven/thirty-day comparison, estimated
+  totals, and A0/zero-pace/C2 states.
 - User A cannot access User B's data.
 - Desktop hover/focus actions, two persistently visible mobile entry-action icons, and the 1366×768 above-the-fold contract.
 
@@ -527,5 +621,3 @@ The following are intentionally outside the current expanded MVP or blocked unti
 - theme system;
 - all-language analytics;
 - persisted aggregates or background processing.
-- vocabulary-to-CEFR word-count values;
-- ideal activity-distribution percentages by CEFR level.
