@@ -4,6 +4,9 @@ import { BoardWorkspace } from "@/components/boards/board-workspace";
 import { DashboardDateBootstrap } from "@/components/boards/dashboard-date-bootstrap";
 import { FirstBoardOnboarding } from "@/components/boards/first-board-onboarding";
 import { VocabularyWorkspace } from "@/components/vocabulary/vocabulary-workspace";
+import { isCefrLevel } from "@/lib/cefr/reference";
+import { calculateStudyTimeForecast } from "@/lib/cefr/study-time";
+import { calculateVocabularyForecast } from "@/lib/cefr/vocabulary";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -78,7 +81,7 @@ export default async function DashboardPage({
 
   const currentCefrLevelResult = await supabase
     .from("cefr_level_events")
-    .select("id")
+    .select("id, level, effective_date")
     .eq("board_id", selectedBoard.id)
     .lte("effective_date", localToday)
     .order("effective_date", { ascending: false })
@@ -96,6 +99,14 @@ export default async function DashboardPage({
   }
 
   const hasCurrentCefrLevel = currentCefrLevelResult.data !== null;
+  const currentCefrLevel =
+    currentCefrLevelResult.data &&
+    isCefrLevel(currentCefrLevelResult.data.level)
+      ? {
+          level: currentCefrLevelResult.data.level,
+          effectiveDate: currentCefrLevelResult.data.effective_date,
+        }
+      : null;
 
   if (tracker === "vocabulary") {
     const { data: vocabularyTotals, error: vocabularyError } = await supabase
@@ -125,6 +136,14 @@ export default async function DashboardPage({
         year={year}
         todayKey={localToday}
         hasCurrentCefrLevel={hasCurrentCefrLevel}
+        vocabularyForecast={calculateVocabularyForecast({
+          currentLevel: currentCefrLevel,
+          todayKey: localToday,
+          entries: vocabularyTotals.map((total) => ({
+            studyDate: total.study_date,
+            wordsLearned: total.words_learned,
+          })),
+        })}
       />
     );
   }
@@ -132,6 +151,7 @@ export default async function DashboardPage({
   const [
     activitiesResult,
     entriesResult,
+    forecastEntriesResult,
     earliestEntryResult,
     activeDateResult,
   ] = await Promise.all([
@@ -146,6 +166,13 @@ export default async function DashboardPage({
       .eq("board_id", selectedBoard.id)
       .gte("study_date", `${year}-01-01`)
       .lte("study_date", `${year}-12-31`)
+      .order("study_date")
+      .order("created_at"),
+    supabase
+      .from("study_entries")
+      .select("study_date, duration_minutes")
+      .eq("board_id", selectedBoard.id)
+      .lte("study_date", localToday)
       .order("study_date")
       .order("created_at"),
     supabase
@@ -166,12 +193,14 @@ export default async function DashboardPage({
   if (
     activitiesResult.error ||
     entriesResult.error ||
+    forecastEntriesResult.error ||
     earliestEntryResult.error ||
     activeDateResult.error
   ) {
     console.error("Supabase board workspace read failed", {
       activities: activitiesResult.error?.message,
       entries: entriesResult.error?.message,
+      forecastEntries: forecastEntriesResult.error?.message,
       earliestEntry: earliestEntryResult.error?.message,
       activeDates: activeDateResult.error?.message,
     });
@@ -202,6 +231,14 @@ export default async function DashboardPage({
       year={year}
       todayKey={localToday}
       hasCurrentCefrLevel={hasCurrentCefrLevel}
+      studyTimeForecast={calculateStudyTimeForecast({
+        currentLevel: currentCefrLevel,
+        todayKey: localToday,
+        entries: forecastEntriesResult.data.map((entry) => ({
+          studyDate: entry.study_date,
+          durationMinutes: entry.duration_minutes,
+        })),
+      })}
     />
   );
 }

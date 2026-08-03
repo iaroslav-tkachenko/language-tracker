@@ -43,6 +43,16 @@ import {
   toDateKey,
 } from "@/lib/dates/study-calendar";
 import { getInclusiveDateCount } from "@/lib/resources/validation";
+import {
+  formatCalendarDuration,
+  formatEstimatedMonth,
+  formatForecastHours,
+  formatPaceMinutes,
+  STUDY_TIME_DISCLOSURE_INTRO,
+  STUDY_TIME_DISCLOSURE_ITEMS,
+  STUDY_TIME_DISCLOSURE_NOTE,
+  type StudyTimeForecast,
+} from "@/lib/cefr/study-time";
 import { calculateStudyStatistics } from "@/lib/statistics/study-statistics";
 
 type BoardSummary = { id: string; name: string };
@@ -69,6 +79,7 @@ type BoardWorkspaceProps = {
   year: number;
   todayKey: string;
   hasCurrentCefrLevel: boolean;
+  studyTimeForecast: StudyTimeForecast;
 };
 
 const quickDurations = [10, 15, 20, 30, 45, 60, 90, 120];
@@ -113,6 +124,169 @@ function createOperationId() {
   ].join("-");
 }
 
+function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
+  if (forecast.status === "no-level") return null;
+
+  if (forecast.status === "highest-level") {
+    return (
+      <section className="mt-6 rounded-3xl border border-blue-200 bg-blue-50/70 p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-4">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600">
+            <Clock3 aria-hidden="true" className="size-6" />
+          </span>
+          <div>
+            <h2 className="text-2xl font-black text-slate-950">
+              Study Time progress
+            </h2>
+            <p className="mt-2 max-w-3xl leading-7 text-slate-700">
+              {forecast.currentLevel} is the highest level in this model, so
+              there is no next-level forecast. Your estimated total learning
+              time is still visible.
+            </p>
+            <p className="mt-4 text-sm font-bold tracking-wide text-slate-500 uppercase">
+              Estimated total learning time
+            </p>
+            <p className="mt-1 text-3xl font-black text-slate-950">
+              &gt; {formatForecastHours(forecast.estimatedTotalLearningMinutes)}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const completedPercent = Math.round(forecast.progressRatio * 100);
+
+  return (
+    <section className="mt-6 rounded-3xl border border-blue-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-start gap-4">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+          <Clock3 aria-hidden="true" className="size-6" />
+        </span>
+        <div>
+          <h2 className="text-2xl font-black text-slate-950">
+            Study Time progress
+          </h2>
+          <p className="mt-1 text-slate-600">
+            Approximate progress from {forecast.currentLevel} to{" "}
+            {forecast.nextLevel}, based on study time since this level.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_1.2fr_1fr]">
+        <div>
+          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+            Current
+          </p>
+          <p className="mt-2 flex items-center gap-3">
+            <span className="flex size-13 items-center justify-center rounded-full bg-slate-950 text-lg font-black text-white">
+              {forecast.currentLevel}
+            </span>
+            <span className="text-xl text-slate-600">
+              ≈ {formatForecastHours(forecast.baselineMinutes)}
+            </span>
+          </p>
+        </div>
+
+        <div className="text-left lg:text-center">
+          <p className="text-sm font-black tracking-wide text-blue-700 uppercase">
+            Progress
+          </p>
+          <p className="mt-2 text-3xl font-black text-slate-950">
+            +{formatForecastHours(forecast.eligibleMinutes)}
+          </p>
+          <p className="mt-1 text-xl text-slate-600">
+            ≈ {formatForecastHours(forecast.estimatedTotalLearningMinutes)} now
+          </p>
+        </div>
+
+        <div className="lg:text-right">
+          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+            Next
+          </p>
+          <p className="mt-2 flex items-center gap-3 lg:justify-end">
+            <span className="text-xl text-slate-600">
+              ≈ {formatForecastHours(forecast.nextLevelBaselineMinutes)} total
+            </span>
+            <span className="flex size-13 items-center justify-center rounded-full bg-slate-100 text-lg font-black text-slate-500">
+              {forecast.nextLevel}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-blue-600"
+            style={{ width: `${completedPercent}%` }}
+          />
+        </div>
+        <p className="mt-3 text-center text-lg font-black text-blue-700">
+          {completedPercent}% completed
+          <span className="px-2 text-slate-300">•</span>
+          <span className="text-slate-700">
+            ≈ {formatForecastHours(forecast.remainingMinutes)} left
+          </span>
+        </p>
+      </div>
+
+      <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/70 p-4">
+        <h3 className="text-xl font-black text-blue-700">
+          Forecast to reach {forecast.nextLevel}
+        </h3>
+        <p className="mt-1 text-slate-600">
+          Based on the latest 7 calendar days, including days with no entries.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl bg-white/80 p-4">
+            <p className="text-sm text-slate-500">Average pace</p>
+            <p className="mt-1 text-xl font-black text-slate-950">
+              {formatPaceMinutes(forecast.sevenDayAverageMinutes)}
+            </p>
+          </div>
+          <div className="rounded-2xl bg-white/80 p-4">
+            <p className="text-sm text-slate-500">
+              Reach {forecast.nextLevel} in
+            </p>
+            <p className="mt-1 text-xl font-black text-slate-950">
+              {forecast.sevenDayEstimate
+                ? `≈ ${formatCalendarDuration(forecast.sevenDayEstimate.duration)}`
+                : "Not available"}
+            </p>
+          </div>
+          <div className="rounded-2xl bg-white/80 p-4">
+            <p className="text-sm text-slate-500">Estimated date</p>
+            <p className="mt-1 text-xl font-black text-slate-950">
+              {forecast.sevenDayEstimate
+                ? formatEstimatedMonth(forecast.sevenDayEstimate.estimatedDate)
+                : "Not available"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <summary className="cursor-pointer font-bold text-slate-700">
+          How this estimate works
+        </summary>
+        <p className="mt-3 leading-7 text-slate-600">
+          {STUDY_TIME_DISCLOSURE_INTRO}
+        </p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+          {STUDY_TIME_DISCLOSURE_ITEMS.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <p className="mt-3 leading-7 text-slate-600">
+          {STUDY_TIME_DISCLOSURE_NOTE}
+        </p>
+      </details>
+    </section>
+  );
+}
+
 export function BoardWorkspace({
   boards,
   selectedBoard,
@@ -124,6 +298,7 @@ export function BoardWorkspace({
   year,
   todayKey,
   hasCurrentCefrLevel,
+  studyTimeForecast,
 }: BoardWorkspaceProps) {
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
@@ -640,7 +815,7 @@ export function BoardWorkspace({
           </div>
         </section>
 
-        <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
             <strong className="block text-2xl text-blue-600">
               {formatDuration(annualTotal)}
@@ -653,40 +828,38 @@ export function BoardWorkspace({
             </strong>
             <span className="text-sm text-slate-500">Days studied</span>
           </div>
-          <div className="col-span-2 rounded-2xl border border-slate-200 p-4 text-center sm:col-span-1">
+          <div className="rounded-2xl border border-slate-200 p-4 text-center">
             <strong className="inline-flex items-center gap-1 text-2xl text-blue-600">
               <Flame aria-hidden="true" className="size-5 text-orange-500" />
               {currentStreak}
             </strong>
             <span className="block text-sm text-slate-500">Current streak</span>
           </div>
-          <div className="col-span-2 grid grid-cols-2 gap-3 sm:col-span-3">
-            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 p-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <Gauge aria-hidden="true" className="size-5" />
+          <div className="flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-slate-200 p-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Gauge aria-hidden="true" className="size-5" />
+            </span>
+            <span className="min-w-0">
+              <strong className="block text-xl text-slate-950 sm:text-2xl">
+                {formatDuration(statistics.calendarDayAverage, true)}
+              </strong>
+              <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
+                Average / calendar day
               </span>
-              <span className="min-w-0">
-                <strong className="block text-xl text-slate-950 sm:text-2xl">
-                  {formatDuration(statistics.calendarDayAverage, true)}
-                </strong>
-                <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
-                  Average / calendar day
-                </span>
+            </span>
+          </div>
+          <div className="flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-slate-200 p-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Gauge aria-hidden="true" className="size-5" />
+            </span>
+            <span className="min-w-0">
+              <strong className="block text-xl text-slate-950 sm:text-2xl">
+                {formatDuration(statistics.activeDayAverage, true)}
+              </strong>
+              <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
+                Average / active day
               </span>
-            </div>
-            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 p-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <Gauge aria-hidden="true" className="size-5" />
-              </span>
-              <span className="min-w-0">
-                <strong className="block text-xl text-slate-950 sm:text-2xl">
-                  {formatDuration(statistics.activeDayAverage, true)}
-                </strong>
-                <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
-                  Average / active day
-                </span>
-              </span>
-            </div>
+            </span>
           </div>
         </section>
 
@@ -1187,6 +1360,8 @@ export function BoardWorkspace({
             </div>
           )}
         </section>
+
+        <StudyTimeForecastCard forecast={studyTimeForecast} />
       </div>
     </main>
   );
