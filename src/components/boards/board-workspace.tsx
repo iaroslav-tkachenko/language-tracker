@@ -286,7 +286,7 @@ function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
       </div>
 
       <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/70 p-4">
-        <h3 className="text-2xl font-black text-blue-700">
+        <h3 className="text-xl font-black text-blue-700 sm:text-2xl">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h3>
         <p className="mt-1 text-slate-600">

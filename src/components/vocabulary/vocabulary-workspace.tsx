@@ -292,7 +292,7 @@ function VocabularyForecastCard({
       </div>
 
       <div className="mt-6 rounded-3xl border border-emerald-100 bg-emerald-50/70 p-4">
-        <h3 className="text-2xl font-black text-emerald-700">
+        <h3 className="text-xl font-black text-emerald-700 sm:text-2xl">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h3>
         <p className="mt-1 text-slate-600">

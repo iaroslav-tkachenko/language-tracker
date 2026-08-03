@@ -59,15 +59,15 @@ function CompactForecastCard({
 
     return (
       <section
-        className={`rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5`}
+        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5`}
       >
-        <div className="flex items-start gap-4">
+        <div className="flex min-w-0 items-start gap-4">
           <span
             className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${accentClasses.icon}`}
           >
             {icon}
           </span>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-xl font-black text-slate-950">{title}</h3>
             <p className="mt-1 leading-7 text-slate-600">
               {forecast.currentLevel} is the highest level in this model, so
@@ -106,15 +106,15 @@ function CompactForecastCard({
 
   return (
     <section
-      className={`rounded-3xl border ${accentClasses.border} bg-white p-4 shadow-sm`}
+      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-4 shadow-sm`}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex min-w-0 items-start gap-4">
         <span
           className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${accentClasses.icon}`}
         >
           {icon}
         </span>
-        <div>
+        <div className="min-w-0">
           <h3 className="text-lg font-black text-slate-950">{title}</h3>
           <p className="mt-1 text-sm text-slate-600">
             Approximate progress from {forecast.currentLevel} to{" "}
@@ -169,10 +169,10 @@ function CompactForecastCard({
           />
         </div>
         <p
-          className={`mt-3 text-center text-base font-black ${accentClasses.text}`}
+          className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-black ${accentClasses.text}`}
         >
-          {completedPercent}% completed
-          <span className="px-2 text-slate-300">•</span>
+          <span>{completedPercent}% completed</span>
+          <span className="text-slate-300">•</span>
           <span className="text-slate-700">≈ {remaining} left</span>
         </p>
       </div>
@@ -180,13 +180,13 @@ function CompactForecastCard({
       <div
         className={`mt-5 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-3`}
       >
-        <h4 className={`text-lg font-black ${accentClasses.text}`}>
+        <h4 className={`break-words text-lg font-black ${accentClasses.text}`}>
           Forecast to reach {forecast.nextLevel} with your current pace
         </h4>
         <p className="mt-1 text-sm text-slate-600">
           Based on every calendar day in the last 7 and 30 days.
         </p>
-        <div className="mt-3 max-w-2xl overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+        <div className="mt-3 w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
           <div
             className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-base font-black ${accentClasses.text}`}
           >
@@ -266,7 +266,7 @@ export function CefrProgressForecastCards({
           Approximate Study Time and Vocabulary forecasts for this language.
         </p>
       </div>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-2">
         <CompactForecastCard
           accent="blue"
           forecast={studyTimeForecast}
