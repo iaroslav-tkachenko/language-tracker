@@ -25,6 +25,8 @@ import {
 } from "@/app/dashboard/actions";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import { MissingLevelBubble } from "@/components/cefr/cefr-level-prompt";
+import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
+import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
 import {
   CEFR_LEVEL_DETAILS,
   CEFR_LEVELS,
@@ -269,6 +271,9 @@ export function CefrHistoryWorkspace({
     ? currentDetails?.description
     : "Add your first level update to start building a transparent history. The app will use this date as the baseline for approximate progress guidance in the next Phase 4 milestones.";
   const boardOptions = useMemo(() => boards, [boards]);
+  const weeklyRecommendation = currentEvent
+    ? getWeeklyRecommendation(currentEvent.level)
+    : null;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -448,6 +453,12 @@ export function CefrHistoryWorkspace({
             )}
           </div>
         </section>
+
+        {weeklyRecommendation && (
+          <div className="mt-6">
+            <WeeklyPlanCard recommendation={weeklyRecommendation} />
+          </div>
+        )}
 
         <section
           aria-labelledby="level-history-heading"
