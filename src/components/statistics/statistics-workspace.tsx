@@ -24,6 +24,14 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
+import type { CefrLevel } from "@/lib/cefr/reference";
+import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
+import { getStudyTimeBaselineMinutes } from "@/lib/cefr/study-time";
+import {
+  formatVocabularyWords,
+  getVocabularyBaselineWords,
+} from "@/lib/cefr/vocabulary";
 import {
   calculateStudyStatistics,
   getActivityTotals,
@@ -59,7 +67,7 @@ type StatisticsWorkspaceProps = {
   activities: ActivitySummary[];
   entries: StudyStatisticsEntry[];
   vocabularyTotals: VocabularyDailyTotal[];
-  hasCurrentCefrLevel: boolean;
+  currentCefrLevel: { level: CefrLevel; effectiveDate: string } | null;
   selectedYear: number;
   todayKey: string;
 };
@@ -77,6 +85,44 @@ function formatDuration(minutes: number, precise = false) {
   const hours = Math.floor(roundedMinutes / 60);
   const remainder = roundedMinutes % 60;
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
+}
+
+function MetricValue({ value }: { value: string | number }) {
+  const tokens = String(value).split(" ");
+
+  return (
+    <strong className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xl leading-tight text-slate-950 sm:text-2xl">
+      {tokens.map((token, index) => {
+        const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
+        if (compactMatch) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="inline-flex items-baseline"
+            >
+              <span>{compactMatch[1]}</span>
+              <span className="ml-0.5 text-[0.65em] font-bold text-slate-500">
+                {compactMatch[2]}
+              </span>
+            </span>
+          );
+        }
+
+        if (/^[a-zA-Z]+$/.test(token)) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="text-[0.65em] font-bold text-slate-500"
+            >
+              {token}
+            </span>
+          );
+        }
+
+        return <span key={`${token}-${index}`}>{token}</span>;
+      })}
+    </strong>
+  );
 }
 
 function MetricCard({
@@ -103,14 +149,58 @@ function MetricCard({
           {icon}
         </span>
         <div>
-          <strong className="block text-xl text-slate-950 sm:text-2xl">
-            {value}
-          </strong>
+          <MetricValue value={value} />
           <span className="text-sm text-slate-500">{label}</span>
         </div>
       </div>
     </article>
   );
+}
+
+function formatApproxDuration(minutes: number) {
+  return `≈ ${formatDuration(Math.round(minutes))}`;
+}
+
+function sumTrackedMinutes(entries: StudyStatisticsEntry[]) {
+  return entries.reduce((total, entry) => total + entry.durationMinutes, 0);
+}
+
+function sumEligibleMinutesSinceLevel({
+  entries,
+  effectiveDate,
+  todayKey,
+}: {
+  entries: StudyStatisticsEntry[];
+  effectiveDate: string;
+  todayKey: string;
+}) {
+  return entries.reduce((total, entry) => {
+    if (entry.studyDate < effectiveDate || entry.studyDate > todayKey) {
+      return total;
+    }
+    return total + entry.durationMinutes;
+  }, 0);
+}
+
+function sumTrackedWords(totals: VocabularyDailyTotal[]) {
+  return totals.reduce((total, entry) => total + entry.wordsLearned, 0);
+}
+
+function sumEligibleWordsSinceLevel({
+  effectiveDate,
+  todayKey,
+  totals,
+}: {
+  effectiveDate: string;
+  todayKey: string;
+  totals: VocabularyDailyTotal[];
+}) {
+  return totals.reduce((total, entry) => {
+    if (entry.studyDate < effectiveDate || entry.studyDate > todayKey) {
+      return total;
+    }
+    return total + entry.wordsLearned;
+  }, 0);
 }
 
 const activityChartColors = [
@@ -325,7 +415,7 @@ export function StatisticsWorkspace({
   activities,
   entries,
   vocabularyTotals,
-  hasCurrentCefrLevel,
+  currentCefrLevel,
   selectedYear,
   todayKey,
 }: StatisticsWorkspaceProps) {
@@ -389,6 +479,37 @@ export function StatisticsWorkspace({
     vocabularySelectedMonth,
     vocabularyTotals,
   ]);
+  const hasCurrentCefrLevel = currentCefrLevel !== null;
+  const trackedStudyMinutes = useMemo(
+    () => sumTrackedMinutes(entries),
+    [entries],
+  );
+  const trackedVocabularyWords = useMemo(
+    () => sumTrackedWords(vocabularyTotals),
+    [vocabularyTotals],
+  );
+  const cefrOverview = useMemo(() => {
+    if (!currentCefrLevel) return null;
+    const eligibleMinutes = sumEligibleMinutesSinceLevel({
+      entries,
+      effectiveDate: currentCefrLevel.effectiveDate,
+      todayKey,
+    });
+    const eligibleWords = sumEligibleWordsSinceLevel({
+      effectiveDate: currentCefrLevel.effectiveDate,
+      todayKey,
+      totals: vocabularyTotals,
+    });
+
+    return {
+      level: currentCefrLevel.level,
+      estimatedLearningMinutes:
+        getStudyTimeBaselineMinutes(currentCefrLevel.level) + eligibleMinutes,
+      estimatedWordsKnown:
+        getVocabularyBaselineWords(currentCefrLevel.level) + eligibleWords,
+      weeklyRecommendation: getWeeklyRecommendation(currentCefrLevel.level),
+    };
+  }, [currentCefrLevel, entries, todayKey, vocabularyTotals]);
 
   function navigateYear(offset: number) {
     router.replace(
@@ -535,8 +656,14 @@ export function StatisticsWorkspace({
               {selectedBoard.name}
             </p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-              Learning statistics
+              Your learning overview
             </h1>
+            {cefrOverview && (
+              <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1.5 text-sm font-bold text-violet-700">
+                <GraduationCap aria-hidden="true" className="size-4" />
+                Current level · {cefrOverview.level}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -560,6 +687,67 @@ export function StatisticsWorkspace({
             </button>
           </div>
         </div>
+
+        {cefrOverview && (
+          <section className="mt-6 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-xl font-black text-slate-950">
+                  Recorded and estimated totals
+                </h2>
+                <p className="mt-1 max-w-3xl leading-7 text-slate-600">
+                  Estimated values combine your current level baseline with
+                  entries recorded since that level date. Tracker totals remain
+                  the exact values you saved.
+                </p>
+              </div>
+              <Link
+                href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-violet-50 px-4 text-sm font-bold text-violet-700 hover:bg-violet-100"
+              >
+                <GraduationCap aria-hidden="true" className="size-4" />
+                Level {cefrOverview.level}
+              </Link>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard
+                icon={<Clock3 aria-hidden="true" className="size-5" />}
+                value={formatDuration(trackedStudyMinutes)}
+                label="Tracked study time"
+              />
+              <MetricCard
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={formatApproxDuration(
+                  cefrOverview.estimatedLearningMinutes,
+                )}
+                label="Estimated learning time"
+              />
+              <MetricCard
+                accent="green"
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                value={formatVocabularyWords(trackedVocabularyWords)}
+                label="Tracked words"
+              />
+              <MetricCard
+                accent="green"
+                icon={<GraduationCap aria-hidden="true" className="size-5" />}
+                value={`≈ ${formatVocabularyWords(
+                  cefrOverview.estimatedWordsKnown,
+                )}`}
+                label="Estimated words known"
+              />
+            </div>
+          </section>
+        )}
+
+        {cefrOverview?.weeklyRecommendation && (
+          <div className="mt-6">
+            <WeeklyPlanCard
+              recommendation={cefrOverview.weeklyRecommendation}
+            />
+          </div>
+        )}
 
         <section aria-labelledby="year-summary-heading" className="mt-6">
           <div>

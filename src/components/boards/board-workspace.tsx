@@ -98,6 +98,54 @@ function formatDuration(minutes: number, precise = false) {
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
+function SummaryValue({
+  value,
+  accentClass = "text-blue-600",
+  sizeClass = "text-2xl",
+}: {
+  value: string | number;
+  accentClass?: string;
+  sizeClass?: string;
+}) {
+  const tokens = String(value).split(" ");
+
+  return (
+    <strong
+      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 leading-tight ${sizeClass} ${accentClass}`}
+    >
+      {tokens.map((token, index) => {
+        const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
+        if (compactMatch) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="inline-flex items-baseline"
+            >
+              <span>{compactMatch[1]}</span>
+              <span className="ml-0.5 text-[0.65em] font-bold text-slate-500">
+                {compactMatch[2]}
+              </span>
+            </span>
+          );
+        }
+
+        if (/^[a-zA-Z]+$/.test(token)) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="text-[0.65em] font-bold text-slate-500"
+            >
+              {token}
+            </span>
+          );
+        }
+
+        return <span key={`${token}-${index}`}>{token}</span>;
+      })}
+    </strong>
+  );
+}
+
 function formatLongDate(dateKey: string) {
   return new Intl.DateTimeFormat("en", {
     weekday: "long",
@@ -851,19 +899,15 @@ export function BoardWorkspace({
 
         <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="block text-2xl text-blue-600">
-              {formatDuration(annualTotal)}
-            </strong>
+            <SummaryValue value={formatDuration(annualTotal)} />
             <span className="text-sm text-slate-500">Total ({year})</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="block text-2xl text-blue-600">
-              {activeDays}
-            </strong>
+            <SummaryValue value={activeDays} />
             <span className="text-sm text-slate-500">Days studied</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-blue-600">
+            <strong className="inline-flex items-baseline justify-center gap-1 text-2xl leading-tight text-blue-600">
               <Flame aria-hidden="true" className="size-5 text-orange-500" />
               {currentStreak}
             </strong>
@@ -874,9 +918,11 @@ export function BoardWorkspace({
               <Gauge aria-hidden="true" className="size-5" />
             </span>
             <span className="min-w-0">
-              <strong className="block text-xl text-slate-950 sm:text-2xl">
-                {formatDuration(statistics.calendarDayAverage, true)}
-              </strong>
+              <SummaryValue
+                value={formatDuration(statistics.calendarDayAverage, true)}
+                accentClass="text-slate-950"
+                sizeClass="text-xl sm:text-2xl"
+              />
               <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
                 Average / calendar day
               </span>
@@ -887,9 +933,11 @@ export function BoardWorkspace({
               <Gauge aria-hidden="true" className="size-5" />
             </span>
             <span className="min-w-0">
-              <strong className="block text-xl text-slate-950 sm:text-2xl">
-                {formatDuration(statistics.activeDayAverage, true)}
-              </strong>
+              <SummaryValue
+                value={formatDuration(statistics.activeDayAverage, true)}
+                accentClass="text-slate-950"
+                sizeClass="text-xl sm:text-2xl"
+              />
               <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
                 Average / active day
               </span>

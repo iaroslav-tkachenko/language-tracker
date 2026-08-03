@@ -111,6 +111,52 @@ function formatAverage(value: number) {
   });
 }
 
+function SummaryValue({
+  value,
+  accentClass = "text-emerald-700",
+}: {
+  value: string | number;
+  accentClass?: string;
+}) {
+  const tokens = String(value).split(" ");
+
+  return (
+    <strong
+      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 text-2xl leading-tight ${accentClass}`}
+    >
+      {tokens.map((token, index) => {
+        const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
+        if (compactMatch) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="inline-flex items-baseline"
+            >
+              <span>{compactMatch[1]}</span>
+              <span className="ml-0.5 text-[0.65em] font-bold text-slate-500">
+                {compactMatch[2]}
+              </span>
+            </span>
+          );
+        }
+
+        if (/^[a-zA-Z]+$/.test(token)) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="text-[0.65em] font-bold text-slate-500"
+            >
+              {token}
+            </span>
+          );
+        }
+
+        return <span key={`${token}-${index}`}>{token}</span>;
+      })}
+    </strong>
+  );
+}
+
 function createOperationId() {
   if (typeof window.crypto.randomUUID === "function") {
     return window.crypto.randomUUID();
@@ -863,49 +909,57 @@ export function VocabularyWorkspace({
           className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-6"
         >
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="block text-2xl text-emerald-700">
-              {statistics.totalWords.toLocaleString("en")}
-            </strong>
+            <SummaryValue value={statistics.totalWords.toLocaleString("en")} />
             <span className="text-sm text-slate-500">Words ({activeYear})</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="block text-2xl text-emerald-700">
-              {statistics.activeDays}
-            </strong>
+            <SummaryValue value={statistics.activeDays} />
             <span className="text-sm text-slate-500">Active days</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Flame aria-hidden="true" className="size-5 text-orange-500" />
-              {statistics.currentStreak}{" "}
-              {statistics.currentStreak === 1 ? "day" : "days"}
-            </strong>
+              <SummaryValue
+                value={`${statistics.currentStreak} ${
+                  statistics.currentStreak === 1 ? "day" : "days"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">Current streak</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Trophy aria-hidden="true" className="size-5 text-amber-500" />
-              {statistics.longestStreak}{" "}
-              {statistics.longestStreak === 1 ? "day" : "days"}
-            </strong>
+              <SummaryValue
+                value={`${statistics.longestStreak} ${
+                  statistics.longestStreak === 1 ? "day" : "days"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">Longest streak</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
-              {formatAverage(statistics.calendarDayAverage)}{" "}
-              {statistics.calendarDayAverage === 1 ? "word" : "words"}
-            </strong>
+              <SummaryValue
+                value={`${formatAverage(statistics.calendarDayAverage)} ${
+                  statistics.calendarDayAverage === 1 ? "word" : "words"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">
               Average / calendar day
             </span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
-              {formatAverage(statistics.activeDayAverage)}{" "}
-              {statistics.activeDayAverage === 1 ? "word" : "words"}
-            </strong>
+              <SummaryValue
+                value={`${formatAverage(statistics.activeDayAverage)} ${
+                  statistics.activeDayAverage === 1 ? "word" : "words"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">
               Average / study day
             </span>

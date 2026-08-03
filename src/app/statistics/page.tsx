@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { StatisticsDateBootstrap } from "@/components/statistics/statistics-date-bootstrap";
 import { StatisticsWorkspace } from "@/components/statistics/statistics-workspace";
+import { isCefrLevel } from "@/lib/cefr/reference";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -87,7 +88,7 @@ export default async function StatisticsPage({
       .order("study_date"),
     supabase
       .from("cefr_level_events")
-      .select("id")
+      .select("id, level, effective_date")
       .eq("board_id", selectedBoard.id)
       .lte("effective_date", localToday)
       .order("effective_date", { ascending: false })
@@ -130,7 +131,15 @@ export default async function StatisticsPage({
         studyDate: total.study_date,
         wordsLearned: total.words_learned,
       }))}
-      hasCurrentCefrLevel={currentCefrLevelResult.data !== null}
+      currentCefrLevel={
+        currentCefrLevelResult.data &&
+        isCefrLevel(currentCefrLevelResult.data.level)
+          ? {
+              level: currentCefrLevelResult.data.level,
+              effectiveDate: currentCefrLevelResult.data.effective_date,
+            }
+          : null
+      }
       selectedYear={selectedYear}
       todayKey={localToday}
     />
