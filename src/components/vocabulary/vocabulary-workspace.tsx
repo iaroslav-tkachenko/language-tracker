@@ -309,7 +309,7 @@ function VocabularyForecastCard({
             ))}
           </div>
           <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
-            <div className="px-4 py-3 text-slate-500">Days with entries</div>
+            <div className="px-4 py-3 text-slate-500">Active days</div>
             {paceColumns.map((pace) => (
               <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
                 {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}

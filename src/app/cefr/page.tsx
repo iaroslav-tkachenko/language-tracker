@@ -59,24 +59,43 @@ export default async function CefrPage({ searchParams }: CefrPageProps) {
     return <CefrDateBootstrap boardId={selectedBoard.id} />;
   }
 
-  const { data: levelEvents, error: levelEventsError } = await supabase
-    .from("cefr_level_events")
-    .select("id, level, effective_date, created_at")
-    .eq("board_id", selectedBoard.id)
-    .order("effective_date", { ascending: false })
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false });
+  const [levelEventsResult, entriesResult, vocabularyTotalsResult] =
+    await Promise.all([
+      supabase
+        .from("cefr_level_events")
+        .select("id, level, effective_date, created_at")
+        .eq("board_id", selectedBoard.id)
+        .order("effective_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false }),
+      supabase
+        .from("study_entries")
+        .select("study_date, duration_minutes")
+        .eq("board_id", selectedBoard.id)
+        .order("study_date")
+        .order("created_at"),
+      supabase
+        .from("vocabulary_daily_totals")
+        .select("study_date, words_learned")
+        .eq("board_id", selectedBoard.id)
+        .order("study_date"),
+    ]);
 
-  if (levelEventsError) {
-    console.error("Supabase CEFR history read failed", {
-      code: levelEventsError.code,
-      message: levelEventsError.message,
+  if (
+    levelEventsResult.error ||
+    entriesResult.error ||
+    vocabularyTotalsResult.error
+  ) {
+    console.error("Supabase CEFR page read failed", {
+      levelEvents: levelEventsResult.error?.message,
+      entries: entriesResult.error?.message,
+      vocabularyTotals: vocabularyTotalsResult.error?.message,
     });
-    throw new Error("Language level history could not be loaded.");
+    throw new Error("Language level data could not be loaded.");
   }
 
   const history = sortCefrHistoryNewestFirst(
-    levelEvents.flatMap((event) => {
+    levelEventsResult.data.flatMap((event) => {
       if (!isCefrLevel(event.level)) return [];
       return [
         {
@@ -94,6 +113,14 @@ export default async function CefrPage({ searchParams }: CefrPageProps) {
       boards={boards}
       selectedBoard={selectedBoard}
       history={history}
+      entries={entriesResult.data.map((entry) => ({
+        studyDate: entry.study_date,
+        durationMinutes: entry.duration_minutes,
+      }))}
+      vocabularyTotals={vocabularyTotalsResult.data.map((total) => ({
+        studyDate: total.study_date,
+        wordsLearned: total.words_learned,
+      }))}
       todayKey={localToday}
     />
   );

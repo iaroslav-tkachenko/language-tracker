@@ -3,8 +3,9 @@
 ## 1. Approval gate
 
 **Current status: Phases 0, 1, 2, and 3 are complete, visually approved, verified
-by green pull-request checks, and merged; Phase 4 requirements are reconciled and
-await the Phase 4A visual milestone.**
+by green pull-request checks, and merged. Phase 4 is implemented through the
+integrated CEFR screen, Study Time and Vocabulary forecasts, Statistics
+analytics, weekly recommendations, and final local verification.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -185,11 +186,13 @@ merged on July 26, 2026.
 
 ## 7. Phase 4 — CEFR history, dual forecast, and combined analytics
 
-Phase 4 follows explicit visual gates. Static desktop/mobile concepts are
+Phase 4 followed explicit visual gates. Static desktop/mobile concepts were
 approved before production UI implementation, and each clickable vertical
-milestone is reviewed before the next product milestone.
+milestone was reviewed before the next product milestone.
 
 ### Phase 4A — Product model and UX approval
+
+**Status:** complete.
 
 - Reconcile the product specification, architecture, and implementation plan
   before feature code changes.
@@ -209,6 +212,8 @@ production CEFR UI work.
 
 ### Phase 4B — Data ownership and safe history mutations
 
+**Status:** complete.
+
 - Add `cefr_level_events` with composite board ownership, A0–C2 constraint,
   non-future effective dates, one event per board/date, history index, RLS, and
   generated database types.
@@ -222,6 +227,8 @@ production CEFR UI work.
   production UI depends on the table.
 
 ### Phase 4C — Clickable CEFR history
+
+**Status:** complete.
 
 - Add a board-scoped CEFR management destination reachable from Study Time,
   Vocabulary, Statistics, and Settings.
@@ -239,6 +246,8 @@ production CEFR UI work.
 
 ### Phase 4D — Study Time forecast, seven-day milestone
 
+**Status:** complete.
+
 - Store the approved transition ranges and exact calculation differences as
   versioned immutable application data.
 - Derive the current-level baseline by summing transition differences from A0.
@@ -255,6 +264,8 @@ production CEFR UI work.
 **Review gate:** provide a clickable Study Time forecast on desktop and mobile.
 
 ### Phase 4E — Vocabulary forecast, seven-day milestone
+
+**Status:** complete.
 
 - Store the approved A0–C2 vocabulary ranges and calculation midpoints as a
   separate versioned immutable model.
@@ -278,6 +289,8 @@ production CEFR UI work.
 
 ### Phase 4F — Thirty-day pace comparison
 
+**Status:** complete.
+
 - Add an independent Study Time pace over today and the previous 29 calendar
   dates, including zeros.
 - Add an independent Vocabulary pace over the same calendar window.
@@ -285,6 +298,8 @@ production CEFR UI work.
 - Keep one forecast available when the other has zero pace.
 
 ### Phase 4G — Board and Statistics integration
+
+**Status:** complete.
 
 - Replace the isolated Phase 1 CEFR fixture with the real current declaration
   and tracker-appropriate forecast.
@@ -309,6 +324,10 @@ learning time`, `Tracked words`, and `Estimated words known`.
 owner approval.
 
 ### Phase 4H — Verification, accessibility, and documentation
+
+**Status:** complete for local application verification and documentation.
+Database and browser checks remain environment-dependent and must be rerun in
+CI or a clean local Supabase/browser stack before merge.
 
 - Unit-test all transition/midpoint differences, derived baselines, effective
   date subtraction, estimated totals, seven/thirty-day zero-inclusive pace,

@@ -362,10 +362,11 @@ The model is fixed and not user-editable.
 | B2            | C1     |          — |       — |         — |          40% |       40% |     20% |
 | C1            | C2     |          — |       — |         — |          40% |       40% |     20% |
 
-The recommendation appears after the Study Time and Vocabulary progress cards
-and in detailed Statistics. It uses an accessible circular chart, a text legend
-with percentages and weekly hours, and adjacent practical advice. C2 has no
-next-level recommendation.
+On the CEFR screen, the recommendation appears after the current-level summary
+and before the Study Time and Vocabulary progress cards. In detailed
+Statistics, it appears alongside the CEFR overview and progress guidance. It
+uses an accessible circular chart, a text legend with percentages and weekly
+hours, and adjacent practical advice. C2 has no next-level recommendation.
 
 Advice is product-authored and grouped into short actionable items:
 
@@ -406,9 +407,10 @@ Advice is product-authored and grouped into short actionable items:
   background as a decorative element; the accessible heading remains the source
   of the level name. The decorative code is hidden when the viewport has no
   clear space for it.
-- The CEFR screen uses the title `Your language level` and the subtitle `Track
-your progress and get approximate forecasts for reaching the next CEFR
-level.` It does not show a separate eyebrow label above the title.
+- The CEFR screen uses the title `Your language level` and the subtitle `Set
+your current CEFR level, track how it changes over time, and see approximate
+guidance for reaching the next level.` It does not show a separate eyebrow
+  label above the title.
 - A0 history cards use the full label `Level A0 - Absolute zero`.
 - The current-level summary does not duplicate an edit action. Users add a new
   declaration through `Add level update` or edit an existing declaration from
@@ -466,7 +468,8 @@ total in the center, and the next-level cumulative reference on the right. The
 line below the progress bar shows the completed percentage and absolute
 remainder. The raw transition-interval size is calculation detail and is not
 shown in the primary UI. The same presentation applies to Study Time and
-Vocabulary.
+Vocabulary. Compact versions of these progress cards appear in Statistics and
+on the CEFR screen after the weekly plan.
 
 Each available forecast displays the approximate calendar duration in years,
 months, and days and the estimated month and year. Compact summaries may omit
@@ -479,7 +482,7 @@ C2 total displays use a strict greater-than sign rather than an approximation
 sign because the highest level has no modeled upper bound.
 The pace comparison explicitly states that both averages cover calendar days,
 including dates with no recorded sessions or words. It presents the latest
-seven- and thirty-day values as columns and uses rows for average pace,
+seven- and thirty-day values as columns and uses rows for active days, average pace,
 next-level duration, and estimated month/year. Its heading names the next level
 as the forecast destination.
 

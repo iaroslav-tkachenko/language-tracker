@@ -25,6 +25,7 @@ import {
 } from "@/app/dashboard/actions";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import { MissingLevelBubble } from "@/components/cefr/cefr-level-prompt";
+import { CefrProgressForecastCards } from "@/components/cefr/cefr-progress-forecast-cards";
 import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
 import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
 import {
@@ -33,13 +34,22 @@ import {
   type CefrLevel,
 } from "@/lib/cefr/reference";
 import type { CefrLevelEvent } from "@/lib/cefr/history";
+import { calculateStudyTimeForecast } from "@/lib/cefr/study-time";
+import { calculateVocabularyForecast } from "@/lib/cefr/vocabulary";
 
 type BoardSummary = { id: string; name: string };
+type StudyEntrySummary = { studyDate: string; durationMinutes: number };
+type VocabularyDailyTotalSummary = {
+  studyDate: string;
+  wordsLearned: number;
+};
 
 type CefrHistoryWorkspaceProps = {
   boards: BoardSummary[];
   selectedBoard: BoardSummary;
   history: CefrLevelEvent[];
+  entries: StudyEntrySummary[];
+  vocabularyTotals: VocabularyDailyTotalSummary[];
   todayKey: string;
 };
 
@@ -133,7 +143,7 @@ function LevelForm({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-bold tracking-wide text-violet-700 uppercase">
-              {isEdit ? "Edit level update" : "Add level update"}
+              {isEdit ? "Edit level update" : "Add a level update"}
             </p>
             <h2
               id="cefr-form-heading"
@@ -185,7 +195,7 @@ function LevelForm({
 
           <label className="block">
             <span className="text-sm font-bold text-slate-700">
-              Date when this level became current
+              Date this level started
             </span>
             <input
               type="date"
@@ -253,6 +263,8 @@ export function CefrHistoryWorkspace({
   boards,
   selectedBoard,
   history,
+  entries,
+  vocabularyTotals,
   todayKey,
 }: CefrHistoryWorkspaceProps) {
   const [formMode, setFormMode] = useState<FormMode>({ kind: "closed" });
@@ -266,14 +278,35 @@ export function CefrHistoryWorkspace({
   const statisticsHref = `/statistics?board=${selectedBoard.id}&year=${todayYear}&today=${todayKey}`;
   const levelLabelText = currentEvent
     ? levelLabel(currentEvent.level)
-    : "No level yet";
+    : "No level set yet";
   const description = currentEvent
     ? currentDetails?.description
-    : "Add your first level update to start building a transparent history. The app will use this date as the baseline for approximate progress guidance in the next Phase 4 milestones.";
+    : "Set your current level and the date it started. This unlocks progress estimates, next-level forecasts, and a weekly plan tailored to your level.";
   const boardOptions = useMemo(() => boards, [boards]);
   const weeklyRecommendation = currentEvent
     ? getWeeklyRecommendation(currentEvent.level)
     : null;
+  const progressForecasts = useMemo(() => {
+    if (!currentEvent) return null;
+
+    const currentLevel = {
+      level: currentEvent.level,
+      effectiveDate: currentEvent.effectiveDate,
+    };
+
+    return {
+      studyTimeForecast: calculateStudyTimeForecast({
+        currentLevel,
+        entries,
+        todayKey,
+      }),
+      vocabularyForecast: calculateVocabularyForecast({
+        currentLevel,
+        entries: vocabularyTotals,
+        todayKey,
+      }),
+    };
+  }, [currentEvent, entries, todayKey, vocabularyTotals]);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -403,8 +436,8 @@ export function CefrHistoryWorkspace({
                 Your language level
               </h1>
               <p className="mt-3 max-w-3xl text-lg leading-8 text-slate-600">
-                Track your progress and get approximate forecasts for reaching
-                the next CEFR level.
+                Set your current CEFR level, track how it changes over time, and
+                see approximate guidance for reaching the next level.
               </p>
             </div>
             <button
@@ -420,7 +453,7 @@ export function CefrHistoryWorkspace({
           <div className="relative isolate border-t border-slate-200 bg-gradient-to-r from-blue-50 to-emerald-50 p-6 sm:p-8">
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-3xl font-black text-slate-950">
+                <h2 className="text-2xl font-black text-slate-950">
                   {levelLabelText}
                 </h2>
                 {currentEvent && (
@@ -432,7 +465,7 @@ export function CefrHistoryWorkspace({
               <p className="mt-2 text-lg text-slate-700">
                 {currentEvent
                   ? `Since ${formatDate(currentEvent.effectiveDate)}`
-                  : "No current level has been added for this board."}
+                  : "Set a level to unlock progress estimates and forecasts."}
               </p>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700">
                 {description}
@@ -460,6 +493,13 @@ export function CefrHistoryWorkspace({
           </div>
         )}
 
+        {progressForecasts && (
+          <CefrProgressForecastCards
+            studyTimeForecast={progressForecasts.studyTimeForecast}
+            vocabularyForecast={progressForecasts.vocabularyForecast}
+          />
+        )}
+
         <section
           aria-labelledby="level-history-heading"
           className="mt-6 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
@@ -474,7 +514,7 @@ export function CefrHistoryWorkspace({
                 Level history
               </h2>
               <p className="mt-1 text-slate-500">
-                Your level updates for this language board, newest first.
+                Your saved level changes, newest first.
               </p>
             </div>
             {history.length > 0 && (
@@ -495,13 +535,12 @@ export function CefrHistoryWorkspace({
                 aria-hidden="true"
                 className="mx-auto size-12 text-violet-600"
               />
-              <h3 className="mt-3 text-xl font-black text-slate-950">
+              <h3 className="mt-3 text-2xl font-black text-slate-950">
                 Set your current level
               </h3>
               <p className="mx-auto mt-2 max-w-xl leading-7 text-slate-600">
-                Add the level you believe is current for this board and the date
-                it became current. You can edit the update later from this
-                history.
+                Choose the level that best describes you today and the date it
+                started. You can edit it later from this history.
               </p>
               <button
                 type="button"
@@ -583,18 +622,17 @@ export function CefrHistoryWorkspace({
         </section>
 
         <section className="mt-6 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="flex items-center gap-3 text-xl font-black text-slate-950">
+          <h2 className="flex items-center gap-3 text-2xl font-black text-slate-950">
             <CheckCircle2
               aria-hidden="true"
               className="size-6 text-emerald-600"
             />
-            How this history is used
+            How your level is used
           </h2>
           <p className="mt-3 max-w-4xl leading-7 text-slate-600">
-            The app never promotes you automatically. Your newest non-future
-            update becomes the current level for this board, and later Phase 4
-            screens will use that date as the starting point for approximate
-            Study Time and Vocabulary forecasts.
+            Your level is always set by you. The latest saved update becomes
+            your current level, and the app uses its date as the starting point
+            for approximate Study Time and Vocabulary forecasts.
           </p>
         </section>
       </div>

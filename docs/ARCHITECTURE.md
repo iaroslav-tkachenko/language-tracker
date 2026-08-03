@@ -2,7 +2,9 @@
 
 ## 1. Status and decision gate
 
-This document defines the architecture baseline. The original implementation was authorized on July 14, 2026; the expanded July 16 scope is documented here but remains behind the updated documentation review gate before feature implementation.
+This document defines the architecture baseline. The original implementation
+was authorized on July 14, 2026; the expanded July 16 scope is documented here,
+and Phases 0 through 4 are implemented as the current MVP baseline.
 
 ## 2. Architecture summary
 
