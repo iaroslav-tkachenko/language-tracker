@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { CEFR_LEVELS } from "@/lib/cefr/reference";
+
 export const resourceIdSchema = z.string().uuid();
 
 export const resourceNameSchema = z
@@ -20,6 +22,21 @@ const dateKeySchema = z
       date.getUTCDate() === day
     );
   }, "Choose a valid study date.");
+
+const nonFutureDateSchema = z
+  .object({
+    effectiveDate: dateKeySchema,
+    localToday: dateKeySchema,
+  })
+  .superRefine(({ effectiveDate, localToday }, context) => {
+    if (effectiveDate > localToday) {
+      context.addIssue({
+        code: "custom",
+        path: ["effectiveDate"],
+        message: "Level update date cannot be in the future.",
+      });
+    }
+  });
 
 function dateOrdinal(dateKey: string) {
   const [year, month, day] = dateKey.split("-").map(Number);
@@ -149,3 +166,17 @@ export const vocabularyTotalBatchSchema = z
       });
     }
   });
+
+export const cefrLevelEventCreateSchema = nonFutureDateSchema.extend({
+  boardId: z.string().uuid(),
+  level: z.enum(CEFR_LEVELS, {
+    message: "Choose A0, A1, A2, B1, B2, C1, or C2.",
+  }),
+});
+
+export const cefrLevelEventUpdateSchema = nonFutureDateSchema.extend({
+  eventId: z.string().uuid(),
+  level: z.enum(CEFR_LEVELS, {
+    message: "Choose A0, A1, A2, B1, B2, C1, or C2.",
+  }),
+});

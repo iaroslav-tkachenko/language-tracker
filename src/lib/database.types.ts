@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       activity_types: {
@@ -48,6 +43,51 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "activity_types_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cefr_level_events: {
+        Row: {
+          board_id: string
+          created_at: string
+          effective_date: string
+          id: string
+          level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          effective_date: string
+          id?: string
+          level: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          effective_date?: string
+          id?: string
+          level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cefr_level_events_board_owner_fkey"
+            columns: ["board_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "language_boards"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "cefr_level_events_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -332,6 +372,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assert_cefr_history_has_no_adjacent_duplicates: {
+        Args: { p_board_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      create_cefr_level_event: {
+        Args: {
+          p_board_id: string
+          p_effective_date: string
+          p_level: string
+          p_local_today: string
+        }
+        Returns: {
+          board_id: string
+          created_at: string
+          effective_date: string
+          id: string
+          level: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cefr_level_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_or_restore_activity_type: {
         Args: { p_name: string }
         Returns: {
@@ -417,6 +484,47 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "vocabulary_total_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      delete_cefr_level_event: {
+        Args: { p_event_id: string }
+        Returns: {
+          board_id: string
+          created_at: string
+          effective_date: string
+          id: string
+          level: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cefr_level_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      update_cefr_level_event: {
+        Args: {
+          p_effective_date: string
+          p_event_id: string
+          p_level: string
+          p_local_today: string
+        }
+        Returns: {
+          board_id: string
+          created_at: string
+          effective_date: string
+          id: string
+          level: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cefr_level_events"
           isOneToOne: true
           isSetofReturn: false
         }

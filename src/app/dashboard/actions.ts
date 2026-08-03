@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
+  cefrLevelEventCreateSchema,
+  cefrLevelEventUpdateSchema,
   resourceIdSchema,
   resourceNameSchema,
   studyEntryBatchSchema,
@@ -22,6 +24,26 @@ export type ResourceActionState = {
   insertedCount?: number;
   preservedCount?: number;
 };
+
+function cefrMutationMessage(error: { code?: string; message: string }) {
+  if (error.code === "23505") {
+    return "A level update already exists for this date.";
+  }
+
+  if (error.code === "23514") {
+    return error.message;
+  }
+
+  if (error.code === "P0002") {
+    return "The level update could not be found.";
+  }
+
+  console.error("Supabase CEFR level mutation failed", {
+    code: error.code,
+    message: error.message,
+  });
+  return "The level update could not be saved. Please try again.";
+}
 
 function parseName(formData: FormData) {
   return resourceNameSchema.safeParse(formData.get("name"));
@@ -403,6 +425,93 @@ export async function deleteVocabularyDailyTotal(formData: FormData) {
   if (error || !data) {
     throw new Error("The vocabulary total could not be deleted.");
   }
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+}
+
+export async function createCefrLevelEvent(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = cefrLevelEventCreateSchema.safeParse({
+    boardId: formData.get("boardId"),
+    level: formData.get("level"),
+    effectiveDate: formData.get("effectiveDate"),
+    localToday: formData.get("localToday"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { error } = await supabase.rpc("create_cefr_level_event", {
+    p_board_id: parsed.data.boardId,
+    p_level: parsed.data.level,
+    p_effective_date: parsed.data.effectiveDate,
+    p_local_today: parsed.data.localToday,
+  });
+
+  if (error) {
+    return { status: "error", message: cefrMutationMessage(error) };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  return { status: "success", message: "Level update saved." };
+}
+
+export async function updateCefrLevelEvent(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = cefrLevelEventUpdateSchema.safeParse({
+    eventId: formData.get("eventId"),
+    level: formData.get("level"),
+    effectiveDate: formData.get("effectiveDate"),
+    localToday: formData.get("localToday"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { error } = await supabase.rpc("update_cefr_level_event", {
+    p_event_id: parsed.data.eventId,
+    p_level: parsed.data.level,
+    p_effective_date: parsed.data.effectiveDate,
+    p_local_today: parsed.data.localToday,
+  });
+
+  if (error) {
+    return { status: "error", message: cefrMutationMessage(error) };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  return { status: "success", message: "Level update saved." };
+}
+
+export async function deleteCefrLevelEvent(formData: FormData) {
+  const parsed = resourceIdSchema.safeParse(formData.get("eventId"));
+  if (!parsed.success) throw new Error("Invalid level update.");
+
+  const supabase = await verifiedClient();
+  if (!supabase) redirect("/sign-in");
+
+  const { error } = await supabase.rpc("delete_cefr_level_event", {
+    p_event_id: parsed.data,
+  });
+
+  if (error) {
+    throw new Error(cefrMutationMessage(error));
+  }
+
   revalidatePath("/dashboard");
   revalidatePath("/statistics");
 }

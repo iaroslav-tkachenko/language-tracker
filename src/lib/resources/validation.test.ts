@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  cefrLevelEventCreateSchema,
+  cefrLevelEventUpdateSchema,
   getInclusiveDateCount,
   resourceNameSchema,
   studyEntryBatchSchema,
@@ -170,6 +172,58 @@ describe("vocabularyTotalBatchSchema", () => {
         ...validBatch,
         startDate,
         endDate,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("cefrLevelEventCreateSchema", () => {
+  const validEvent = {
+    boardId: "10000000-0000-4000-8000-000000000001",
+    level: "A0",
+    effectiveDate: "2026-07-30",
+    localToday: "2026-07-30",
+  };
+
+  it.each(["A0", "A1", "A2", "B1", "B2", "C1", "C2"])(
+    "accepts %s level declarations",
+    (level) => {
+      expect(
+        cefrLevelEventCreateSchema.safeParse({
+          ...validEvent,
+          level,
+        }).success,
+      ).toBe(true);
+    },
+  );
+
+  it("rejects future effective dates", () => {
+    expect(
+      cefrLevelEventCreateSchema.safeParse({
+        ...validEvent,
+        effectiveDate: "2026-07-31",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects unknown levels", () => {
+    expect(
+      cefrLevelEventCreateSchema.safeParse({
+        ...validEvent,
+        level: "D1",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("cefrLevelEventUpdateSchema", () => {
+  it("requires an existing event identity", () => {
+    expect(
+      cefrLevelEventUpdateSchema.safeParse({
+        eventId: "not-a-uuid",
+        level: "B1",
+        effectiveDate: "2026-07-30",
+        localToday: "2026-07-30",
       }).success,
     ).toBe(false);
   });
