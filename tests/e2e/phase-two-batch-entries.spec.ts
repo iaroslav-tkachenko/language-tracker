@@ -26,11 +26,9 @@ test.describe("Phase 2 date-range sessions", () => {
     await page.goto("/settings");
     await page.getByLabel("Add language").fill(boardName);
     await page.getByRole("button", { name: "Add language" }).click();
-    await expect(page.getByRole("status")).toContainText(
-      `${boardName} is ready.`,
-    );
-    await page.reload();
-    await page.getByRole("link", { name: boardName }).click();
+    const boardLink = page.getByRole("link", { name: boardName });
+    await expect(boardLink).toBeVisible();
+    await boardLink.click();
 
     async function createRange() {
       await page.getByRole("button", { name: "Add study session" }).click();

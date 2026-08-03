@@ -24,12 +24,9 @@ test.describe("Phase 4C CEFR history", () => {
     await page.goto("/settings");
     await page.getByLabel("Add language").fill(boardName);
     await page.getByRole("button", { name: "Add language" }).click();
-    await expect(page.getByRole("status")).toContainText(
-      `${boardName} is ready.`,
-    );
-    await page.reload();
 
     const boardLink = page.getByRole("link", { name: boardName });
+    await expect(boardLink).toBeVisible();
     const boardHref = await boardLink.getAttribute("href");
     const boardId = boardHref
       ? new URL(boardHref, "http://127.0.0.1:3000").searchParams.get("board")

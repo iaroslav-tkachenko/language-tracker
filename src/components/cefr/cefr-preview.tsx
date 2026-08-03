@@ -1315,7 +1315,7 @@ export function CefrPreview() {
     if (reviewLevel) {
       return [
         {
-          id: `event-${reviewLevel.toLowerCase()}`,
+          id: `scenario-${scenario}-${reviewLevel.toLowerCase()}`,
           level: reviewLevel,
           effectiveDate: "2026-07-12",
         },

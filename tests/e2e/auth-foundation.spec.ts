@@ -56,9 +56,11 @@ test.describe("authentication foundation", () => {
   test("shows recoverable authentication-link errors", async ({ page }) => {
     await page.goto("/sign-in?error=confirmation");
 
-    await expect(page.getByRole("alert")).toContainText(
-      "This confirmation link is invalid or expired.",
-    );
+    await expect(
+      page
+        .getByRole("alert")
+        .filter({ hasText: "This confirmation link is invalid or expired." }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
   });
 });
