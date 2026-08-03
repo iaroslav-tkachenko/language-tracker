@@ -76,6 +76,18 @@ export type CalendarDuration = {
   days: number;
 };
 
+export type VocabularyPaceEstimate = {
+  periodDays: 7 | 30;
+  totalWords: number;
+  entryDays: number;
+  averageWords: number;
+  estimate: {
+    daysRemaining: number;
+    estimatedDate: string;
+    duration: CalendarDuration;
+  } | null;
+};
+
 export type VocabularyForecast =
   | {
       status: "no-level";
@@ -89,8 +101,8 @@ export type VocabularyForecast =
       baselineWords: number;
       eligibleWords: number;
       estimatedVocabularySize: number;
-      sevenDayTotalWords: number;
-      sevenDayAverageWords: number;
+      sevenDayPace: VocabularyPaceEstimate;
+      thirtyDayPace: VocabularyPaceEstimate;
     }
   | {
       status: "forecast";
@@ -105,13 +117,8 @@ export type VocabularyForecast =
       estimatedVocabularySize: number;
       remainingWords: number;
       progressRatio: number;
-      sevenDayTotalWords: number;
-      sevenDayAverageWords: number;
-      sevenDayEstimate: {
-        daysRemaining: number;
-        estimatedDate: string;
-        duration: CalendarDuration;
-      } | null;
+      sevenDayPace: VocabularyPaceEstimate;
+      thirtyDayPace: VocabularyPaceEstimate;
     };
 
 function levelIndex(level: CefrLevel) {
@@ -173,6 +180,51 @@ function calendarDurationBetween(startDateKey: string, endDateKey: string) {
   return { years, months, days };
 }
 
+function calculatePaceEstimate({
+  entries,
+  periodDays,
+  remainingWords,
+  todayKey,
+}: {
+  entries: VocabularyForecastEntry[];
+  periodDays: 7 | 30;
+  remainingWords: number;
+  todayKey: string;
+}): VocabularyPaceEstimate {
+  const periodStart = shiftDate(todayKey, -(periodDays - 1));
+  const totalWords = sumWordsBetween(entries, periodStart, todayKey);
+  const entryDays = new Set(
+    entries
+      .filter(
+        (entry) =>
+          entry.studyDate >= periodStart && entry.studyDate <= todayKey,
+      )
+      .map((entry) => entry.studyDate),
+  ).size;
+  const averageWords = totalWords / periodDays;
+  const daysRemaining =
+    remainingWords > 0 && averageWords > 0
+      ? Math.ceil(remainingWords / averageWords)
+      : null;
+  const estimatedDate =
+    daysRemaining === null ? null : shiftDate(todayKey, daysRemaining);
+
+  return {
+    periodDays,
+    totalWords,
+    entryDays,
+    averageWords,
+    estimate:
+      daysRemaining === null || estimatedDate === null
+        ? null
+        : {
+            daysRemaining,
+            estimatedDate,
+            duration: calendarDurationBetween(todayKey, estimatedDate),
+          },
+  };
+}
+
 export function calculateVocabularyForecast({
   currentLevel,
   entries,
@@ -191,14 +243,24 @@ export function calculateVocabularyForecast({
     currentLevel.effectiveDate,
     todayKey,
   );
-  const sevenDayStart = shiftDate(todayKey, -6);
-  const sevenDayTotalWords = sumWordsBetween(entries, sevenDayStart, todayKey);
-  const sevenDayAverageWords = sevenDayTotalWords / 7;
   const baselineWords = getVocabularyBaselineWords(currentLevel.level);
   const estimatedVocabularySize = baselineWords + eligibleWords;
   const nextReference = nextReferenceFor(currentLevel.level);
 
   if (!nextReference) {
+    const sevenDayPace = calculatePaceEstimate({
+      entries,
+      periodDays: 7,
+      remainingWords: 0,
+      todayKey,
+    });
+    const thirtyDayPace = calculatePaceEstimate({
+      entries,
+      periodDays: 30,
+      remainingWords: 0,
+      todayKey,
+    });
+
     return {
       status: "highest-level",
       modelVersion: VOCABULARY_MODEL_VERSION,
@@ -207,19 +269,25 @@ export function calculateVocabularyForecast({
       baselineWords,
       eligibleWords,
       estimatedVocabularySize,
-      sevenDayTotalWords,
-      sevenDayAverageWords,
+      sevenDayPace,
+      thirtyDayPace,
     };
   }
 
   const requiredWords = nextReference.midpointWords - baselineWords;
   const remainingWords = Math.max(0, requiredWords - eligibleWords);
-  const daysRemaining =
-    remainingWords > 0 && sevenDayAverageWords > 0
-      ? Math.ceil(remainingWords / sevenDayAverageWords)
-      : null;
-  const estimatedDate =
-    daysRemaining === null ? null : shiftDate(todayKey, daysRemaining);
+  const sevenDayPace = calculatePaceEstimate({
+    entries,
+    periodDays: 7,
+    remainingWords,
+    todayKey,
+  });
+  const thirtyDayPace = calculatePaceEstimate({
+    entries,
+    periodDays: 30,
+    remainingWords,
+    todayKey,
+  });
 
   return {
     status: "forecast",
@@ -235,16 +303,8 @@ export function calculateVocabularyForecast({
     remainingWords,
     progressRatio:
       requiredWords === 0 ? 1 : Math.min(1, eligibleWords / requiredWords),
-    sevenDayTotalWords,
-    sevenDayAverageWords,
-    sevenDayEstimate:
-      daysRemaining === null || estimatedDate === null
-        ? null
-        : {
-            daysRemaining,
-            estimatedDate,
-            duration: calendarDurationBetween(todayKey, estimatedDate),
-          },
+    sevenDayPace,
+    thirtyDayPace,
   };
 }
 

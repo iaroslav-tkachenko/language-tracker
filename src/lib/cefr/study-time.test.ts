@@ -76,10 +76,16 @@ describe("calculateStudyTimeForecast", () => {
     expect(forecast.estimatedTotalLearningMinutes).toBe(380 * 60 + 480);
     expect(forecast.remainingMinutes).toBe(200 * 60 - 480);
     expect(forecast.progressRatio).toBeCloseTo(0.04);
-    expect(forecast.sevenDayTotalMinutes).toBe(180);
-    expect(forecast.sevenDayAverageMinutes).toBeCloseTo(180 / 7);
-    expect(forecast.sevenDayEstimate?.daysRemaining).toBe(448);
-    expect(forecast.sevenDayEstimate?.estimatedDate).toBe("2027-10-25");
+    expect(forecast.sevenDayPace.totalMinutes).toBe(180);
+    expect(forecast.sevenDayPace.entryDays).toBe(3);
+    expect(forecast.sevenDayPace.averageMinutes).toBeCloseTo(180 / 7);
+    expect(forecast.sevenDayPace.estimate?.daysRemaining).toBe(448);
+    expect(forecast.sevenDayPace.estimate?.estimatedDate).toBe("2027-10-25");
+    expect(forecast.thirtyDayPace.totalMinutes).toBe(1479);
+    expect(forecast.thirtyDayPace.entryDays).toBe(6);
+    expect(forecast.thirtyDayPace.averageMinutes).toBeCloseTo(1479 / 30);
+    expect(forecast.thirtyDayPace.estimate?.daysRemaining).toBe(234);
+    expect(forecast.thirtyDayPace.estimate?.estimatedDate).toBe("2027-03-25");
   });
 
   it("uses a zero floor when the transition reference is reached", () => {
@@ -93,7 +99,8 @@ describe("calculateStudyTimeForecast", () => {
     if (forecast.status !== "forecast") return;
     expect(forecast.remainingMinutes).toBe(0);
     expect(forecast.progressRatio).toBe(1);
-    expect(forecast.sevenDayEstimate).toBeNull();
+    expect(forecast.sevenDayPace.estimate).toBeNull();
+    expect(forecast.thirtyDayPace.estimate).toBeNull();
   });
 
   it("returns no seven-day estimate when pace is zero", () => {
@@ -105,8 +112,9 @@ describe("calculateStudyTimeForecast", () => {
 
     expect(forecast.status).toBe("forecast");
     if (forecast.status !== "forecast") return;
-    expect(forecast.sevenDayAverageMinutes).toBe(0);
-    expect(forecast.sevenDayEstimate).toBeNull();
+    expect(forecast.sevenDayPace.averageMinutes).toBe(0);
+    expect(forecast.sevenDayPace.estimate).toBeNull();
+    expect(forecast.thirtyDayPace.estimate).toBeNull();
   });
 
   it("returns highest-level state for C2", () => {

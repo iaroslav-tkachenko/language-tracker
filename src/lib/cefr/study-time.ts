@@ -80,6 +80,18 @@ export type CalendarDuration = {
   days: number;
 };
 
+export type StudyTimePaceEstimate = {
+  periodDays: 7 | 30;
+  totalMinutes: number;
+  entryDays: number;
+  averageMinutes: number;
+  estimate: {
+    daysRemaining: number;
+    estimatedDate: string;
+    duration: CalendarDuration;
+  } | null;
+};
+
 export type StudyTimeForecast =
   | {
       status: "no-level";
@@ -93,8 +105,8 @@ export type StudyTimeForecast =
       baselineMinutes: number;
       eligibleMinutes: number;
       estimatedTotalLearningMinutes: number;
-      sevenDayTotalMinutes: number;
-      sevenDayAverageMinutes: number;
+      sevenDayPace: StudyTimePaceEstimate;
+      thirtyDayPace: StudyTimePaceEstimate;
     }
   | {
       status: "forecast";
@@ -109,13 +121,8 @@ export type StudyTimeForecast =
       estimatedTotalLearningMinutes: number;
       remainingMinutes: number;
       progressRatio: number;
-      sevenDayTotalMinutes: number;
-      sevenDayAverageMinutes: number;
-      sevenDayEstimate: {
-        daysRemaining: number;
-        estimatedDate: string;
-        duration: CalendarDuration;
-      } | null;
+      sevenDayPace: StudyTimePaceEstimate;
+      thirtyDayPace: StudyTimePaceEstimate;
     };
 
 function transitionFor(level: CefrLevel) {
@@ -181,6 +188,51 @@ function calendarDurationBetween(startDateKey: string, endDateKey: string) {
   return { years, months, days };
 }
 
+function calculatePaceEstimate({
+  entries,
+  periodDays,
+  remainingMinutes,
+  todayKey,
+}: {
+  entries: StudyTimeForecastEntry[];
+  periodDays: 7 | 30;
+  remainingMinutes: number;
+  todayKey: string;
+}): StudyTimePaceEstimate {
+  const periodStart = shiftDate(todayKey, -(periodDays - 1));
+  const totalMinutes = sumMinutesBetween(entries, periodStart, todayKey);
+  const entryDays = new Set(
+    entries
+      .filter(
+        (entry) =>
+          entry.studyDate >= periodStart && entry.studyDate <= todayKey,
+      )
+      .map((entry) => entry.studyDate),
+  ).size;
+  const averageMinutes = totalMinutes / periodDays;
+  const daysRemaining =
+    remainingMinutes > 0 && averageMinutes > 0
+      ? Math.ceil(remainingMinutes / averageMinutes)
+      : null;
+  const estimatedDate =
+    daysRemaining === null ? null : shiftDate(todayKey, daysRemaining);
+
+  return {
+    periodDays,
+    totalMinutes,
+    entryDays,
+    averageMinutes,
+    estimate:
+      daysRemaining === null || estimatedDate === null
+        ? null
+        : {
+            daysRemaining,
+            estimatedDate,
+            duration: calendarDurationBetween(todayKey, estimatedDate),
+          },
+  };
+}
+
 export function calculateStudyTimeForecast({
   currentLevel,
   entries,
@@ -199,18 +251,24 @@ export function calculateStudyTimeForecast({
     currentLevel.effectiveDate,
     todayKey,
   );
-  const sevenDayStart = shiftDate(todayKey, -6);
-  const sevenDayTotalMinutes = sumMinutesBetween(
-    entries,
-    sevenDayStart,
-    todayKey,
-  );
-  const sevenDayAverageMinutes = sevenDayTotalMinutes / 7;
   const baselineMinutes = getStudyTimeBaselineMinutes(currentLevel.level);
   const estimatedTotalLearningMinutes = baselineMinutes + eligibleMinutes;
   const transition = transitionFor(currentLevel.level);
 
   if (!transition) {
+    const sevenDayPace = calculatePaceEstimate({
+      entries,
+      periodDays: 7,
+      remainingMinutes: 0,
+      todayKey,
+    });
+    const thirtyDayPace = calculatePaceEstimate({
+      entries,
+      periodDays: 30,
+      remainingMinutes: 0,
+      todayKey,
+    });
+
     return {
       status: "highest-level",
       modelVersion: STUDY_TIME_MODEL_VERSION,
@@ -219,20 +277,26 @@ export function calculateStudyTimeForecast({
       baselineMinutes,
       eligibleMinutes,
       estimatedTotalLearningMinutes,
-      sevenDayTotalMinutes,
-      sevenDayAverageMinutes,
+      sevenDayPace,
+      thirtyDayPace,
     };
   }
 
   const requiredMinutes = transition.calculationHours * 60;
   const remainingMinutes = Math.max(0, requiredMinutes - eligibleMinutes);
   const nextLevelBaselineMinutes = baselineMinutes + requiredMinutes;
-  const daysRemaining =
-    remainingMinutes > 0 && sevenDayAverageMinutes > 0
-      ? Math.ceil(remainingMinutes / sevenDayAverageMinutes)
-      : null;
-  const estimatedDate =
-    daysRemaining === null ? null : shiftDate(todayKey, daysRemaining);
+  const sevenDayPace = calculatePaceEstimate({
+    entries,
+    periodDays: 7,
+    remainingMinutes,
+    todayKey,
+  });
+  const thirtyDayPace = calculatePaceEstimate({
+    entries,
+    periodDays: 30,
+    remainingMinutes,
+    todayKey,
+  });
 
   return {
     status: "forecast",
@@ -250,16 +314,8 @@ export function calculateStudyTimeForecast({
       requiredMinutes === 0
         ? 1
         : Math.min(1, eligibleMinutes / requiredMinutes),
-    sevenDayTotalMinutes,
-    sevenDayAverageMinutes,
-    sevenDayEstimate:
-      daysRemaining === null || estimatedDate === null
-        ? null
-        : {
-            daysRemaining,
-            estimatedDate,
-            duration: calendarDurationBetween(todayKey, estimatedDate),
-          },
+    sevenDayPace,
+    thirtyDayPace,
   };
 }
 

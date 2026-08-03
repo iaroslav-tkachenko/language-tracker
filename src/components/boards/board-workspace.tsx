@@ -52,6 +52,7 @@ import {
   STUDY_TIME_DISCLOSURE_ITEMS,
   STUDY_TIME_DISCLOSURE_NOTE,
   type StudyTimeForecast,
+  type StudyTimePaceEstimate,
 } from "@/lib/cefr/study-time";
 import { calculateStudyStatistics } from "@/lib/statistics/study-statistics";
 
@@ -156,6 +157,10 @@ function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
   }
 
   const completedPercent = Math.round(forecast.progressRatio * 100);
+  const paceColumns: StudyTimePaceEstimate[] = [
+    forecast.sevenDayPace,
+    forecast.thirtyDayPace,
+  ];
 
   return (
     <section className="mt-6 rounded-3xl border border-blue-200 bg-white p-5 shadow-sm sm:p-6">
@@ -233,43 +238,72 @@ function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
       </div>
 
       <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/70 p-4">
-        <h3 className="text-xl font-black text-blue-700">
-          Forecast to reach {forecast.nextLevel}
+        <h3 className="text-2xl font-black text-blue-700">
+          Forecast to reach {forecast.nextLevel} with your current pace
         </h3>
         <p className="mt-1 text-slate-600">
-          Based on the latest 7 calendar days, including days with no entries.
+          Based on your activity across every calendar day in the last 7 and 30
+          days, including days with no entries.
         </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white/80 p-4">
-            <p className="text-sm text-slate-500">Average pace</p>
-            <p className="mt-1 text-xl font-black text-slate-950">
-              {formatPaceMinutes(forecast.sevenDayAverageMinutes)}
-            </p>
+        <div className="mt-4 max-w-3xl overflow-x-auto rounded-2xl border border-blue-100 bg-white/80">
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100 text-lg font-black text-blue-700">
+            <div className="px-4 py-3 text-slate-500" />
+            {paceColumns.map((pace) => (
+              <div key={pace.periodDays} className="px-4 py-3">
+                Last {pace.periodDays} days
+              </div>
+            ))}
           </div>
-          <div className="rounded-2xl bg-white/80 p-4">
-            <p className="text-sm text-slate-500">
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
+            <div className="px-4 py-3 text-slate-500">Days with entries</div>
+            {paceColumns.map((pace) => (
+              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
+                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+              </div>
+            ))}
+          </div>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
+            <div className="px-4 py-3 text-slate-500">Average pace</div>
+            {paceColumns.map((pace) => (
+              <div
+                key={pace.periodDays}
+                className="px-4 py-3 font-semibold text-slate-950"
+              >
+                {formatPaceMinutes(pace.averageMinutes)}
+              </div>
+            ))}
+          </div>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
+            <div className="px-4 py-3 text-slate-500">
               Reach {forecast.nextLevel} in
-            </p>
-            <p className="mt-1 text-xl font-black text-slate-950">
-              {forecast.sevenDayEstimate
-                ? `≈ ${formatCalendarDuration(forecast.sevenDayEstimate.duration)}`
-                : "Not available"}
-            </p>
+            </div>
+            {paceColumns.map((pace) => (
+              <div
+                key={pace.periodDays}
+                className="px-4 py-3 font-semibold text-slate-950"
+              >
+                {pace.estimate
+                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                  : "Not available"}
+              </div>
+            ))}
           </div>
-          <div className="rounded-2xl bg-white/80 p-4">
-            <p className="text-sm text-slate-500">Estimated date</p>
-            <p className="mt-1 text-xl font-black text-slate-950">
-              {forecast.sevenDayEstimate
-                ? formatEstimatedMonth(forecast.sevenDayEstimate.estimatedDate)
-                : "Not available"}
-            </p>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr]">
+            <div className="px-4 py-3 text-slate-500">Estimated date</div>
+            {paceColumns.map((pace) => (
+              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
+                {pace.estimate
+                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                  : "Not available"}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <summary className="cursor-pointer font-bold text-slate-700">
-          How this estimate works
+          How we calculate this
         </summary>
         <p className="mt-3 leading-7 text-slate-600">
           {STUDY_TIME_DISCLOSURE_INTRO}
