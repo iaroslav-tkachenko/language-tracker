@@ -9,6 +9,7 @@ import {
   Clock3,
   Flame,
   Gauge,
+  GraduationCap,
   LogOut,
   Pencil,
   Plus,
@@ -29,6 +30,10 @@ import {
 } from "@/app/dashboard/actions";
 import { ActivityIcon } from "@/components/activities/activity-icon";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
+import {
+  CefrLevelPrompt,
+  MissingLevelBubble,
+} from "@/components/cefr/cefr-level-prompt";
 import {
   fromDateKey,
   getCalendarCells,
@@ -63,6 +68,7 @@ type BoardWorkspaceProps = {
   selectedDate: string;
   year: number;
   todayKey: string;
+  hasCurrentCefrLevel: boolean;
 };
 
 const quickDurations = [10, 15, 20, 30, 45, 60, 90, 120];
@@ -117,6 +123,7 @@ export function BoardWorkspace({
   selectedDate,
   year,
   todayKey,
+  hasCurrentCefrLevel,
 }: BoardWorkspaceProps) {
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
@@ -427,6 +434,14 @@ export function BoardWorkspace({
               <BookOpen aria-hidden="true" className="size-5" />
               Vocabulary
             </Link>
+            <Link
+              href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+              className="relative flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+            >
+              {!hasCurrentCefrLevel && <MissingLevelBubble />}
+              <GraduationCap aria-hidden="true" className="size-5" />
+              Level
+            </Link>
           </nav>
 
           <div className="flex items-center gap-1">
@@ -465,7 +480,7 @@ export function BoardWorkspace({
         </div>
         <nav
           aria-label="Mobile primary"
-          className="grid grid-cols-3 border-t border-slate-100 sm:hidden"
+          className="grid grid-cols-4 border-t border-slate-100 sm:hidden"
         >
           <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
             <Clock3 aria-hidden="true" className="size-4.5" />
@@ -479,6 +494,14 @@ export function BoardWorkspace({
             Vocabulary
           </Link>
           <Link
+            href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+          >
+            {!hasCurrentCefrLevel && <MissingLevelBubble />}
+            <GraduationCap aria-hidden="true" className="size-4.5" />
+            Level
+          </Link>
+          <Link
             href={`/statistics?board=${selectedBoard.id}&year=${year}&today=${todayKey}`}
             className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
@@ -489,6 +512,16 @@ export function BoardWorkspace({
       </header>
 
       <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
+        {!hasCurrentCefrLevel && (
+          <div className="mb-6">
+            <CefrLevelPrompt
+              href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+              context="study"
+              accent="blue"
+            />
+          </div>
+        )}
+
         <section aria-labelledby="year-heading">
           <div className="flex items-center justify-center gap-4">
             <button

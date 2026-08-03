@@ -9,6 +9,7 @@ import {
   Clock3,
   Flame,
   Gauge,
+  GraduationCap,
   LogOut,
   Settings,
   Trophy,
@@ -19,6 +20,10 @@ import { useMemo, useState } from "react";
 
 import { ActivityIcon } from "@/components/activities/activity-icon";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
+import {
+  CefrLevelPrompt,
+  MissingLevelBubble,
+} from "@/components/cefr/cefr-level-prompt";
 import {
   calculateStudyStatistics,
   getActivityTotals,
@@ -54,6 +59,7 @@ type StatisticsWorkspaceProps = {
   activities: ActivitySummary[];
   entries: StudyStatisticsEntry[];
   vocabularyTotals: VocabularyDailyTotal[];
+  hasCurrentCefrLevel: boolean;
   selectedYear: number;
   todayKey: string;
 };
@@ -319,6 +325,7 @@ export function StatisticsWorkspace({
   activities,
   entries,
   vocabularyTotals,
+  hasCurrentCefrLevel,
   selectedYear,
   todayKey,
 }: StatisticsWorkspaceProps) {
@@ -439,6 +446,14 @@ export function StatisticsWorkspace({
               <BookOpen aria-hidden="true" className="size-5" />
               Vocabulary
             </Link>
+            <Link
+              href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+              className="relative flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-violet-700"
+            >
+              {!hasCurrentCefrLevel && <MissingLevelBubble />}
+              <GraduationCap aria-hidden="true" className="size-5" />
+              Level
+            </Link>
           </nav>
 
           <div className="flex items-center gap-1">
@@ -472,7 +487,7 @@ export function StatisticsWorkspace({
         </div>
         <nav
           aria-label="Mobile primary"
-          className="grid grid-cols-3 border-t border-slate-100 md:hidden"
+          className="grid grid-cols-4 border-t border-slate-100 md:hidden"
         >
           <Link
             href={`/dashboard?board=${selectedBoard.id}&date=${todayKey}&today=${todayKey}`}
@@ -488,6 +503,14 @@ export function StatisticsWorkspace({
             <BookOpen aria-hidden="true" className="size-4.5" />
             Vocabulary
           </Link>
+          <Link
+            href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+          >
+            {!hasCurrentCefrLevel && <MissingLevelBubble />}
+            <GraduationCap aria-hidden="true" className="size-4.5" />
+            Level
+          </Link>
           <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
@@ -496,6 +519,16 @@ export function StatisticsWorkspace({
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        {!hasCurrentCefrLevel && (
+          <div className="mb-6">
+            <CefrLevelPrompt
+              href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
+              context="statistics"
+              accent="violet"
+            />
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold tracking-wide text-blue-600 uppercase">

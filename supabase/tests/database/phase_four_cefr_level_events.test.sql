@@ -169,7 +169,7 @@ select throws_ok(
     )
   $$,
   '23514',
-  'Adjacent level updates cannot use the same level',
+  'Choose a level different from the current one.',
   'chronologically adjacent duplicate levels are rejected'
 );
 
@@ -239,7 +239,7 @@ select throws_ok(
     )
   $$,
   '23514',
-  'Adjacent level updates cannot use the same level',
+  'Choose a level different from the current one.',
   'editing cannot create adjacent duplicate levels'
 );
 
@@ -338,7 +338,7 @@ select throws_ok(
     )
   $$,
   '23514',
-  'Adjacent level updates cannot use the same level',
+  'Choose a level different from the current one.',
   'deleting a separating event cannot leave adjacent duplicate levels'
 );
 

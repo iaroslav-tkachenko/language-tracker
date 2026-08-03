@@ -302,6 +302,10 @@ All statistics are scoped to the selected board.
 - Estimated totals are unavailable without a current declaration. They are
   recalculated after any CEFR-history change and never rewrite Study Time or
   Vocabulary records.
+- When no current CEFR declaration exists, Study Time, Vocabulary, and
+  Statistics each show a compact prompt to set the current language level. The
+  prompt explains that adding a level unlocks more detailed progress analytics
+  and links to the board-scoped CEFR management screen.
 
 ### 10.2 Active days and averages
 
@@ -562,6 +566,9 @@ materially change progress. CEFR descriptions are based on the
 - A board-scoped CEFR management screen is reachable from Study Time,
   Vocabulary, Statistics, and Settings. Settings also manages boards and the
   global activity catalog.
+- If the selected board has no current CEFR declaration, the `Level` navigation
+  item shows a small notification bubble with an exclamation mark. The bubble is
+  hidden after the user adds the first current level for that board.
 - Destructive actions use clear labels and confirmation where historical data would become hidden.
 - Signing out always requires explicit confirmation; cancellation preserves the
   current authenticated screen.

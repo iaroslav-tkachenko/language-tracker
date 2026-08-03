@@ -460,6 +460,7 @@ export async function createCefrLevelEvent(
 
   revalidatePath("/dashboard");
   revalidatePath("/statistics");
+  revalidatePath("/cefr");
   return { status: "success", message: "Level update saved." };
 }
 
@@ -494,6 +495,7 @@ export async function updateCefrLevelEvent(
 
   revalidatePath("/dashboard");
   revalidatePath("/statistics");
+  revalidatePath("/cefr");
   return { status: "success", message: "Level update saved." };
 }
 
@@ -514,6 +516,7 @@ export async function deleteCefrLevelEvent(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/statistics");
+  revalidatePath("/cefr");
 }
 
 export async function archiveLanguageBoard(formData: FormData) {

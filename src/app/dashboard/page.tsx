@@ -76,6 +76,27 @@ export default async function DashboardPage({
 
   const year = Number(requestedDate.slice(0, 4));
 
+  const currentCefrLevelResult = await supabase
+    .from("cefr_level_events")
+    .select("id")
+    .eq("board_id", selectedBoard.id)
+    .lte("effective_date", localToday)
+    .order("effective_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (currentCefrLevelResult.error) {
+    console.error("Supabase CEFR current level read failed", {
+      code: currentCefrLevelResult.error.code,
+      message: currentCefrLevelResult.error.message,
+    });
+    throw new Error("Language level could not be loaded.");
+  }
+
+  const hasCurrentCefrLevel = currentCefrLevelResult.data !== null;
+
   if (tracker === "vocabulary") {
     const { data: vocabularyTotals, error: vocabularyError } = await supabase
       .from("vocabulary_daily_totals")
@@ -103,6 +124,7 @@ export default async function DashboardPage({
         selectedDate={requestedDate}
         year={year}
         todayKey={localToday}
+        hasCurrentCefrLevel={hasCurrentCefrLevel}
       />
     );
   }
@@ -179,6 +201,7 @@ export default async function DashboardPage({
       selectedDate={requestedDate}
       year={year}
       todayKey={localToday}
+      hasCurrentCefrLevel={hasCurrentCefrLevel}
     />
   );
 }

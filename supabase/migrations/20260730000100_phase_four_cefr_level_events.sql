@@ -66,7 +66,7 @@ begin
     ) as ordered_events
     where previous_level = level
   ) then
-    raise exception 'Adjacent level updates cannot use the same level'
+    raise exception 'Choose a level different from the current one.'
       using errcode = 'check_violation';
   end if;
 end;

@@ -63,35 +63,51 @@ export default async function StatisticsPage({
       ? parsedYear
       : Number(localToday.slice(0, 4));
 
-  const [activitiesResult, entriesResult, vocabularyTotalsResult] =
-    await Promise.all([
-      supabase
-        .from("activity_types")
-        .select("id, name, system_key")
-        .order("position")
-        .order("created_at"),
-      supabase
-        .from("study_entries")
-        .select("study_date, duration_minutes, activity_type_id")
-        .eq("board_id", selectedBoard.id)
-        .order("study_date")
-        .order("created_at"),
-      supabase
-        .from("vocabulary_daily_totals")
-        .select("study_date, words_learned")
-        .eq("board_id", selectedBoard.id)
-        .order("study_date"),
-    ]);
+  const [
+    activitiesResult,
+    entriesResult,
+    vocabularyTotalsResult,
+    currentCefrLevelResult,
+  ] = await Promise.all([
+    supabase
+      .from("activity_types")
+      .select("id, name, system_key")
+      .order("position")
+      .order("created_at"),
+    supabase
+      .from("study_entries")
+      .select("study_date, duration_minutes, activity_type_id")
+      .eq("board_id", selectedBoard.id)
+      .order("study_date")
+      .order("created_at"),
+    supabase
+      .from("vocabulary_daily_totals")
+      .select("study_date, words_learned")
+      .eq("board_id", selectedBoard.id)
+      .order("study_date"),
+    supabase
+      .from("cefr_level_events")
+      .select("id")
+      .eq("board_id", selectedBoard.id)
+      .lte("effective_date", localToday)
+      .order("effective_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   if (
     activitiesResult.error ||
     entriesResult.error ||
-    vocabularyTotalsResult.error
+    vocabularyTotalsResult.error ||
+    currentCefrLevelResult.error
   ) {
     console.error("Supabase statistics read failed", {
       activities: activitiesResult.error?.message,
       entries: entriesResult.error?.message,
       vocabularyTotals: vocabularyTotalsResult.error?.message,
+      currentCefrLevel: currentCefrLevelResult.error?.message,
     });
     throw new Error("Statistics could not be loaded.");
   }
@@ -114,6 +130,7 @@ export default async function StatisticsPage({
         studyDate: total.study_date,
         wordsLearned: total.words_learned,
       }))}
+      hasCurrentCefrLevel={currentCefrLevelResult.data !== null}
       selectedYear={selectedYear}
       todayKey={localToday}
     />

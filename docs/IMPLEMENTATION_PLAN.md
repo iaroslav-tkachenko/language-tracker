@@ -230,6 +230,10 @@ production CEFR UI work.
 - Show history newest first with a `Current` marker.
 - Implement edit and confirmed delete. Deleting the current event promotes the
   preceding event; deleting the last event restores the no-level state.
+- In the no-level state, show an exclamation notification bubble on the `Level`
+  navigation item and provide compact prompts from Study Time, Vocabulary, and
+  Statistics that explain a current level unlocks more detailed progress
+  analytics.
 
 **Review gate:** provide a clickable desktop/mobile create/edit/delete flow.
 
@@ -287,6 +291,10 @@ production CEFR UI work.
 - Add compact current-to-next summaries to Study Time and Vocabulary.
 - Add detailed CEFR information to the existing combined Statistics
   destination.
+- Ensure a newly added CEFR history event visibly affects the product after the
+  forecast milestones land: Study Time, Vocabulary, and Statistics should stop
+  showing no-level prompts and should show the current level plus the relevant
+  forecast or estimated-total analytics.
 - Add the approved immutable ten-hour weekly recommendation model for A0 through
   C1, including the circular allocation chart, derived weekly hours, and
   product-authored advice in both the CEFR and Statistics destinations.
