@@ -730,7 +730,9 @@ export function VocabularyWorkspace({
               Statistics
             </Link>
             <Link
-              href="/settings"
+              href={`/settings?returnTo=${encodeURIComponent(
+                `/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}&tracker=vocabulary`,
+              )}`}
               aria-label="Settings"
               className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
@@ -867,7 +869,6 @@ export function VocabularyWorkspace({
           <div className="mb-6">
             <CefrLevelPrompt
               href={`/cefr?board=${activeBoard.id}&today=${todayKey}`}
-              context="vocabulary"
               accent="green"
             />
           </div>

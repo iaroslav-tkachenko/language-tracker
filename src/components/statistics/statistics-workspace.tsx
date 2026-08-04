@@ -886,7 +886,9 @@ export function StatisticsWorkspace({
               Statistics
             </span>
             <Link
-              href="/settings"
+              href={`/settings?returnTo=${encodeURIComponent(
+                `/statistics?board=${selectedBoard.id}&year=${selectedYear}&today=${todayKey}`,
+              )}`}
               aria-label="Settings"
               className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             >
@@ -947,7 +949,6 @@ export function StatisticsWorkspace({
           <div className="mb-6">
             <CefrLevelPrompt
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              context="statistics"
               accent="violet"
             />
           </div>

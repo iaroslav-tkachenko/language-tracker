@@ -73,8 +73,8 @@ select is(
 );
 select is(
   (select count(*) from public.activity_types),
-  14::bigint,
-  'new auth users receive seven standard activities each'
+  18::bigint,
+  'new auth users receive nine standard activities each'
 );
 
 insert into public.language_boards (id, user_id, name)
@@ -88,8 +88,8 @@ insert into public.activity_types (id, user_id, name, position)
 values (
   '12000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001',
-  'Shadowing',
-  7
+  'Conversation practice',
+  9
 );
 
 set local role authenticated;
@@ -106,8 +106,19 @@ select is(
 );
 select is(
   (select count(*) from public.activity_types),
-  8::bigint,
+  10::bigint,
   'user A can select only their own activities'
+);
+
+select throws_ok(
+  $$
+    update public.activity_types
+    set archived_at = statement_timestamp()
+    where name = 'Reading'
+  $$,
+  '23514',
+  'System activities cannot be archived',
+  'system activities cannot be archived'
 );
 
 select throws_ok(
@@ -135,7 +146,7 @@ select lives_ok(
   'user A can create a board through the guarded function'
 );
 select lives_ok(
-  $$ select public.create_or_restore_activity_type('YouTube') $$,
+  $$ select public.create_or_restore_activity_type('Language exchange') $$,
   'user A can create a custom activity through the guarded function'
 );
 
@@ -183,7 +194,7 @@ select throws_ok(
 
 update public.activity_types
 set archived_at = statement_timestamp()
-where name = 'Shadowing';
+where name = 'Conversation practice';
 
 select throws_ok(
   $$
@@ -208,14 +219,14 @@ select throws_ok(
 );
 
 select lives_ok(
-  $$ select public.create_or_restore_activity_type('shadowing') $$,
+  $$ select public.create_or_restore_activity_type('conversation practice') $$,
   'a case-insensitive archived-name match restores the activity'
 );
 select is(
   (
     select count(*)
     from public.activity_types
-    where lower(name) = 'shadowing' and archived_at is null
+    where lower(name) = 'conversation practice' and archived_at is null
   ),
   1::bigint,
   'restoration reuses one active activity identity'

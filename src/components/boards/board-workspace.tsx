@@ -753,27 +753,21 @@ export function BoardWorkspace({
               Statistics
             </Link>
             <Link
-              href="/settings"
+              href={`/settings?returnTo=${encodeURIComponent(
+                `/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}`,
+              )}`}
               aria-label="Settings"
               className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
               <Settings aria-hidden="true" className="size-4.5" />
             </Link>
-            <ConfirmSignOutForm className="sm:hidden">
+            <ConfirmSignOutForm>
               <button
                 type="submit"
                 aria-label="Sign out"
                 className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 <LogOut aria-hidden="true" className="size-4.5" />
-              </button>
-            </ConfirmSignOutForm>
-            <ConfirmSignOutForm className="hidden sm:block">
-              <button
-                type="submit"
-                className="min-h-9 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-              >
-                Sign out
               </button>
             </ConfirmSignOutForm>
           </div>
@@ -881,7 +875,6 @@ export function BoardWorkspace({
           <div className="mb-6">
             <CefrLevelPrompt
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              context="study"
               accent="blue"
             />
           </div>

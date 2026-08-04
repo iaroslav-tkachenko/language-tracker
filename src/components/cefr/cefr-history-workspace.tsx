@@ -370,7 +370,9 @@ export function CefrHistoryWorkspace({
               Statistics
             </Link>
             <Link
-              href="/settings"
+              href={`/settings?returnTo=${encodeURIComponent(
+                `/cefr?board=${selectedBoard.id}&today=${todayKey}`,
+              )}`}
               aria-label="Settings"
               className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             >

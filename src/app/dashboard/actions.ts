@@ -128,6 +128,45 @@ export async function createLanguageBoard(
   return { status: "success", message: `${parsed.data} is ready.` };
 }
 
+export async function renameLanguageBoard(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsedId = resourceIdSchema.safeParse(formData.get("boardId"));
+  const parsedName = parseName(formData);
+  if (!parsedId.success || !parsedName.success) {
+    return {
+      status: "error",
+      message:
+        parsedName.error?.issues[0]?.message ?? "Invalid language board.",
+    };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase
+    .from("language_boards")
+    .update({ name: parsedName.data })
+    .eq("id", parsedId.data)
+    .is("archived_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { status: "error", message: providerMessage("board", error) };
+  }
+  if (!data) {
+    return { status: "error", message: "The language board could not be found." };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  revalidatePath("/cefr");
+  revalidatePath("/settings");
+  return { status: "success", message: "Language renamed." };
+}
+
 export async function createLanguageBoardAndRedirect(
   _state: ResourceActionState,
   formData: FormData,
@@ -575,6 +614,17 @@ export async function archiveActivityType(formData: FormData) {
 
   const supabase = await verifiedClient();
   if (!supabase) redirect("/sign-in");
+
+  const { data: activity, error: activityError } = await supabase
+    .from("activity_types")
+    .select("id, system_key")
+    .eq("id", parsed.data)
+    .maybeSingle();
+
+  if (activityError || !activity) throw new Error("The activity could not be found.");
+  if (activity.system_key !== null) {
+    throw new Error("System activities cannot be removed.");
+  }
 
   const { data, error } = await supabase
     .from("activity_types")
