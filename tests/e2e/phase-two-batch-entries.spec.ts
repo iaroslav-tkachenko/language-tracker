@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { createLanguageBoardFromSettings } from "./helpers";
+
 const email = process.env.E2E_USER_EMAIL;
 const password = process.env.E2E_USER_PASSWORD;
 
@@ -24,13 +26,8 @@ test.describe("Phase 2 date-range sessions", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     await page.goto("/settings");
-    await page.getByLabel("Add language").fill(boardName);
-    await page.getByRole("button", { name: "Add language" }).click();
-    await expect(page.getByRole("status")).toContainText(
-      `${boardName} is ready.`,
-    );
-    await page.reload();
-    await page.getByRole("link", { name: boardName }).click();
+    const boardLink = await createLanguageBoardFromSettings(page, boardName);
+    await boardLink.click();
 
     async function createRange() {
       await page.getByRole("button", { name: "Add study session" }).click();

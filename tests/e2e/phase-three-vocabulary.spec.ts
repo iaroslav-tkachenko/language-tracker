@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { createLanguageBoardFromSettings } from "./helpers";
+
 const email = process.env.E2E_USER_EMAIL;
 const password = process.env.E2E_USER_PASSWORD;
 
@@ -12,7 +14,7 @@ test.describe("Phase 3 Vocabulary", () => {
   test("completes vocabulary, batch, navigation, and statistics journeys", async ({
     page,
   }, testInfo) => {
-    const suffix = testInfo.project.name;
+    const suffix = `${testInfo.project.name} retry ${testInfo.retry}`;
     const boardName = `Vocabulary ${suffix}`;
     const today = "2026-07-26";
     const firstDate = "2026-07-20";
@@ -26,13 +28,7 @@ test.describe("Phase 3 Vocabulary", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     await page.goto("/settings");
-    await page.getByLabel("Add language").fill(boardName);
-    await page.getByRole("button", { name: "Add language" }).click();
-    await expect(page.getByRole("status")).toContainText(
-      `${boardName} is ready.`,
-    );
-    await page.reload();
-    const boardLink = page.getByRole("link", { name: boardName });
+    const boardLink = await createLanguageBoardFromSettings(page, boardName);
     const boardHref = await boardLink.getAttribute("href");
     const boardId = boardHref
       ? new URL(boardHref, "http://127.0.0.1:3000").searchParams.get("board")
@@ -99,18 +95,24 @@ test.describe("Phase 3 Vocabulary", () => {
       : page.getByRole("link", { name: "Statistics" });
     await statisticsLink.click();
     await expect(
-      page.getByRole("heading", { name: "Learning statistics" }),
+      page.getByRole("heading", { name: "Your learning overview" }),
     ).toBeVisible();
 
     const selectedYearSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Selected year" }),
     });
+    const selectedYearVocabulary = selectedYearSection
+      .locator("div")
+      .filter({
+        has: page.getByRole("heading", { name: "New words" }),
+      })
+      .first();
     await expect(
-      selectedYearSection
+      selectedYearVocabulary
         .locator("article")
         .filter({ hasText: "Total in 2026" })
-        .filter({ hasText: "8 words" }),
-    ).toContainText("8 words");
+        .first(),
+    ).toContainText(/8\s*words/);
     await expect(
       selectedYearSection.getByText("Active days in 2026"),
     ).toBeVisible();
@@ -122,18 +124,18 @@ test.describe("Phase 3 Vocabulary", () => {
       currentProgressSection
         .locator("article")
         .filter({ hasText: "All-time total" }),
-    ).toContainText("8 words");
+    ).toContainText(/8\s*words/);
     await expect(
       currentProgressSection
         .locator("article")
         .filter({ hasText: "Current week" })
-        .filter({ hasText: "8 words" }),
+        .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
     await expect(
       currentProgressSection
         .locator("article")
         .filter({ hasText: "Current month" })
-        .filter({ hasText: "8 words" }),
+        .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
 
     const wordsChart = page.locator("section").filter({

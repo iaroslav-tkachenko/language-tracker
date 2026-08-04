@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -61,6 +61,15 @@ export default async function SettingsPage() {
             <ArrowLeft aria-hidden="true" className="size-5" />
             Study Time
           </Link>
+          {boards[0] && (
+            <Link
+              href={`/cefr?board=${boards[0].id}`}
+              className="flex min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-violet-700 hover:bg-violet-50"
+            >
+              <GraduationCap aria-hidden="true" className="size-5" />
+              Language level
+            </Link>
+          )}
           <ConfirmSignOutForm>
             <button
               type="submit"

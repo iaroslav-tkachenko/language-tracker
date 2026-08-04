@@ -9,6 +9,7 @@ import {
   Clock3,
   Flame,
   Gauge,
+  GraduationCap,
   LogOut,
   Pencil,
   Plus,
@@ -28,12 +29,30 @@ import {
 } from "@/app/dashboard/actions";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import {
+  CefrLevelPrompt,
+  MissingLevelBubble,
+} from "@/components/cefr/cefr-level-prompt";
+import {
   fromDateKey,
   getCalendarCells,
   getCalendarRangeCells,
   shiftDate,
   toDateKey,
 } from "@/lib/dates/study-calendar";
+import {
+  formatCalendarDuration,
+  formatEstimatedMonth,
+} from "@/lib/cefr/study-time";
+import {
+  formatVocabularyPace,
+  formatVocabularyWords,
+  VOCABULARY_DISCLOSURE_INTRO,
+  VOCABULARY_DISCLOSURE_ITEMS,
+  VOCABULARY_DISCLOSURE_NOTE,
+  VOCABULARY_MODEL_VERSION,
+  type VocabularyForecast,
+  type VocabularyPaceEstimate,
+} from "@/lib/cefr/vocabulary";
 import { getInclusiveDateCount } from "@/lib/resources/validation";
 import {
   calculateVocabularyStatistics,
@@ -54,6 +73,8 @@ type VocabularyWorkspaceProps = {
   selectedDate: string;
   year: number;
   todayKey: string;
+  hasCurrentCefrLevel?: boolean;
+  vocabularyForecast?: VocabularyForecast;
   reviewMode?: boolean;
 };
 
@@ -90,6 +111,52 @@ function formatAverage(value: number) {
   });
 }
 
+function SummaryValue({
+  value,
+  accentClass = "text-emerald-700",
+}: {
+  value: string | number;
+  accentClass?: string;
+}) {
+  const tokens = String(value).split(" ");
+
+  return (
+    <strong
+      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 text-2xl leading-tight ${accentClass}`}
+    >
+      {tokens.map((token, index) => {
+        const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
+        if (compactMatch) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="inline-flex items-baseline"
+            >
+              <span>{compactMatch[1]}</span>
+              <span className="ml-0.5 text-[0.65em] font-bold text-slate-500">
+                {compactMatch[2]}
+              </span>
+            </span>
+          );
+        }
+
+        if (/^[a-zA-Z]+$/.test(token)) {
+          return (
+            <span
+              key={`${token}-${index}`}
+              className="text-[0.65em] font-bold text-slate-500"
+            >
+              {token}
+            </span>
+          );
+        }
+
+        return <span key={`${token}-${index}`}>{token}</span>;
+      })}
+    </strong>
+  );
+}
+
 function createOperationId() {
   if (typeof window.crypto.randomUUID === "function") {
     return window.crypto.randomUUID();
@@ -108,6 +175,206 @@ function createOperationId() {
   ].join("-");
 }
 
+function VocabularyForecastCard({
+  forecast,
+}: {
+  forecast: VocabularyForecast;
+}) {
+  if (forecast.status === "no-level") return null;
+
+  if (forecast.status === "highest-level") {
+    return (
+      <section className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-4">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700">
+            <BookOpen aria-hidden="true" className="size-6" />
+          </span>
+          <div>
+            <h2 className="text-2xl font-black text-slate-950">
+              Vocabulary progress
+            </h2>
+            <p className="mt-2 max-w-3xl leading-7 text-slate-700">
+              {forecast.currentLevel} is the highest level in this model, so
+              there is no next-level forecast. Your estimated vocabulary size is
+              still visible.
+            </p>
+            <p className="mt-4 text-sm font-bold tracking-wide text-slate-500 uppercase">
+              Estimated vocabulary size
+            </p>
+            <p className="mt-1 text-3xl font-black text-slate-950">
+              &gt; {formatVocabularyWords(forecast.estimatedVocabularySize)}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const completedPercent = Math.round(forecast.progressRatio * 100);
+  const paceColumns: VocabularyPaceEstimate[] = [
+    forecast.sevenDayPace,
+    forecast.thirtyDayPace,
+  ];
+
+  return (
+    <section className="mt-6 rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-start gap-4">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+          <BookOpen aria-hidden="true" className="size-6" />
+        </span>
+        <div>
+          <h2 className="text-2xl font-black text-slate-950">
+            Vocabulary progress
+          </h2>
+          <p className="mt-1 text-slate-600">
+            Approximate progress from {forecast.currentLevel} to{" "}
+            {forecast.nextLevel}, based on words recorded since this level.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_1.2fr_1fr]">
+        <div>
+          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+            Current
+          </p>
+          <p className="mt-2 flex items-center gap-3">
+            <span className="flex size-13 items-center justify-center rounded-full bg-slate-950 text-lg font-black text-white">
+              {forecast.currentLevel}
+            </span>
+            <span className="text-xl text-slate-600">
+              ≈ {formatVocabularyWords(forecast.baselineWords)}
+            </span>
+          </p>
+        </div>
+
+        <div className="text-left lg:text-center">
+          <p className="text-sm font-black tracking-wide text-emerald-700 uppercase">
+            Progress
+          </p>
+          <p className="mt-2 text-3xl font-black text-slate-950">
+            +{formatVocabularyWords(forecast.eligibleWords)}
+          </p>
+          <p className="mt-1 text-xl text-slate-600">
+            ≈ {formatVocabularyWords(forecast.estimatedVocabularySize)} now
+          </p>
+        </div>
+
+        <div className="lg:text-right">
+          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+            Next
+          </p>
+          <p className="mt-2 flex items-center gap-3 lg:justify-end">
+            <span className="text-xl text-slate-600">
+              ≈ {formatVocabularyWords(forecast.nextLevelBaselineWords)} total
+            </span>
+            <span className="flex size-13 items-center justify-center rounded-full bg-slate-100 text-lg font-black text-slate-500">
+              {forecast.nextLevel}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-emerald-600"
+            style={{ width: `${completedPercent}%` }}
+          />
+        </div>
+        <p className="mt-3 text-center text-lg font-black text-emerald-700">
+          {completedPercent}% completed
+          <span className="px-2 text-slate-300">•</span>
+          <span className="text-slate-700">
+            ≈ {formatVocabularyWords(forecast.remainingWords)} left
+          </span>
+        </p>
+      </div>
+
+      <div className="mt-6 rounded-3xl border border-emerald-100 bg-emerald-50/70 p-4">
+        <h3 className="text-xl font-black text-emerald-700 sm:text-2xl">
+          Forecast to reach {forecast.nextLevel} with your current pace
+        </h3>
+        <p className="mt-1 text-slate-600">
+          Based on your activity across every calendar day in the last 7 and 30
+          days, including days with no entries.
+        </p>
+        <div className="mt-4 max-w-3xl overflow-x-auto rounded-2xl border border-emerald-100 bg-white/80">
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100 text-lg font-black text-emerald-700">
+            <div className="px-4 py-3 text-slate-500" />
+            {paceColumns.map((pace) => (
+              <div key={pace.periodDays} className="px-4 py-3">
+                Last {pace.periodDays} days
+              </div>
+            ))}
+          </div>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
+            <div className="px-4 py-3 text-slate-500">Active days</div>
+            {paceColumns.map((pace) => (
+              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
+                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+              </div>
+            ))}
+          </div>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
+            <div className="px-4 py-3 text-slate-500">Average pace</div>
+            {paceColumns.map((pace) => (
+              <div
+                key={pace.periodDays}
+                className="px-4 py-3 font-semibold text-slate-950"
+              >
+                {formatVocabularyPace(pace.averageWords)}
+              </div>
+            ))}
+          </div>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
+            <div className="px-4 py-3 text-slate-500">
+              Reach {forecast.nextLevel} in
+            </div>
+            {paceColumns.map((pace) => (
+              <div
+                key={pace.periodDays}
+                className="px-4 py-3 font-semibold text-slate-950"
+              >
+                {pace.estimate
+                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                  : "Not available"}
+              </div>
+            ))}
+          </div>
+          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr]">
+            <div className="px-4 py-3 text-slate-500">Estimated date</div>
+            {paceColumns.map((pace) => (
+              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
+                {pace.estimate
+                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                  : "Not available"}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <summary className="cursor-pointer font-bold text-slate-700">
+          How we calculate this
+        </summary>
+        <p className="mt-3 leading-7 text-slate-600">
+          {VOCABULARY_DISCLOSURE_INTRO}
+        </p>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+          {VOCABULARY_DISCLOSURE_ITEMS.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <p className="mt-3 leading-7 text-slate-600">
+          {VOCABULARY_DISCLOSURE_NOTE}
+        </p>
+      </details>
+    </section>
+  );
+}
+
 export function VocabularyWorkspace({
   boards,
   selectedBoard,
@@ -115,6 +382,11 @@ export function VocabularyWorkspace({
   selectedDate,
   year,
   todayKey,
+  hasCurrentCefrLevel = true,
+  vocabularyForecast = {
+    status: "no-level",
+    modelVersion: VOCABULARY_MODEL_VERSION,
+  },
   reviewMode = false,
 }: VocabularyWorkspaceProps) {
   const router = useRouter();
@@ -399,6 +671,14 @@ export function VocabularyWorkspace({
               <BookOpen aria-hidden="true" className="size-5" />
               Vocabulary
             </span>
+            <Link
+              href={`/cefr?board=${activeBoard.id}&today=${todayKey}`}
+              className="relative flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+            >
+              {!hasCurrentCefrLevel && <MissingLevelBubble />}
+              <GraduationCap aria-hidden="true" className="size-5" />
+              Level
+            </Link>
           </nav>
 
           <div className="flex items-center gap-1">
@@ -441,7 +721,7 @@ export function VocabularyWorkspace({
         </div>
         <nav
           aria-label="Mobile primary"
-          className="grid grid-cols-3 border-t border-slate-100 sm:hidden"
+          className="grid grid-cols-4 border-t border-slate-100 sm:hidden"
         >
           <Link
             href={
@@ -459,6 +739,14 @@ export function VocabularyWorkspace({
             Vocabulary
           </span>
           <Link
+            href={`/cefr?board=${activeBoard.id}&today=${todayKey}`}
+            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+          >
+            {!hasCurrentCefrLevel && <MissingLevelBubble />}
+            <GraduationCap aria-hidden="true" className="size-4.5" />
+            Level
+          </Link>
+          <Link
             href={
               reviewMode
                 ? "/statistics"
@@ -473,6 +761,16 @@ export function VocabularyWorkspace({
       </header>
 
       <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
+        {!hasCurrentCefrLevel && (
+          <div className="mb-6">
+            <CefrLevelPrompt
+              href={`/cefr?board=${activeBoard.id}&today=${todayKey}`}
+              context="vocabulary"
+              accent="green"
+            />
+          </div>
+        )}
+
         <section aria-labelledby="vocabulary-year-heading">
           <div className="flex items-center justify-center gap-4">
             <button
@@ -611,49 +909,57 @@ export function VocabularyWorkspace({
           className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-6"
         >
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="block text-2xl text-emerald-700">
-              {statistics.totalWords.toLocaleString("en")}
-            </strong>
+            <SummaryValue value={statistics.totalWords.toLocaleString("en")} />
             <span className="text-sm text-slate-500">Words ({activeYear})</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="block text-2xl text-emerald-700">
-              {statistics.activeDays}
-            </strong>
+            <SummaryValue value={statistics.activeDays} />
             <span className="text-sm text-slate-500">Active days</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Flame aria-hidden="true" className="size-5 text-orange-500" />
-              {statistics.currentStreak}{" "}
-              {statistics.currentStreak === 1 ? "day" : "days"}
-            </strong>
+              <SummaryValue
+                value={`${statistics.currentStreak} ${
+                  statistics.currentStreak === 1 ? "day" : "days"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">Current streak</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Trophy aria-hidden="true" className="size-5 text-amber-500" />
-              {statistics.longestStreak}{" "}
-              {statistics.longestStreak === 1 ? "day" : "days"}
-            </strong>
+              <SummaryValue
+                value={`${statistics.longestStreak} ${
+                  statistics.longestStreak === 1 ? "day" : "days"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">Longest streak</span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
-              {formatAverage(statistics.calendarDayAverage)}{" "}
-              {statistics.calendarDayAverage === 1 ? "word" : "words"}
-            </strong>
+              <SummaryValue
+                value={`${formatAverage(statistics.calendarDayAverage)} ${
+                  statistics.calendarDayAverage === 1 ? "word" : "words"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">
               Average / calendar day
             </span>
           </div>
           <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-center gap-1 text-2xl text-emerald-700">
+            <span className="inline-flex items-baseline justify-center gap-1">
               <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
-              {formatAverage(statistics.activeDayAverage)}{" "}
-              {statistics.activeDayAverage === 1 ? "word" : "words"}
-            </strong>
+              <SummaryValue
+                value={`${formatAverage(statistics.activeDayAverage)} ${
+                  statistics.activeDayAverage === 1 ? "word" : "words"
+                }`}
+              />
+            </span>
             <span className="block text-sm text-slate-500">
               Average / study day
             </span>
@@ -1042,6 +1348,8 @@ export function VocabularyWorkspace({
             </form>
           )}
         </section>
+
+        <VocabularyForecastCard forecast={vocabularyForecast} />
       </div>
     </main>
   );

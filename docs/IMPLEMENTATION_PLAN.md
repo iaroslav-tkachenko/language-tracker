@@ -2,8 +2,10 @@
 
 ## 1. Approval gate
 
-**Current status: Phases 0, 1, and 2 complete and merged; Phase 3 Vocabulary is
-implemented and visually approved, with pull-request verification in progress.**
+**Current status: Phases 0, 1, 2, and 3 are complete, visually approved, verified
+by green pull-request checks, and merged. Phase 4 is implemented through the
+integrated CEFR screen, Study Time and Vocabulary forecasts, Statistics
+analytics, weekly recommendations, and final local verification.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -145,9 +147,9 @@ browser jobs, and merged on July 26, 2026.
 
 ## 6. Phase 3 — Vocabulary tracker
 
-**Status:** implementation and desktop/mobile visual review approved by the
-project owner on July 26, 2026; automated pull-request verification is the
-remaining exit gate.
+**Status:** complete, approved by the project owner on desktop and mobile,
+verified by green application, database, and browser pull-request jobs, and
+merged on July 26, 2026.
 
 ### Work
 
@@ -182,48 +184,185 @@ remaining exit gate.
 - Vocabulary is a complete, private, board-scoped daily tracker with production-backed behavior.
 - The project owner approves the clickable Vocabulary milestone.
 
-## 7. Phase 4 — CEFR history, forecast, and combined analytics
+## 7. Phase 4 — CEFR history, dual forecast, and combined analytics
 
-### Milestone 4A — CEFR history
+Phase 4 followed explicit visual gates. Static desktop/mobile concepts were
+approved before production UI implementation, and each clickable vertical
+milestone was reviewed before the next product milestone.
 
-- Add `cefr_level_events` with board ownership, A1–C2 constraint, non-future effective-date mutation, RLS, and history index.
-- Add product-authored, sourced summaries of each CEFR level.
-- Implement manual declaration and chronological history; never auto-promote.
+### Phase 4A — Product model and UX approval
 
-### Milestone 4B — Approximate forecast
+**Status:** complete.
 
-- Version immutable Cambridge cumulative ranges and canonical midpoints in application reference data.
-- Calculate reference difference to the next level, eligible logged minutes since the current declaration, and remaining minutes with a zero floor.
-- Calculate pace over exactly seven calendar dates ending today, including zero-study dates.
-- Display approximate remaining hours and estimated date when possible.
-- Handle no declaration, zero pace, completed estimate, and C2 explicitly.
-- Display the Cambridge source, cross-language limitation, and non-assessment warning with every forecast.
-- Replace the isolated test-user fixture with the real current level and calculated estimated next-level date.
+- Reconcile the product specification, architecture, and implementation plan
+  before feature code changes.
+- Lock the application-defined `A0 — Absolute zero` state and sourced A1–C2
+  descriptions.
+- Version the approved immutable Study Time transition model and Vocabulary
+  midpoint model.
+- Document recorded versus estimated totals, consistent user-facing `words`
+  terminology, seven- and thirty-day pace, calendar-duration presentation,
+  disclosures, and unavailable states.
+- Prepare desktop/mobile concepts for the no-level state, board-scoped CEFR
+  management, history CRUD, both forecasts, Statistics integration, A0, C2,
+  zero pace, and reached-reference states.
 
-### Milestone 4C — Statistics integration
+**Review gate:** the project owner approves the visual direction before
+production CEFR UI work.
 
-- Add CEFR history and forecast information to the existing combined Study Time
-  and Vocabulary Statistics destination.
-- Present units, periods, and methodologies unambiguously.
-- Keep `Top activity` and latest-seven-day actual allocation in detailed statistics.
+### Phase 4B — Data ownership and safe history mutations
 
-### Deferred within Phase 4
+**Status:** complete.
 
-- Do not implement vocabulary-to-CEFR word-count cutoffs until the owner supplies and approves their immutable values.
-- Do not implement ideal activity distributions until the owner supplies and approves the per-level model and methodology.
-- Users will not edit either reference model.
+- Add `cefr_level_events` with composite board ownership, A0–C2 constraint,
+  non-future effective dates, one event per board/date, history index, RLS, and
+  generated database types.
+- Implement owned create/edit/delete functions. Reject an occupied date rather
+  than overwriting its event.
+- Reject chronologically adjacent duplicate levels while allowing a
+  non-adjacent return such as `B1 → B2 → B1`.
+- Preserve deterministic reverse-chronological history and derive current level
+  from the greatest effective date.
+- Cover concurrency, regression, deletion, every ownership path, and RLS before
+  production UI depends on the table.
 
-### Critical verification
+### Phase 4C — Clickable CEFR history
 
-- Historical ordering, same-day update behavior, level regression/reassessment, and cross-user isolation.
-- Cambridge midpoint differences, effective-date subtraction, seven-day zero-inclusive pace, rounding, zero remaining, zero pace, and C2.
-- Copy makes clear that the level is self-declared and the forecast is approximate.
+**Status:** complete.
+
+- Add a board-scoped CEFR management destination reachable from Study Time,
+  Vocabulary, Statistics, and Settings.
+- Implement no-level CTA, A0–C2 selection, default-today date input, sourced
+  level descriptions, and actionable invalid-date/conflict errors.
+- Show history newest first with a `Current` marker.
+- Implement edit and confirmed delete. Deleting the current event promotes the
+  preceding event; deleting the last event restores the no-level state.
+- In the no-level state, show an exclamation notification bubble on the `Level`
+  navigation item and provide compact prompts from Study Time, Vocabulary, and
+  Statistics that explain a current level unlocks more detailed progress
+  analytics.
+
+**Review gate:** provide a clickable desktop/mobile create/edit/delete flow.
+
+### Phase 4D — Study Time forecast, seven-day milestone
+
+**Status:** complete.
+
+- Store the approved transition ranges and exact calculation differences as
+  versioned immutable application data.
+- Derive the current-level baseline by summing transition differences from A0.
+- Calculate eligible non-future minutes from the current declaration's
+  effective date, remaining transition minutes with a zero floor, and estimated
+  total learning time.
+- Calculate pace over exactly seven calendar dates ending today, including
+  zero-study dates.
+- Present remaining hours, progress, approximate years/months/days, estimated
+  month/year, methodology, and disclosure.
+- Handle no declaration, zero pace, reached reference, A0, and C2 without
+  automatic promotion.
+
+**Review gate:** provide a clickable Study Time forecast on desktop and mobile.
+
+### Phase 4E — Vocabulary forecast, seven-day milestone
+
+**Status:** complete.
+
+- Store the approved A0–C2 vocabulary ranges and calculation midpoints as a
+  separate versioned immutable model.
+- Calculate eligible non-future recorded words from the current declaration's
+  effective date, remaining midpoint difference in words with a zero floor, and
+  estimated vocabulary size.
+- Calculate pace over exactly seven calendar dates ending today, including
+  zero-word dates.
+- Use `words` consistently across tracker, heatmap, statistics, CEFR reference
+  intervals, estimated totals, and forecast copy.
+- Present progress, remaining words, approximate years/months/days, estimated
+  month/year, methodology, and disclosure.
+- Keep the current-level baseline, recorded increment, estimated total,
+  next-level cumulative reference, completed percentage, and absolute remainder
+  in one progress visualization; do not show the raw interval size in the
+  primary UI.
+- Handle no declaration, zero pace, reached reference, A0, and C2 independently
+  of the Study Time forecast.
+
+**Review gate:** provide a clickable Vocabulary forecast on desktop and mobile.
+
+### Phase 4F — Thirty-day pace comparison
+
+**Status:** complete.
+
+- Add an independent Study Time pace over today and the previous 29 calendar
+  dates, including zeros.
+- Add an independent Vocabulary pace over the same calendar window.
+- Present seven- and thirty-day forecasts with explicit units and period labels.
+- Keep one forecast available when the other has zero pace.
+
+### Phase 4G — Board and Statistics integration
+
+**Status:** complete.
+
+- Replace the isolated Phase 1 CEFR fixture with the real current declaration
+  and tracker-appropriate forecast.
+- Add compact current-to-next summaries to Study Time and Vocabulary.
+- Add detailed CEFR information to the existing combined Statistics
+  destination.
+- Ensure a newly added CEFR history event visibly affects the product after the
+  forecast milestones land: Study Time, Vocabulary, and Statistics should stop
+  showing no-level prompts and should show the current level plus the relevant
+  forecast or estimated-total analytics.
+- Add the approved immutable ten-hour weekly recommendation model for A0 through
+  C1, including the circular allocation chart, derived weekly hours, and
+  product-authored advice in both the CEFR and Statistics destinations.
+- Distinguish the four user-facing metrics: `Tracked study time`, `Estimated
+learning time`, `Tracked words`, and `Estimated words known`.
+- Show Study Time and Vocabulary progress, remaining units, seven/thirty-day
+  estimates, history access, model versions, methodologies, and disclosures.
+- Keep `Top activity` and latest-seven-day actual allocation in detailed
+  statistics.
+
+**Review gate:** provide the complete integrated desktop/mobile flow for product
+owner approval.
+
+### Phase 4H — Verification, accessibility, and documentation
+
+**Status:** complete for local application verification and documentation.
+Database and browser checks remain environment-dependent and must be rerun in
+CI or a clean local Supabase/browser stack before merge.
+
+- Unit-test all transition/midpoint differences, derived baselines, effective
+  date subtraction, estimated totals, seven/thirty-day zero-inclusive pace,
+  calendar-duration formatting, rounding, A0, zero remaining, zero pace, and C2.
+- pgTAP-test constraints, concurrency, occupied-date rejection, adjacent-level
+  validation, create/edit/delete, history ordering, and cross-user isolation.
+- Playwright-test history CRUD, regression/non-adjacent return, both forecast
+  models, all unavailable states, navigation, and combined Statistics on
+  desktop and mobile.
+- Run formatting, linting, strict type checking, unit tests, database tests,
+  browser tests, and the production build.
+- Complete responsive, keyboard, touch, screen-reader, and non-color manual
+  checks.
+- Document reference-model versions, formulas, rounding, sources, limitations,
+  and deferred work.
+
+### Fixed recommendation model within Phase 4
+
+- The owner approved the per-level percentages, ten-hour reference week, and
+  advice copy on July 27, 2026.
+- Store the recommendation model as immutable versioned application reference
+  data. Users do not edit it.
+- Treat the mix as suggested guidance, not a personalized guarantee or a record
+  of actual activity allocation.
 
 ### Phase exit criteria
 
-- CEFR history is preserved and forecasts are deterministic, transparent, and non-authoritative.
+- A0–C2 history is preserved with safe mutations and verified owner isolation.
+- Study Time and Vocabulary forecasts are deterministic, transparent,
+  reproducible for seven- and thirty-day pace, and non-authoritative.
+- Recorded and estimated totals are clearly separated.
 - Combined statistics are responsive and accessible.
-- The project owner approves the Phase 4 visual and analytical milestone.
+- All required automated checks pass, manual desktop/mobile review is complete,
+  documentation matches behavior, and the project owner approves the final
+  Phase 4 visual and analytical milestone.
 
 ## 8. Hardening and deployment
 
@@ -265,7 +404,8 @@ remaining exit gate.
 | Batch requests partially write or duplicate  | One database transaction, operation ID, unique provenance/date constraint, and retry/failure tests     |
 | Vocabulary daily values race                 | Database uniqueness plus owned upsert and concurrent tests                                             |
 | CEFR forecast appears authoritative          | Persistent approximation/source warning, self-declared language, and explicit unavailable states       |
-| Cambridge guidance is English-specific       | Disclose cross-language application and avoid automatic level changes                                  |
+| Cross-language reference guidance varies     | Version and disclose the multi-source Study Time model and non-normative Vocabulary research model     |
+| Recorded words cannot be deduplicated        | Label Vocabulary reference totals as approximate and disclose that individual words are not stored     |
 | Deferred models acquire guessed values       | Traceable deferred requirements and an implementation gate requiring owner-approved values             |
 | Future entries corrupt current metrics       | Centralized `local_today` cutoff and boundary fixtures for both trackers                               |
 | RLS policies miss new tables/functions       | Explicit allow/deny pgTAP coverage and composite ownership constraints before UI delivery              |

@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  createLanguageBoardFromSettings,
+  removeSettingsResourceIfPresent,
+} from "./helpers";
+
 const email = process.env.E2E_USER_EMAIL;
 const password = process.env.E2E_USER_PASSWORD;
 
@@ -24,13 +29,9 @@ test.describe("Phase 1 Study Time", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     await page.goto("/settings");
-    await page.getByLabel("Add language").fill(boardName);
-    await page.getByRole("button", { name: "Add language" }).click();
-    await expect(page.getByRole("status")).toContainText(
-      `${boardName} is ready.`,
-    );
-    await page.reload();
-    await page.getByRole("link", { name: boardName }).click();
+    await removeSettingsResourceIfPresent(page, activityName);
+    const boardLink = await createLanguageBoardFromSettings(page, boardName);
+    await boardLink.click();
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole("heading", { name: /^\d{4}$/ })).toBeVisible();
 
@@ -87,14 +88,14 @@ test.describe("Phase 1 Study Time", () => {
     await page.getByRole("button", { name: activityName, exact: true }).click();
     await page.getByRole("button", { name: "Save" }).click();
     await expect(
-      page.locator("article").filter({ hasText: activityName }),
+      page.locator("article").filter({ hasText: activityName }).first(),
     ).toContainText("15m");
     await expect(page.getByText("Average / calendar day")).toBeVisible();
     await expect(page.getByText("Average / active day")).toBeVisible();
 
     await statisticsLink.click();
     await expect(
-      page.getByRole("heading", { name: "Learning statistics" }),
+      page.getByRole("heading", { name: "Your learning overview" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Selected year" }),

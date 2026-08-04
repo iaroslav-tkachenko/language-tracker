@@ -287,6 +287,25 @@ All statistics are scoped to the selected board.
   word total, active days, calendar-day average, and study-day average belong to
   `Selected year`. All-time words, current and longest vocabulary streak, and
   current-week/current-month word totals belong to `Current progress`.
+- After the user declares a current level, detailed statistics also distinguish
+  source-record totals from model-based estimates. The UI labels these metrics
+  `Tracked study time`, `Estimated learning time`, `Tracked words`, and
+  `Estimated words known`; each card has a corresponding icon. Tracked values
+  remain the exact values saved in the trackers. Estimated learning time equals
+  the current level's derived cumulative reference baseline plus non-future
+  Study Time recorded from that declaration's effective date through today.
+  Estimated words known equals the current level's reference vocabulary
+  midpoint plus non-future words recorded over the same interval.
+- The statistics overview uses the heading `Your learning overview` and the
+  status `Current level · <level>`. User-facing copy does not use the technical
+  terms `self-declared` or `non-future entries`.
+- Estimated totals are unavailable without a current declaration. They are
+  recalculated after any CEFR-history change and never rewrite Study Time or
+  Vocabulary records.
+- When no current CEFR declaration exists, Study Time, Vocabulary, and
+  Statistics each show a compact prompt to set the current language level. The
+  prompt explains that adding a level unlocks more detailed progress analytics
+  and links to the board-scoped CEFR management screen.
 
 ### 10.2 Active days and averages
 
@@ -329,42 +348,200 @@ duration and percentage of the period total. The seven-date window includes
 zero-study dates and excludes future entries; its heading is
 `Activity totals latest 7 days`.
 
-The product will later compare actual allocation with a fixed ideal distribution for each CEFR level. The model will not be user-editable, but its percentages and methodology remain deferred until separate product-owner approval and must not be implemented with provisional values.
+The product also shows an approved suggested weekly learning mix for the
+transition from the current level to the next level. The reference week is ten
+hours. Percentages always total 100% and are also displayed as hours per week.
+The model is fixed and not user-editable.
+
+| Current level | Target | Vocabulary | Grammar | Shadowing | Conversation | Listening | Reading |
+| ------------- | ------ | ---------: | ------: | --------: | -----------: | --------: | ------: |
+| A0            | A1     |        70% |     15% |       15% |            — |         — |       — |
+| A1            | A2     |        65% |     15% |       20% |            — |         — |       — |
+| A2            | B1     |        50% |       — |         — |          10% |       40% |       — |
+| B1            | B2     |        20% |       — |         — |          20% |       40% |     20% |
+| B2            | C1     |          — |       — |         — |          40% |       40% |     20% |
+| C1            | C2     |          — |       — |         — |          40% |       40% |     20% |
+
+On the CEFR screen, the recommendation appears after the current-level summary
+and before the Study Time and Vocabulary progress cards. In detailed
+Statistics, it appears alongside the CEFR overview and progress guidance. It
+uses an accessible circular chart, a text legend with percentages and weekly
+hours, and adjacent practical advice. C2 has no next-level recommendation.
+
+Advice is product-authored and grouped into short actionable items:
+
+- A0 to A1: build phonetics and pronunciation habits; use beginner-friendly
+  video and shadowing; learn sentence structure and present-tense changes;
+  recognize cases and articles without over-focusing on them; learn sentences
+  rather than isolated words; use spaced repetition, preferably Anki; create
+  cards for common present-tense verb forms; add at least ten new cards daily.
+- A1 to A2: continue level-appropriate video and shadowing; learn the main verb
+  tenses; learn sentences rather than isolated words; use spaced repetition;
+  create cards for common verbs in different tense forms; add at least ten new
+  cards daily.
+- A2 to B1: speak regularly with native speakers, AI, or aloud to oneself;
+  increase level-appropriate podcast and video listening; capture useful new
+  words in cards and review them consistently.
+- B1 to B2: increase speaking practice; move toward content created for native
+  speakers, beginning with familiar cartoons or series; read comics or
+  accessible fiction; use AI to simplify difficult news passages; keep
+  collecting and reviewing useful vocabulary.
+- B2 to C1 and C1 to C2: consume more content created for native speakers; speak
+  with native speakers about varied topics; switch devices and interfaces to
+  the language being learned.
 
 ### 10.6 CEFR declaration history
 
 - CEFR belongs to one language board.
-- The user manually declares A1, A2, B1, B2, C1, or C2 with an effective date no later than browser-local today.
-- Earlier declarations remain visible; the latest effective declaration is current.
+- The user manually declares A0, A1, A2, B1, B2, C1, or C2 with an effective
+  date no later than browser-local today. A0 is labelled `Absolute zero` and is
+  an application-defined starting state, not an official CEFR level.
+- Earlier declarations remain visible in reverse chronological order; the
+  declaration with the latest effective date is current.
+- The current history row labels its date as `Since`; earlier rows use `From`.
+- The current-level summary and current history row share the heading pattern
+  `Level <level>` plus a `Current` badge and a `Since` date. A0 uses the full
+  heading `Level A0 - Absolute zero`.
+- The current-level summary has no circular level badge or transition arrow. It
+  uses a large, non-interactive current-level code in the green side of the
+  background as a decorative element; the accessible heading remains the source
+  of the level name. The decorative code is hidden when the viewport has no
+  clear space for it.
+- The CEFR screen uses the title `Your language level` and the subtitle `Set
+your current CEFR level, track how it changes over time, and see approximate
+guidance for reaching the next level.` It does not show a separate eyebrow
+  label above the title.
+- A0 history cards use the full label `Level A0 - Absolute zero`.
+- The current-level summary does not duplicate an edit action. Users add a new
+  declaration through `Add level update` or edit an existing declaration from
+  `Level history`.
+- Each board has at most one declaration per effective date. Creating or editing
+  a declaration onto an occupied date is rejected with an actionable error; the
+  existing event is never silently replaced.
+- Chronologically adjacent declarations cannot use the same level. Returning to
+  a previously declared level after an intervening different level is allowed,
+  for example `B1 → B2 → B1`.
+- The user may edit a declaration's level or effective date and may delete any
+  declaration after explicit confirmation. Deleting the current declaration
+  makes the preceding declaration current; deleting the final declaration
+  returns the board to the no-level state.
 - The system never infers or promotes the level from hours or vocabulary.
-- Each level has a concise product-authored description based on sourced CEFR can-do descriptors.
+- Every A0–C2 level has a three-sentence product-authored description whose
+  first sentence explicitly names the level. A1–C2 descriptions are based on
+  sourced CEFR can-do descriptors. A0 describes an absolute beginner and
+  explicitly discloses its non-official status.
 
-### 10.7 Approximate next-level forecast
+### 10.7 Approximate Study Time reference model
 
-The forecast uses the midpoint of Cambridge English's published cumulative guided-learning-hour ranges as a fixed reference:
+Study Time guidance is immutable, versioned application reference data. The
+first approved model uses these transition values:
 
-| CEFR level | Published cumulative range | Reference midpoint |
-| ---------- | -------------------------: | -----------------: |
-| A1         |               90–100 hours |           95 hours |
-| A2         |              180–200 hours |          190 hours |
-| B1         |              350–400 hours |          375 hours |
-| B2         |              500–600 hours |          550 hours |
-| C1         |              700–800 hours |          750 hours |
-| C2         |          1,000–1,200 hours |        1,100 hours |
+| Transition | Indicative range | Calculation difference |
+| ---------- | ---------------: | ---------------------: |
+| A0 → A1    |     80–120 hours |              100 hours |
+| A1 → A2    |     90–140 hours |              110 hours |
+| A2 → B1    |    140–200 hours |              170 hours |
+| B1 → B2    |    160–240 hours |              200 hours |
+| B2 → C1    |    200–300 hours |              250 hours |
+| C1 → C2    |    280–450 hours |              350 hours |
 
 For a current declaration below C2:
 
-1. Reference hours to the next level equal the difference between the next and current midpoints.
-2. Eligible logged Study Time is the board total from the current declaration's effective date through today.
-3. Remaining minutes equal the reference difference in minutes minus eligible logged minutes, with a floor of zero.
-4. Recent pace equals total eligible minutes over today and the previous six calendar dates divided by seven, including zero-study dates.
-5. When pace is positive, the forecast date is today plus the ceiling of remaining minutes divided by average minutes per calendar day.
+1. Required minutes equal the approved calculation difference for the transition.
+2. Eligible Study Time equals the board total from the current declaration's
+   effective date through browser-local today.
+3. Remaining minutes equal required minutes minus eligible minutes, with a zero
+   floor.
+4. The current level baseline equals the sum of approved transition differences
+   from A0 through that level. Estimated total learning time equals that baseline
+   plus eligible Study Time.
+5. Seven-day pace equals the total over today and the previous six calendar
+   dates divided by seven. Thirty-day pace equals the total over today and the
+   previous 29 calendar dates divided by 30. Both include zero-study dates and
+   exclude future entries.
+6. For each positive pace, the forecast date is today plus the ceiling of
+   remaining minutes divided by average minutes per calendar day.
 
-A zero pace produces no estimated date. C2 has no next level. Reaching zero remaining minutes prompts the user to reassess their level but never changes it automatically.
+The primary progress visualization keeps these values in one reading flow:
+current-level baseline on the left, eligible recorded progress and its estimated
+total in the center, and the next-level cumulative reference on the right. The
+line below the progress bar shows the completed percentage and absolute
+remainder. The raw transition-interval size is calculation detail and is not
+shown in the primary UI. The same presentation applies to Study Time and
+Vocabulary. Compact versions of these progress cards appear in Statistics and
+on the CEFR screen after the weekly plan.
 
-Every result must state that the estimate applies Cambridge English guided-learning guidance to all language boards and is not a proficiency assessment or guarantee. Learning background, language, intensity, exposure, age, and other factors can materially change progress. Reference: [Cambridge English guided learning hours](https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours). CEFR descriptions are based on the [Council of Europe CEFR levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-%20descriptions).
+Each available forecast displays the approximate calendar duration in years,
+months, and days and the estimated month and year. Compact summaries may omit
+days but must retain an approximation label and the period used. A zero pace
+produces no estimate for that period. C2 has no next-level forecast. Reaching a
+zero remaining value prompts reassessment but never changes the declared level.
+The comparison table labels an unavailable average as `No data`; dependent
+forecast values use `Not available`.
+C2 total displays use a strict greater-than sign rather than an approximation
+sign because the highest level has no modeled upper bound.
+The pace comparison explicitly states that both averages cover calendar days,
+including dates with no recorded sessions or words. It presents the latest
+seven- and thirty-day values as columns and uses rows for active days, average pace,
+next-level duration, and estimated month/year. Its heading names the next level
+as the forecast destination.
 
-Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Their values remain deferred and must not be shown until separately approved.
+Every Study Time result includes this disclosure:
+
+> Reference ranges and values used for calculations: A0 to A1: 80–120 hours
+> (calculation value: 100 hours); A1 to A2: 90–140 hours (110 hours); A2 to B1:
+> 140–200 hours (170 hours); B1 to B2: 160–240 hours (200 hours); B2 to C1:
+> 200–300 hours (250 hours); C1 to C2: 280–450 hours (350 hours). These figures
+> are based on averaged data from Cambridge English, the Goethe-Institut, and
+> European language institutes. They are approximate guides, not guaranteed
+> timeframes.
+
+### 10.8 Approximate Vocabulary reference model
+
+Vocabulary guidance is a separate immutable, versioned reference model:
+
+| Level | Indicative cumulative vocabulary |  Calculation midpoint |
+| ----- | -------------------------------: | --------------------: |
+| A0    |                          0 words |                     0 |
+| A1    |                  700–1,200 words |                   900 |
+| A2    |                1,200–2,000 words |                 1,600 |
+| B1    |                2,000–3,000 words |                 2,500 |
+| B2    |                3,000–4,500 words |                 3,700 |
+| C1    |                4,000–6,000 words |                 5,000 |
+| C2    |               5,000–8,000+ words | 7,000; no upper bound |
+
+For a current declaration below C2:
+
+1. Required words equal the next level's midpoint minus the current level's
+   midpoint.
+2. Eligible words equal non-future Vocabulary totals from the current
+   declaration's effective date through today.
+3. Remaining words equal required words minus eligible words, with a zero
+   floor.
+4. Estimated vocabulary size equals the current level midpoint plus eligible
+   words.
+5. Seven-day and thirty-day paces use the same zero-inclusive calendar windows
+   as Study Time and produce independent forecast dates when positive.
+
+All user-facing Vocabulary copy uses `words`, including tracker entries,
+heatmaps, primary statistics, CEFR reference intervals, estimated vocabulary
+size, and remaining targets. The methodology explains that recorded words are
+an approximate progress signal; individual words are not stored and the product
+cannot deduplicate repeated vocabulary.
+
+Every Vocabulary result includes this disclosure:
+
+> Reference ranges and values used for calculations: A1: 700–1,200 words
+> (calculation value: 900 words); A2: 1,200–2,000 words (1,600 words); B1:
+> 2,000–3,000 words (2,500 words); B2: 3,000–4,500 words (3,700 words); C1:
+> 4,000–6,000 words (5,000 words); C2: 5,000–8,000+ words (7,000 words). These
+> ranges are based on vocabulary research by Milton and by Finlayson, Marsden,
+> and Hawkes. They are not official CEFR standards.
+
+Both forecast models are guidance rather than assessment or guarantee. Language,
+learning background, intensity, exposure, age, retention, and other factors can
+materially change progress. CEFR descriptions are based on the
+[Council of Europe CEFR levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-%20descriptions).
 
 ## 11. Responsive UI
 
@@ -382,10 +559,19 @@ Vocabulary-to-CEFR word-count cutoffs will later be fixed and non-editable. Thei
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
 - The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.
 - When the current CEFR level appears in the primary summary, its value uses a circular badge rather than a pill or oval.
-- On mobile, the CEFR summary uses a compact two-line layout: the first line shows the current circular level badge, a directional arrow, and the next level (for example, `B1 → B2`); the second line shows the approximate forecast (for example, `Estimated in ≈ 6 months`). Desktop may retain the more descriptive current-level and pace labels.
+- On mobile, the CEFR summary uses a compact layout: the first line shows the
+  current circular level badge, a directional arrow, and the next level (for
+  example, `B1 → B2`); supporting copy shows the tracker-appropriate forecast
+  and its seven- or thirty-day pace period. Desktop may show both pace periods
+  and more methodology detail.
 - Phase 1 screenshot reviews may use an isolated test-user fixture reading `Current level: B1` and `Estimated B2: in about 6 months at this pace`. This fixture must never be presented as real data to a production user and is replaced by the Phase 4 calculation.
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
-- A settings area manages boards and the global activity catalog.
+- A board-scoped CEFR management screen is reachable from Study Time,
+  Vocabulary, Statistics, and Settings. Settings also manages boards and the
+  global activity catalog.
+- If the selected board has no current CEFR declaration, the `Level` navigation
+  item shows a small notification bubble with an exclamation mark. The bubble is
+  hidden after the user adds the first current level for that board.
 - Destructive actions use clear labels and confirmation where historical data would become hidden.
 - Signing out always requires explicit confirmation; cancellation preserves the
   current authenticated screen.
