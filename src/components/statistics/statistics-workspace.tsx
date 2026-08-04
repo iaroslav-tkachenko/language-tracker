@@ -172,6 +172,10 @@ function formatApproxDuration(minutes: number) {
   return `≈ ${formatDuration(Math.round(minutes))}`;
 }
 
+function formatCompactForecastValue(value: string, unit: "h" | "w") {
+  return value.replace(/\s+(?:hour|hours|word|words)$/, ` ${unit}`);
+}
+
 function sumTrackedMinutes(entries: StudyStatisticsEntry[]) {
   return entries.reduce((total, entry) => total + entry.durationMinutes, 0);
 }
@@ -267,7 +271,7 @@ function CompactForecastCard({
             {icon}
           </span>
           <div className="min-w-0">
-            <h3 className="text-xl font-black text-slate-950">{title}</h3>
+            <h3 className="text-xl font-bold text-slate-950">{title}</h3>
             <p className="mt-1 leading-7 text-slate-600">
               {forecast.currentLevel} is the highest level in this model, so
               there is no next-level forecast.
@@ -275,7 +279,7 @@ function CompactForecastCard({
             <p className="mt-3 text-sm font-bold tracking-wide text-slate-500 uppercase">
               {totalLabel}
             </p>
-            <p className="mt-1 text-2xl font-black text-slate-950">
+            <p className="mt-1 text-2xl font-bold text-slate-950">
               &gt; {total}
             </p>
           </div>
@@ -286,18 +290,27 @@ function CompactForecastCard({
 
   const isStudyTime = "estimatedTotalLearningMinutes" in forecast;
   const completedPercent = Math.round(forecast.progressRatio * 100);
-  const baseline = isStudyTime
-    ? formatForecastHours(forecast.baselineMinutes)
-    : formatVocabularyWords(forecast.baselineWords);
+  const baseline = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.baselineMinutes)
+      : formatVocabularyWords(forecast.baselineWords),
+    isStudyTime ? "h" : "w",
+  );
   const added = isStudyTime
     ? formatForecastHours(forecast.eligibleMinutes)
     : formatVocabularyWords(forecast.eligibleWords);
-  const estimatedNow = isStudyTime
-    ? formatForecastHours(forecast.estimatedTotalLearningMinutes)
-    : formatVocabularyWords(forecast.estimatedVocabularySize);
-  const nextTotal = isStudyTime
-    ? formatForecastHours(forecast.nextLevelBaselineMinutes)
-    : formatVocabularyWords(forecast.nextLevelBaselineWords);
+  const estimatedNow = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.estimatedTotalLearningMinutes)
+      : formatVocabularyWords(forecast.estimatedVocabularySize),
+    isStudyTime ? "h" : "w",
+  );
+  const nextTotal = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.nextLevelBaselineMinutes)
+      : formatVocabularyWords(forecast.nextLevelBaselineWords),
+    isStudyTime ? "h" : "w",
+  );
   const remaining = isStudyTime
     ? formatForecastHours(forecast.remainingMinutes)
     : formatVocabularyWords(forecast.remainingWords);
@@ -314,46 +327,52 @@ function CompactForecastCard({
           {icon}
         </span>
         <div className="min-w-0">
-          <h3 className="text-lg font-black text-slate-950">{title}</h3>
-          <p className="mt-1 text-sm text-slate-600">
+          <h3 className="text-lg font-bold text-slate-950">{title}</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
             Approximate progress from {forecast.currentLevel} to{" "}
             {forecast.nextLevel}.
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1.15fr_1fr]">
-        <div>
-          <p className="text-xs font-black tracking-wide text-slate-500 uppercase">
+      <div className="mt-5 grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
           </p>
-          <p className="mt-2 flex items-center gap-2">
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-950 text-base font-black text-white">
+          <p className="mt-2 flex min-h-11 items-center gap-2">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
               {forecast.currentLevel}
             </span>
-            <span className="text-base text-slate-600">≈ {baseline}</span>
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈ {baseline}
+            </span>
           </p>
         </div>
 
-        <div className="text-left md:text-center">
+        <div className="min-w-0 text-left md:text-center">
           <p
-            className={`text-xs font-black tracking-wide uppercase ${accentClasses.text}`}
+            className={`text-xs font-bold tracking-wide uppercase ${accentClasses.text}`}
           >
             Progress
           </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">+{added}</p>
-          <p className="mt-1 text-base text-slate-600">≈ {estimatedNow} now</p>
+          <p className="mt-2 text-xl font-bold leading-6 text-slate-950">
+            +{added}
+          </p>
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            ≈ {estimatedNow} now
+          </p>
         </div>
 
-        <div className="md:text-right">
-          <p className="text-xs font-black tracking-wide text-slate-500 uppercase">
+        <div className="min-w-0 md:text-right">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Next
           </p>
-          <p className="mt-2 flex items-center gap-2 md:justify-end">
-            <span className="text-base text-slate-600">
+          <p className="mt-2 flex min-h-11 items-center gap-2 md:justify-end">
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
               ≈ {nextTotal} total
             </span>
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-base font-black text-slate-500">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
               {forecast.nextLevel}
             </span>
           </p>
@@ -368,7 +387,7 @@ function CompactForecastCard({
           />
         </div>
         <p
-          className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-black ${accentClasses.text}`}
+          className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold ${accentClasses.text}`}
         >
           <span>{completedPercent}% completed</span>
           <span className="text-slate-300">•</span>
@@ -377,71 +396,94 @@ function CompactForecastCard({
       </div>
 
       <div
-        className={`mt-5 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-3`}
+        className={`mt-8 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-4`}
       >
-        <h4 className={`break-words text-lg font-black ${accentClasses.text}`}>
+        <h4 className="break-words text-base font-bold text-slate-700">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h4>
-        <p className="mt-1 text-sm text-slate-600">
-          Based on every calendar day in the last 7 and 30 days.
-        </p>
-        <div className="mt-3 w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-base font-black ${accentClasses.text}`}
-          >
-            <div className="px-4 py-3 text-slate-500" />
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3">
-                Last {pace.periodDays} days
-              </div>
-            ))}
-          </div>
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
-          >
-            <div className="px-4 py-3 text-slate-500">Active days</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
-              </div>
-            ))}
-          </div>
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
-          >
-            <div className="px-4 py-3 text-slate-500">Average pace</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-950">
-                {"averageMinutes" in pace
-                  ? formatPaceMinutes(pace.averageMinutes)
-                  : formatVocabularyPace(pace.averageWords)}
-              </div>
-            ))}
-          </div>
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
-          >
-            <div className="px-4 py-3 text-slate-500">
-              Reach {forecast.nextLevel} in
+        <div className="relative mt-4">
+          <div className="w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-sm font-bold text-slate-700`}
+            >
+              <div className="px-3 py-3 text-slate-500" />
+              {paceColumns.map((pace) => (
+                <div key={pace.periodDays} className="px-3 py-3">
+                  Last {pace.periodDays} days
+                </div>
+              ))}
             </div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-950">
-                {pace.estimate
-                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
-                  : "Not available"}
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            >
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Active days
               </div>
-            ))}
-          </div>
-          <div className="grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr]">
-            <div className="px-4 py-3 text-slate-500">Estimated date</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.estimate
-                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
-                  : "Not available"}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+                </div>
+              ))}
+            </div>
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            >
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Average pace
               </div>
-            ))}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {"averageMinutes" in pace
+                    ? formatPaceMinutes(pace.averageMinutes)
+                    : formatVocabularyPace(pace.averageWords)}
+                </div>
+              ))}
+            </div>
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            >
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Reach {forecast.nextLevel} in
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr]">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Estimated date
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
           </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm md:hidden"
+          >
+            <ChevronRight className="size-4" />
+          </span>
         </div>
       </div>
     </section>
@@ -493,7 +535,7 @@ function ActivityDonut({
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
       <h2 className="text-xl font-bold text-slate-950">{title}</h2>
-      <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+      <p className="mt-1 text-sm leading-6 text-slate-500">{subtitle}</p>
       {rows.length > 0 ? (
         <div className="mt-6 grid items-center gap-7 sm:grid-cols-[190px_1fr]">
           <div
@@ -782,9 +824,9 @@ export function StatisticsWorkspace({
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-17 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
           <details className="group relative">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xl px-3 text-lg font-bold text-slate-950 hover:bg-slate-50">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg px-2.5 text-base font-bold text-slate-950 hover:bg-slate-50">
               {selectedBoard.name}
               <span
                 aria-hidden="true"
@@ -812,55 +854,55 @@ export function StatisticsWorkspace({
 
           <nav
             aria-label="Primary"
-            className="hidden min-h-17 items-stretch md:flex"
+            className="hidden min-h-14 items-stretch md:flex"
           >
             <Link
               href={`/dashboard?board=${selectedBoard.id}&date=${todayKey}&today=${todayKey}`}
-              className="flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-blue-600"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-blue-600"
             >
-              <Clock3 aria-hidden="true" className="size-5" />
+              <Clock3 aria-hidden="true" className="size-4.5" />
               Study Time
             </Link>
             <Link
               href={`/dashboard?board=${selectedBoard.id}&date=${vocabularyDate}&today=${todayKey}&tracker=vocabulary`}
-              className="flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-emerald-700"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-emerald-700"
             >
-              <BookOpen aria-hidden="true" className="size-5" />
+              <BookOpen aria-hidden="true" className="size-4.5" />
               Vocabulary
             </Link>
             <Link
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              className="relative flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-violet-700"
+              className="relative flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-violet-700"
             >
               {!hasCurrentCefrLevel && <MissingLevelBubble />}
-              <GraduationCap aria-hidden="true" className="size-5" />
+              <GraduationCap aria-hidden="true" className="size-4.5" />
               Level
             </Link>
           </nav>
 
           <div className="flex items-center gap-1">
-            <span className="hidden min-h-11 items-center gap-2 rounded-xl bg-blue-50 px-3 font-semibold text-blue-700 sm:flex">
-              <BarChart3 aria-hidden="true" className="size-5" />
+            <span className="hidden min-h-9 items-center gap-2 rounded-lg bg-blue-50 px-2.5 text-sm font-semibold text-blue-700 sm:flex">
+              <BarChart3 aria-hidden="true" className="size-4.5" />
               Statistics
             </span>
             <Link
               href="/settings"
               aria-label="Settings"
-              className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             >
-              <Settings aria-hidden="true" className="size-5" />
+              <Settings aria-hidden="true" className="size-4.5" />
             </Link>
             <ConfirmSignOutForm>
               <button
                 type="submit"
                 aria-label="Sign out"
-                className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:hidden"
+                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:hidden"
               >
-                <LogOut aria-hidden="true" className="size-5" />
+                <LogOut aria-hidden="true" className="size-4.5" />
               </button>
               <button
                 type="submit"
-                className="hidden min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:block"
+                className="hidden min-h-9 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:block"
               >
                 Sign out
               </button>
@@ -873,27 +915,27 @@ export function StatisticsWorkspace({
         >
           <Link
             href={`/dashboard?board=${selectedBoard.id}&date=${todayKey}&today=${todayKey}`}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </Link>
           <Link
             href={`/dashboard?board=${selectedBoard.id}&date=${vocabularyDate}&today=${todayKey}&tracker=vocabulary`}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
           >
             <BookOpen aria-hidden="true" className="size-4.5" />
             Vocabulary
           </Link>
           <Link
             href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+            className="relative flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
           >
             {!hasCurrentCefrLevel && <MissingLevelBubble />}
             <GraduationCap aria-hidden="true" className="size-4.5" />
             Level
           </Link>
-          <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
+          <span className="flex min-h-12 items-center justify-center gap-1.5 border-b-2 border-blue-600 px-2 text-xs font-semibold text-blue-600">
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
           </span>
@@ -911,12 +953,12 @@ export function StatisticsWorkspace({
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
           <div>
             <p className="text-sm font-semibold tracking-wide text-blue-600 uppercase">
               {selectedBoard.name}
             </p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+            <h1 className="mt-1 text-3xl font-bold text-slate-950">
               Your learning overview
             </h1>
             {cefrOverview && (
@@ -926,49 +968,19 @@ export function StatisticsWorkspace({
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigateYear(-1)}
-              aria-label="Previous year"
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronLeft aria-hidden="true" className="size-5" />
-            </button>
-            <strong className="min-w-16 text-center text-xl">
-              {selectedYear}
-            </strong>
-            <button
-              type="button"
-              onClick={() => navigateYear(1)}
-              aria-label="Next year"
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronRight aria-hidden="true" className="size-5" />
-            </button>
-          </div>
         </div>
 
         {cefrOverview && (
           <section className="mt-6 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="text-xl font-black text-slate-950">
-                  Recorded and estimated totals
-                </h2>
-                <p className="mt-1 max-w-3xl leading-7 text-slate-600">
-                  Estimated values combine your current level baseline with
-                  entries recorded since that level date. Tracker totals remain
-                  the exact values you saved.
-                </p>
-              </div>
-              <Link
-                href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-violet-50 px-4 text-sm font-bold text-violet-700 hover:bg-violet-100"
-              >
-                <GraduationCap aria-hidden="true" className="size-4" />
-                Level {cefrOverview.level}
-              </Link>
+            <div>
+              <h2 className="text-xl font-bold text-slate-950">
+                Recorded and estimated totals
+              </h2>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+                Estimates combine your current-level baseline with activity
+                recorded since its start date. Tracked totals always reflect the
+                entries you saved.
+              </p>
             </div>
 
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -1005,10 +1017,10 @@ export function StatisticsWorkspace({
         {cefrOverview && (
           <section className="mt-6">
             <div className="mb-4">
-              <h2 className="text-xl font-black text-slate-950">
+              <h2 className="text-xl font-bold text-slate-950">
                 Progress toward the next level
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm leading-6 text-slate-500">
                 Approximate Study Time and Vocabulary forecasts for this board.
               </p>
             </div>
@@ -1029,25 +1041,40 @@ export function StatisticsWorkspace({
           </section>
         )}
 
-        {cefrOverview?.weeklyRecommendation && (
-          <div className="mt-6">
-            <WeeklyPlanCard
-              recommendation={cefrOverview.weeklyRecommendation}
-            />
-          </div>
-        )}
-
         <section aria-labelledby="year-summary-heading" className="mt-6">
-          <div>
-            <h2
-              id="year-summary-heading"
-              className="text-xl font-bold text-slate-950"
-            >
-              Selected year
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              These values change when you select another year.
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2
+                id="year-summary-heading"
+                className="text-xl font-bold text-slate-950"
+              >
+                Selected year
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Metrics for the calendar year you select.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigateYear(-1)}
+                aria-label="Previous year"
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronLeft aria-hidden="true" className="size-4.5" />
+              </button>
+              <strong className="min-w-16 text-center text-xl text-slate-950">
+                {selectedYear}
+              </strong>
+              <button
+                type="button"
+                onClick={() => navigateYear(1)}
+                aria-label="Next year"
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronRight aria-hidden="true" className="size-4.5" />
+              </button>
+            </div>
           </div>
           <div className="mt-5">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-blue-700 uppercase">
@@ -1080,7 +1107,7 @@ export function StatisticsWorkspace({
           <div className="mt-5">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
               <BookOpen aria-hidden="true" className="size-4" />
-              New words
+              Vocabulary
             </h3>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <MetricCard
@@ -1125,8 +1152,9 @@ export function StatisticsWorkspace({
             >
               Current progress
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Live values through today, independent of the selected year.
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Live totals through today. These values do not change when you
+              switch years.
             </p>
           </div>
           <div className="mt-5">
@@ -1169,15 +1197,9 @@ export function StatisticsWorkspace({
           <div className="mt-5">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
               <BookOpen aria-hidden="true" className="size-4" />
-              New words
+              Vocabulary
             </h3>
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <MetricCard
-                accent="green"
-                icon={<BookOpen aria-hidden="true" className="size-5" />}
-                value={`${vocabularyStatistics.allTimeWords.toLocaleString("en")} words`}
-                label="All-time total"
-              />
               <MetricCard
                 accent="green"
                 icon={<Flame aria-hidden="true" className="size-5" />}
@@ -1193,6 +1215,12 @@ export function StatisticsWorkspace({
                   vocabularyStatistics.longestStreak === 1 ? "day" : "days"
                 }`}
                 label="Longest streak"
+              />
+              <MetricCard
+                accent="green"
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.currentDayWords.toLocaleString("en")} words`}
+                label="Today"
               />
               <MetricCard
                 accent="green"
@@ -1214,10 +1242,10 @@ export function StatisticsWorkspace({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                Time distribution
+                Study Time distribution
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Compare exact study minutes across calendar periods.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Compare tracked study time across calendar periods.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1262,11 +1290,10 @@ export function StatisticsWorkspace({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                New words distribution
+                Vocabulary distribution
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Compare the number of actively learned words across calendar
-                periods.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Compare words you actively learned across calendar periods.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1315,12 +1342,20 @@ export function StatisticsWorkspace({
             activities={activities}
           />
           <ActivityDonut
-            title="Activity totals latest 7 days"
-            subtitle="Today and the previous six calendar dates."
+            title="Activity totals in the last 7 days"
+            subtitle="Includes today and the previous six calendar dates."
             totals={recentTotals}
             activities={activities}
           />
         </div>
+
+        {cefrOverview?.weeklyRecommendation && (
+          <div className="mt-6">
+            <WeeklyPlanCard
+              recommendation={cefrOverview.weeklyRecommendation}
+            />
+          </div>
+        )}
       </div>
     </main>
   );

@@ -321,23 +321,17 @@ export function calculateStudyTimeForecast({
 
 export function formatCalendarDuration(duration: CalendarDuration) {
   const parts = [
-    duration.years > 0
-      ? `${duration.years} ${duration.years === 1 ? "year" : "years"}`
-      : null,
-    duration.months > 0
-      ? `${duration.months} ${duration.months === 1 ? "month" : "months"}`
-      : null,
-    duration.days > 0
-      ? `${duration.days} ${duration.days === 1 ? "day" : "days"}`
-      : null,
+    duration.years > 0 ? `${duration.years} y` : null,
+    duration.months > 0 ? `${duration.months} m` : null,
+    duration.days > 0 ? `${duration.days} d` : null,
   ].filter((part) => part !== null);
 
-  return parts.length > 0 ? parts.join(", ") : "0 days";
+  return parts.length > 0 ? parts.join(" ") : "0 d";
 }
 
 export function formatEstimatedMonth(dateKey: string) {
   return new Intl.DateTimeFormat("en", {
-    month: "long",
+    month: "short",
     year: "numeric",
   }).format(fromDateKey(dateKey));
 }

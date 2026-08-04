@@ -1,4 +1,4 @@
-import { Check, Target } from "lucide-react";
+import { Check } from "lucide-react";
 
 import {
   getWeeklyHours,
@@ -40,38 +40,37 @@ export function WeeklyPlanCard({
   recommendation: WeeklyRecommendation;
 }) {
   return (
-    <section className="rounded-4xl border border-violet-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex items-start gap-4">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
-          <Target aria-hidden="true" className="size-6" />
-        </span>
-        <div>
-          <h2 className="text-2xl font-black text-slate-950">
-            Weekly plan to reach {recommendation.targetLevel}
-          </h2>
-          <p className="mt-1 text-slate-600">
-            A suggested {WEEKLY_PLAN_HOURS}-hour weekly mix for faster progress.
-          </p>
-        </div>
+    <section className="rounded-3xl border border-violet-200 bg-white p-4 shadow-sm sm:p-5">
+      <div>
+        <h2 className="text-xl font-bold text-slate-950">
+          Weekly plan to reach {recommendation.targetLevel}
+        </h2>
+        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">
+          For meaningful progress, we recommend studying your chosen language
+          for at least 10 focused hours each week. This does not mean you need
+          to spend all that time with textbooks or grammar drills. It also
+          includes focused listening and watching, such as podcasts, videos, and
+          TV shows. This plan shows one suggested mix for your next level.
+        </p>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[0.95fr_1.55fr]">
-        <div className="rounded-3xl bg-slate-50 p-5">
-          <div className="grid gap-5 sm:grid-cols-[220px_1fr] sm:items-center lg:grid-cols-1">
+      <div className="mt-5 grid gap-5 lg:grid-cols-[0.95fr_1.55fr]">
+        <div className="rounded-2xl bg-slate-50 p-4">
+          <div className="grid gap-4 sm:grid-cols-[170px_1fr] sm:items-center lg:grid-cols-1">
             <div
               aria-hidden="true"
-              className="relative mx-auto size-56 rounded-full"
+              className="relative mx-auto size-44 rounded-full"
               style={{ background: chartBackground(recommendation) }}
             >
-              <div className="absolute inset-9 flex flex-col items-center justify-center rounded-full bg-white text-center shadow-inner">
-                <strong className="text-4xl font-black text-slate-950">
+              <div className="absolute inset-7 flex flex-col items-center justify-center rounded-full bg-white text-center shadow-inner">
+                <strong className="text-2xl font-bold text-slate-950">
                   {WEEKLY_PLAN_HOURS}h
                 </strong>
-                <span className="text-slate-500">per week</span>
+                <span className="text-sm text-slate-500">per week</span>
               </div>
             </div>
 
-            <ul className="space-y-3">
+            <ul className="space-y-2 text-sm">
               {recommendation.segments.map((segment) => {
                 const hours = getWeeklyHours(segment.percent);
                 return (
@@ -89,7 +88,7 @@ export function WeeklyPlanCard({
                       />
                       <span className="truncate">{segment.activity}</span>
                     </span>
-                    <strong className="shrink-0 text-slate-950">
+                    <strong className="shrink-0 text-sm text-slate-950">
                       {segment.percent}% · {formatHours(hours)}
                     </strong>
                   </li>
@@ -100,20 +99,20 @@ export function WeeklyPlanCard({
         </div>
 
         <div>
-          <h3 className="text-xl font-black text-slate-950">
+          <h3 className="text-lg font-bold text-slate-950">
             How to use this plan
           </h3>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {recommendation.advice.map((item) => (
               <article
                 key={item.title}
-                className="rounded-3xl border border-slate-200 bg-white p-4"
+                className="rounded-xl border border-slate-200 bg-white p-3"
               >
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
-                    <Check aria-hidden="true" className="size-4.5" />
+                <div className="flex items-start gap-2.5">
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                    <Check aria-hidden="true" className="size-4" />
                   </span>
-                  <p className="leading-7 text-slate-700">
+                  <p className="text-sm leading-6 text-slate-700">
                     <strong className="text-slate-950">{item.title}</strong>{" "}
                     {item.body}
                   </p>

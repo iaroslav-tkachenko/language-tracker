@@ -132,15 +132,15 @@ describe("calculateStudyTimeForecast", () => {
 });
 
 describe("formatCalendarDuration", () => {
-  it("formats years, months, and days", () => {
+  it("formats years, months, and days compactly", () => {
     expect(formatCalendarDuration({ years: 1, months: 2, days: 3 })).toBe(
-      "1 year, 2 months, 3 days",
+      "1 y 2 m 3 d",
     );
     expect(formatCalendarDuration({ years: 0, months: 4, days: 17 })).toBe(
-      "4 months, 17 days",
+      "4 m 17 d",
     );
     expect(formatCalendarDuration({ years: 0, months: 0, days: 0 })).toBe(
-      "0 days",
+      "0 d",
     );
   });
 });

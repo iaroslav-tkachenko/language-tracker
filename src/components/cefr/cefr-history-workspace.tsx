@@ -311,9 +311,9 @@ export function CefrHistoryWorkspace({
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-17 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
           <details className="group relative">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xl px-3 text-lg font-bold text-slate-950 hover:bg-slate-50">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg px-2.5 text-base font-bold text-slate-950 hover:bg-slate-50">
               {selectedBoard.name}
               <span
                 aria-hidden="true"
@@ -339,24 +339,24 @@ export function CefrHistoryWorkspace({
             </div>
           </details>
 
-          <nav aria-label="Primary" className="hidden items-stretch md:flex">
+          <nav aria-label="Primary" className="hidden min-h-14 items-stretch md:flex">
             <Link
               href={dashboardHref}
-              className="flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:text-blue-700"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-blue-700"
             >
-              <Clock3 aria-hidden="true" className="size-5" />
+              <Clock3 aria-hidden="true" className="size-4.5" />
               Study Time
             </Link>
             <Link
               href={vocabularyHref}
-              className="flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:text-emerald-700"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-emerald-700"
             >
-              <BookOpen aria-hidden="true" className="size-5" />
+              <BookOpen aria-hidden="true" className="size-4.5" />
               Vocabulary
             </Link>
-            <span className="relative flex min-h-17 items-center gap-2 border-b-3 border-violet-600 px-5 font-semibold text-violet-700">
+            <span className="relative flex min-h-14 items-center gap-2 border-b-2 border-violet-600 px-4 text-sm font-semibold text-violet-700">
               {!currentEvent && <MissingLevelBubble />}
-              <GraduationCap aria-hidden="true" className="size-5" />
+              <GraduationCap aria-hidden="true" className="size-4.5" />
               Level
             </span>
           </nav>
@@ -364,22 +364,22 @@ export function CefrHistoryWorkspace({
           <div className="flex items-center gap-1">
             <Link
               href={statisticsHref}
-              className="hidden min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
+              className="hidden min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
             >
-              <BarChart3 aria-hidden="true" className="size-5" />
+              <BarChart3 aria-hidden="true" className="size-4.5" />
               Statistics
             </Link>
             <Link
               href="/settings"
               aria-label="Settings"
-              className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             >
-              <Settings aria-hidden="true" className="size-5" />
+              <Settings aria-hidden="true" className="size-4.5" />
             </Link>
             <ConfirmSignOutForm>
               <button
                 type="submit"
-                className="hidden min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950 sm:block"
+                className="hidden min-h-9 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950 sm:block"
               >
                 Sign out
               </button>
@@ -388,9 +388,9 @@ export function CefrHistoryWorkspace({
               <button
                 type="submit"
                 aria-label="Sign out"
-                className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
-                <LogOut aria-hidden="true" className="size-5" />
+                <LogOut aria-hidden="true" className="size-4.5" />
               </button>
             </ConfirmSignOutForm>
           </div>
@@ -401,26 +401,26 @@ export function CefrHistoryWorkspace({
         >
           <Link
             href={dashboardHref}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </Link>
           <Link
             href={vocabularyHref}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
           >
             <BookOpen aria-hidden="true" className="size-4.5" />
             Vocabulary
           </Link>
-          <span className="relative flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-violet-600 px-2 text-xs font-semibold text-violet-700">
+          <span className="relative flex min-h-12 items-center justify-center gap-1.5 border-b-2 border-violet-600 px-2 text-xs font-semibold text-violet-700">
             {!currentEvent && <MissingLevelBubble />}
             <GraduationCap aria-hidden="true" className="size-4.5" />
             Level
           </span>
           <Link
             href={statisticsHref}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
