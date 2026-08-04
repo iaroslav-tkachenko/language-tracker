@@ -796,7 +796,7 @@ export function VocabularyWorkspace({
         </nav>
       </header>
 
-      <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6">
         {boardDialogOpen && (
           <div
             role="dialog"
@@ -884,13 +884,13 @@ export function VocabularyWorkspace({
               >
                 <ChevronLeft aria-hidden="true" className="size-4.5" />
               </button>
-              <div className="min-w-20 text-center">
-                <p className="text-xs font-semibold tracking-wide text-emerald-700 uppercase">
+              <div className="w-32 text-center">
+                <p className="h-4 text-xs leading-4 font-semibold tracking-wide text-emerald-700 uppercase">
                   Words learned
                 </p>
                 <h1
                   id="vocabulary-year-heading"
-                  className="text-2xl font-bold text-slate-950"
+                  className="mt-0.5 text-2xl leading-7 font-bold text-slate-950"
                 >
                   {activeYear}
                 </h1>
@@ -992,29 +992,35 @@ export function VocabularyWorkspace({
               ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
-              {[
-                "0 words",
-                "1–2 words",
-                "3–5 words",
-                "6–9 words",
-                "10–14 words",
-                "15–19 words",
-                "20–39 words",
-                "40+ words",
-              ].map((label, level) => (
-                <span key={label} className="inline-flex items-center gap-1.5">
+            <div className="mt-3 text-center text-xs text-slate-500">
+              <p>Words per day</p>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+                {[
+                  "0",
+                  "1–2",
+                  "3–5",
+                  "6–9",
+                  "10–14",
+                  "15–19",
+                  "20–39",
+                  "40+",
+                ].map((label, level) => (
                   <span
-                    aria-hidden="true"
-                    className="size-3 rounded-sm border border-slate-100"
-                    style={{
-                      backgroundColor:
-                        level === 0 ? missedColor : heatColors[level],
-                    }}
-                  />
-                  {label}
-                </span>
-              ))}
+                    key={label}
+                    className="inline-flex items-center gap-1.5"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="size-3 rounded-sm border border-slate-100"
+                      style={{
+                        backgroundColor:
+                          level === 0 ? missedColor : heatColors[level],
+                      }}
+                    />
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -1179,7 +1185,7 @@ export function VocabularyWorkspace({
               </form>
             </article>
           ) : (
-            <div className="mt-5 rounded-2xl bg-white px-4 py-8 text-center">
+            <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-6 text-center">
               <BookOpen
                 aria-hidden="true"
                 className="mx-auto size-7 text-slate-400"
@@ -1188,7 +1194,7 @@ export function VocabularyWorkspace({
                 No new words yet
               </p>
               <p className="mt-1 text-sm text-slate-500">
-                Record only words you actively learned—not words you simply
+                Record only words you actively learned, not words you simply
                 heard or read.
               </p>
             </div>

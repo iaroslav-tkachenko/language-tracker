@@ -15,6 +15,7 @@ import {
   Plus,
   Settings,
   Trash2,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -102,17 +103,15 @@ function formatDuration(minutes: number, precise = false) {
 function SummaryValue({
   value,
   accentClass = "text-blue-600",
-  sizeClass = "text-xl",
 }: {
   value: string | number;
   accentClass?: string;
-  sizeClass?: string;
 }) {
   const tokens = String(value).split(" ");
 
   return (
     <strong
-      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 leading-tight ${sizeClass} ${accentClass}`}
+      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 text-2xl leading-tight ${accentClass}`}
     >
       {tokens.map((token, index) => {
         const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
@@ -899,12 +898,17 @@ export function BoardWorkspace({
               >
                 <ChevronLeft aria-hidden="true" className="size-4.5" />
               </button>
-              <h1
-                id="year-heading"
-                className="min-w-20 text-center text-2xl font-bold text-slate-950"
-              >
-                {year}
-              </h1>
+              <div className="w-32 text-center">
+                <p className="h-4 text-xs leading-4 font-semibold tracking-wide text-blue-600 uppercase">
+                  Minutes studied
+                </p>
+                <h1
+                  id="year-heading"
+                  className="mt-0.5 text-2xl leading-7 font-bold text-slate-950"
+                >
+                  {year}
+                </h1>
+              </div>
               <button
                 type="button"
                 aria-label="Next year"
@@ -1002,29 +1006,35 @@ export function BoardWorkspace({
               ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
-              {[
-                ["0 min", heatColors.missed],
-                ["1–14", heatColors.levels[0]],
-                ["15–29", heatColors.levels[1]],
-                ["30–59", heatColors.levels[2]],
-                ["60–119", heatColors.levels[3]],
-                ["120–180", heatColors.levels[4]],
-                ["181+", heatColors.levels[5]],
-              ].map(([label, color]) => (
-                <span key={label} className="inline-flex items-center gap-1.5">
+            <div className="mt-3 text-center text-xs text-slate-500">
+              <p>Minutes per day</p>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+                {[
+                  ["0", heatColors.missed],
+                  ["1–14", heatColors.levels[0]],
+                  ["15–29", heatColors.levels[1]],
+                  ["30–59", heatColors.levels[2]],
+                  ["60–119", heatColors.levels[3]],
+                  ["120–180", heatColors.levels[4]],
+                  ["181+", heatColors.levels[5]],
+                ].map(([label, color]) => (
                   <span
-                    aria-hidden="true"
-                    className="size-3 rounded-sm"
-                    style={{ backgroundColor: color }}
-                  />
-                  {label}
-                </span>
-              ))}
+                    key={label}
+                    className="inline-flex items-center gap-1.5"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="size-3 rounded-sm"
+                      style={{ backgroundColor: color }}
+                    />
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
           </section>
 
-          <section className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+          <section className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
             <div className="rounded-2xl border border-slate-200 p-3 text-center">
               <SummaryValue value={formatDuration(annualTotal)} />
               <span className="text-sm text-slate-500">Total ({year})</span>
@@ -1034,45 +1044,51 @@ export function BoardWorkspace({
               <span className="text-sm text-slate-500">Days studied</span>
             </div>
             <div className="rounded-2xl border border-slate-200 p-3 text-center">
-              <strong className="inline-flex items-baseline justify-center gap-1 text-xl leading-tight text-blue-600">
-                <Flame
-                  aria-hidden="true"
-                  className="size-4.5 text-orange-500"
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Flame aria-hidden="true" className="size-5 text-orange-500" />
+                <SummaryValue
+                  value={`${currentStreak} ${
+                    currentStreak === 1 ? "day" : "days"
+                  }`}
                 />
-                {currentStreak}
-              </strong>
+              </span>
               <span className="block text-sm text-slate-500">
                 Current streak
               </span>
             </div>
-            <div className="flex min-w-0 items-center justify-center gap-2.5 rounded-2xl border border-slate-200 p-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                <Gauge aria-hidden="true" className="size-4.5" />
-              </span>
-              <span className="min-w-0">
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Trophy aria-hidden="true" className="size-5 text-amber-500" />
                 <SummaryValue
-                  value={formatDuration(statistics.calendarDayAverage, true)}
-                  accentClass="text-slate-950"
-                  sizeClass="text-xl sm:text-2xl"
+                  value={`${statistics.longestStreak} ${
+                    statistics.longestStreak === 1 ? "day" : "days"
+                  }`}
                 />
-                <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
-                  Average / calendar day
-                </span>
+              </span>
+              <span className="block text-sm text-slate-500">
+                Longest streak
               </span>
             </div>
-            <div className="flex min-w-0 items-center justify-center gap-2.5 rounded-2xl border border-slate-200 p-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                <Gauge aria-hidden="true" className="size-4.5" />
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Gauge aria-hidden="true" className="size-5 text-blue-600" />
+                <SummaryValue
+                  value={formatDuration(statistics.calendarDayAverage, true)}
+                />
               </span>
-              <span className="min-w-0">
+              <span className="block text-sm text-slate-500">
+                Average / calendar day
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Gauge aria-hidden="true" className="size-5 text-blue-600" />
                 <SummaryValue
                   value={formatDuration(statistics.activeDayAverage, true)}
-                  accentClass="text-slate-950"
-                  sizeClass="text-xl sm:text-2xl"
                 />
-                <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
-                  Average / active day
-                </span>
+              </span>
+              <span className="block text-sm text-slate-500">
+                Average / active day
               </span>
             </div>
           </section>
