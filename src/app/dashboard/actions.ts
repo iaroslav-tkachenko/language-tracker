@@ -128,6 +128,36 @@ export async function createLanguageBoard(
   return { status: "success", message: `${parsed.data} is ready.` };
 }
 
+export async function createLanguageBoardAndRedirect(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = parseName(formData);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase.rpc(
+    "create_or_restore_language_board",
+    { p_name: parsed.data },
+  );
+
+  if (error) {
+    return { status: "error", message: providerMessage("board", error) };
+  }
+
+  const tracker = formData.get("tracker") === "vocabulary" ? "vocabulary" : "";
+
+  revalidatePath("/dashboard");
+  revalidatePath("/settings");
+  redirect(
+    `/dashboard?board=${data.id}${tracker ? `&tracker=${tracker}` : ""}`,
+  );
+}
+
 export async function createActivityType(
   _state: ResourceActionState,
   formData: FormData,

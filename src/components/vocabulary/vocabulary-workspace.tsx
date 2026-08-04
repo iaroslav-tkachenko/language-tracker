@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
 import {
+  createLanguageBoardAndRedirect,
   createVocabularyTotalBatch,
   deleteVocabularyDailyTotal,
   type ResourceActionState,
@@ -184,7 +185,7 @@ function VocabularyForecastCard({
 
   if (forecast.status === "highest-level") {
     return (
-      <section className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50/70 p-5 shadow-sm sm:p-6">
+      <section className="mx-auto mt-5 max-w-6xl rounded-3xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-4">
           <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700">
             <BookOpen aria-hidden="true" className="size-6" />
@@ -217,7 +218,7 @@ function VocabularyForecastCard({
   ];
 
   return (
-    <section className="mt-6 rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="mx-auto mt-5 max-w-6xl rounded-3xl border border-emerald-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start gap-4">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
           <BookOpen aria-hidden="true" className="size-6" />
@@ -411,6 +412,12 @@ export function VocabularyWorkspace({
     createVocabularyTotalBatch,
     initialActionState,
   );
+  const [boardState, boardAction, boardPending] = useActionState(
+    createLanguageBoardAndRedirect,
+    initialActionState,
+  );
+  const [boardDialogOpen, setBoardDialogOpen] = useState(false);
+  const [newBoardName, setNewBoardName] = useState("");
 
   useEffect(() => {
     if (actionState.status !== "success") return;
@@ -435,6 +442,17 @@ export function VocabularyWorkspace({
   const activeDate = reviewMode ? reviewDate : selectedDate;
   const activeYear = reviewMode ? Number(reviewDate.slice(0, 4)) : year;
   const activeBoard = reviewMode ? reviewBoard : selectedBoard;
+  const trimmedBoardName = newBoardName.trim();
+  const duplicateBoardName = boards.some(
+    (board) => board.name.toLowerCase() === trimmedBoardName.toLowerCase(),
+  );
+  const boardLimitReached = boards.length >= 6;
+  const canCreateBoard =
+    trimmedBoardName.length > 0 &&
+    trimmedBoardName.length <= 50 &&
+    !duplicateBoardName &&
+    !boardLimitReached &&
+    !reviewMode;
   const visibleTotals = useMemo(
     () => (reviewMode ? (reviewTotalsByBoard[activeBoard.id] ?? []) : totals),
     [activeBoard.id, reviewMode, reviewTotalsByBoard, totals],
@@ -588,7 +606,7 @@ export function VocabularyWorkspace({
         onClick={() => navigateToDate(cell.dateKey)}
         aria-label={label}
         title={label}
-        className={`${compact ? "size-2.5 rounded-[2px]" : "size-3.5 rounded-[3px] sm:size-4"} border ${
+        className={`${compact ? "size-2.5 rounded-[2px]" : "h-[1.0625rem] w-full rounded-[3px]"} border ${
           cell.dateKey === activeDate
             ? "border-slate-950 ring-1 ring-slate-950"
             : "border-white"
@@ -605,9 +623,9 @@ export function VocabularyWorkspace({
   return (
     <main className="min-h-screen bg-white">
       <header className="border-b border-slate-200">
-        <div className="mx-auto flex min-h-17 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
           <details className="group relative">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xl px-3 text-lg font-bold text-slate-950 hover:bg-slate-50">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg px-2.5 text-base font-bold text-slate-950 hover:bg-slate-50">
               {activeBoard.name}
               <span
                 aria-hidden="true"
@@ -652,6 +670,24 @@ export function VocabularyWorkspace({
                   </Link>
                 ),
               )}
+              <div className="mt-2 border-t border-slate-100 pt-2">
+                {boardLimitReached || reviewMode ? (
+                  <p className="rounded-xl bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-500">
+                    {reviewMode
+                      ? "Add languages from your live dashboard."
+                      : "You can have up to 6 active language boards. Remove one in Settings before adding another."}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setBoardDialogOpen(true)}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+                  >
+                    <Plus aria-hidden="true" className="size-4" />
+                    Add language
+                  </button>
+                )}
+              </div>
             </div>
           </details>
 
@@ -662,21 +698,21 @@ export function VocabularyWorkspace({
                   ? "/dashboard"
                   : `/dashboard?board=${activeBoard.id}&date=${activeDate}&today=${todayKey}`
               }
-              className="flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
             >
-              <Clock3 aria-hidden="true" className="size-5" />
+              <Clock3 aria-hidden="true" className="size-4.5" />
               Study Time
             </Link>
-            <span className="flex min-h-17 items-center gap-2 border-b-3 border-emerald-600 px-5 font-semibold text-emerald-700">
-              <BookOpen aria-hidden="true" className="size-5" />
+            <span className="flex min-h-14 items-center gap-2 border-b-2 border-emerald-600 px-4 text-sm font-semibold text-emerald-700">
+              <BookOpen aria-hidden="true" className="size-4.5" />
               Vocabulary
             </span>
             <Link
               href={`/cefr?board=${activeBoard.id}&today=${todayKey}`}
-              className="relative flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+              className="relative flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
             >
               {!hasCurrentCefrLevel && <MissingLevelBubble />}
-              <GraduationCap aria-hidden="true" className="size-5" />
+              <GraduationCap aria-hidden="true" className="size-4.5" />
               Level
             </Link>
           </nav>
@@ -688,31 +724,31 @@ export function VocabularyWorkspace({
                   ? "/statistics"
                   : `/statistics?board=${activeBoard.id}&year=${activeYear}&today=${todayKey}`
               }
-              className="hidden min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
+              className="hidden min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
             >
-              <BarChart3 aria-hidden="true" className="size-5" />
+              <BarChart3 aria-hidden="true" className="size-4.5" />
               Statistics
             </Link>
             <Link
               href="/settings"
               aria-label="Settings"
-              className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
-              <Settings aria-hidden="true" className="size-5" />
+              <Settings aria-hidden="true" className="size-4.5" />
             </Link>
             <ConfirmSignOutForm className="sm:hidden">
               <button
                 type="submit"
                 aria-label="Sign out"
-                className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
-                <LogOut aria-hidden="true" className="size-5" />
+                <LogOut aria-hidden="true" className="size-4.5" />
               </button>
             </ConfirmSignOutForm>
             <ConfirmSignOutForm className="hidden sm:block">
               <button
                 type="submit"
-                className="min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                className="min-h-9 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 Sign out
               </button>
@@ -729,18 +765,18 @@ export function VocabularyWorkspace({
                 ? "/dashboard"
                 : `/dashboard?board=${activeBoard.id}&date=${activeDate}&today=${todayKey}`
             }
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </Link>
-          <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-emerald-600 px-2 text-xs font-semibold text-emerald-700">
+          <span className="flex min-h-12 items-center justify-center gap-1.5 border-b-2 border-emerald-600 px-2 text-xs font-semibold text-emerald-700">
             <BookOpen aria-hidden="true" className="size-4.5" />
             Vocabulary
           </span>
           <Link
             href={`/cefr?board=${activeBoard.id}&today=${todayKey}`}
-            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+            className="relative flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
           >
             {!hasCurrentCefrLevel && <MissingLevelBubble />}
             <GraduationCap aria-hidden="true" className="size-4.5" />
@@ -752,7 +788,7 @@ export function VocabularyWorkspace({
                 ? "/statistics"
                 : `/statistics?board=${activeBoard.id}&year=${activeYear}&today=${todayKey}`
             }
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
@@ -761,6 +797,72 @@ export function VocabularyWorkspace({
       </header>
 
       <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
+        {boardDialogOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-language-heading"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4"
+          >
+            <form
+              action={boardAction}
+              onSubmit={(event) => {
+                if (!canCreateBoard) event.preventDefault();
+              }}
+              className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+            >
+              <input type="hidden" name="tracker" value="vocabulary" />
+              <h2
+                id="add-language-heading"
+                className="text-lg font-bold text-slate-950"
+              >
+                Add language
+              </h2>
+              <label className="mt-4 block text-sm font-semibold text-slate-800">
+                Language name
+                <input
+                  name="name"
+                  required
+                  maxLength={50}
+                  autoComplete="off"
+                  value={newBoardName}
+                  onChange={(event) => setNewBoardName(event.target.value)}
+                  placeholder="German"
+                  className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 px-4 text-base text-slate-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </label>
+              {duplicateBoardName && (
+                <p role="alert" className="mt-2 text-sm text-red-700">
+                  You already have an active board with this name.
+                </p>
+              )}
+              {boardState.status === "error" && (
+                <p role="alert" className="mt-2 text-sm text-red-700">
+                  {boardState.message}
+                </p>
+              )}
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBoardDialogOpen(false);
+                    setNewBoardName("");
+                  }}
+                  className="min-h-11 flex-1 rounded-xl border border-slate-300 px-4 font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canCreateBoard || boardPending}
+                  className="min-h-11 flex-1 rounded-xl bg-emerald-600 px-4 font-semibold text-white disabled:cursor-not-allowed disabled:bg-emerald-300"
+                >
+                  {boardPending ? "Adding..." : "Confirm"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
         {!hasCurrentCefrLevel && (
           <div className="mb-6">
             <CefrLevelPrompt
@@ -771,202 +873,223 @@ export function VocabularyWorkspace({
           </div>
         )}
 
-        <section aria-labelledby="vocabulary-year-heading">
-          <div className="flex items-center justify-center gap-4">
-            <button
-              type="button"
-              aria-label="Previous year"
-              onClick={() => navigateYear(-1)}
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronLeft aria-hidden="true" className="size-5" />
-            </button>
-            <div className="min-w-28 text-center">
-              <p className="text-xs font-semibold tracking-wide text-emerald-700 uppercase">
-                New words
-              </p>
-              <h1
-                id="vocabulary-year-heading"
-                className="text-3xl font-bold text-slate-950"
+        <div className="mx-auto max-w-6xl">
+          <section aria-labelledby="vocabulary-year-heading">
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                aria-label="Previous year"
+                onClick={() => navigateYear(-1)}
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
               >
-                {activeYear}
-              </h1>
-            </div>
-            <button
-              type="button"
-              aria-label="Next year"
-              onClick={() => navigateYear(1)}
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronRight aria-hidden="true" className="size-5" />
-            </button>
-          </div>
-
-          <div className="mt-6 hidden overflow-x-auto pb-2 sm:block">
-            <div className="mx-auto w-max">
-              <div className="mb-2 flex justify-between px-1 text-xs text-slate-500">
-                {[
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                ].map((month) => (
-                  <span key={month}>{month}</span>
-                ))}
+                <ChevronLeft aria-hidden="true" className="size-4.5" />
+              </button>
+              <div className="min-w-20 text-center">
+                <p className="text-xs font-semibold tracking-wide text-emerald-700 uppercase">
+                  Words learned
+                </p>
+                <h1
+                  id="vocabulary-year-heading"
+                  className="text-2xl font-bold text-slate-950"
+                >
+                  {activeYear}
+                </h1>
               </div>
-              <div className="grid grid-flow-col grid-rows-7 gap-1">
-                {calendarCells.map((cell) =>
-                  renderHeatCell(
-                    { dateKey: cell.dateKey, visible: cell.inYear },
-                    false,
-                  ),
-                )}
-              </div>
+              <button
+                type="button"
+                aria-label="Next year"
+                onClick={() => navigateYear(1)}
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronRight aria-hidden="true" className="size-4.5" />
+              </button>
             </div>
-          </div>
 
-          <div className="mt-6 space-y-5 sm:hidden">
-            {[
-              {
-                label: "Jan–Jun",
-                months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-                cells: getCalendarRangeCells(
-                  `${activeYear}-01-01`,
-                  `${activeYear}-06-30`,
-                ),
-              },
-              {
-                label: "Jul–Dec",
-                months: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                cells: getCalendarRangeCells(
-                  `${activeYear}-07-01`,
-                  `${activeYear}-12-31`,
-                ),
-              },
-            ].map((halfYear) => (
-              <div key={halfYear.label}>
-                <h2 className="text-center text-sm font-semibold text-slate-600">
-                  {halfYear.label}
-                </h2>
-                <div className="mx-auto mt-2 w-max max-w-full">
-                  <div className="mb-1.5 flex justify-between px-0.5 text-[9px] text-slate-500">
-                    {halfYear.months.map((month) => (
-                      <span key={month}>{month}</span>
-                    ))}
-                  </div>
-                  <div className="grid grid-flow-col grid-rows-7 gap-0.5">
-                    {halfYear.cells.map((cell) =>
-                      renderHeatCell(
-                        {
-                          dateKey: cell.dateKey,
-                          visible: cell.inRange,
-                        },
-                        true,
-                      ),
-                    )}
-                  </div>
+            <div className="mt-5 hidden overflow-x-auto pb-2 sm:block">
+              <div className="grid min-w-[720px] grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2">
+                <div />
+                <div className="mb-2 flex justify-between px-0.5 text-xs text-slate-500">
+                  {[
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ].map((month) => (
+                    <span key={month}>{month}</span>
+                  ))}
+                </div>
+                <div className="grid grid-rows-7 gap-1 text-[10px] leading-none text-slate-500">
+                  {["M", "T", "W", "T", "F", "S", "S"].map((weekday, index) => (
+                    <span
+                      key={`${weekday}-${index}`}
+                      className="flex h-[1.0625rem] items-center justify-center"
+                    >
+                      {weekday}
+                    </span>
+                  ))}
+                </div>
+                <div className="grid grid-cols-[repeat(53,minmax(0,1fr))] grid-flow-col grid-rows-7 gap-1">
+                  {calendarCells.map((cell) =>
+                    renderHeatCell(
+                      { dateKey: cell.dateKey, visible: cell.inYear },
+                      false,
+                    ),
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
-            {[
-              "0 words",
-              "1–2 words",
-              "3–5 words",
-              "6–9 words",
-              "10–14 words",
-              "15–19 words",
-              "20–39 words",
-              "40+ words",
-            ].map((label, level) => (
-              <span key={label} className="inline-flex items-center gap-1.5">
-                <span
-                  aria-hidden="true"
-                  className="size-3 rounded-sm border border-slate-100"
-                  style={{
-                    backgroundColor:
-                      level === 0 ? missedColor : heatColors[level],
-                  }}
-                />
-                {label}
+            <div className="mt-6 space-y-5 sm:hidden">
+              {[
+                {
+                  label: "Jan–Jun",
+                  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                  cells: getCalendarRangeCells(
+                    `${activeYear}-01-01`,
+                    `${activeYear}-06-30`,
+                  ),
+                },
+                {
+                  label: "Jul–Dec",
+                  months: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                  cells: getCalendarRangeCells(
+                    `${activeYear}-07-01`,
+                    `${activeYear}-12-31`,
+                  ),
+                },
+              ].map((halfYear) => (
+                <div key={halfYear.label}>
+                  <h2 className="text-center text-sm font-semibold text-slate-600">
+                    {halfYear.label}
+                  </h2>
+                  <div className="mx-auto mt-2 w-max max-w-full">
+                    <div className="mb-1.5 flex justify-between px-0.5 text-[9px] text-slate-500">
+                      {halfYear.months.map((month) => (
+                        <span key={month}>{month}</span>
+                      ))}
+                    </div>
+                    <div className="grid grid-flow-col grid-rows-7 gap-0.5">
+                      {halfYear.cells.map((cell) =>
+                        renderHeatCell(
+                          {
+                            dateKey: cell.dateKey,
+                            visible: cell.inRange,
+                          },
+                          true,
+                        ),
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
+              {[
+                "0 words",
+                "1–2 words",
+                "3–5 words",
+                "6–9 words",
+                "10–14 words",
+                "15–19 words",
+                "20–39 words",
+                "40+ words",
+              ].map((label, level) => (
+                <span key={label} className="inline-flex items-center gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className="size-3 rounded-sm border border-slate-100"
+                    style={{
+                      backgroundColor:
+                        level === 0 ? missedColor : heatColors[level],
+                    }}
+                  />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          <section
+            aria-label="Vocabulary summary"
+            className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6"
+          >
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <SummaryValue
+                value={statistics.totalWords.toLocaleString("en")}
+              />
+              <span className="text-sm text-slate-500">
+                Words ({activeYear})
               </span>
-            ))}
-          </div>
-        </section>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <SummaryValue value={statistics.activeDays} />
+              <span className="text-sm text-slate-500">Active days</span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Flame aria-hidden="true" className="size-5 text-orange-500" />
+                <SummaryValue
+                  value={`${statistics.currentStreak} ${
+                    statistics.currentStreak === 1 ? "day" : "days"
+                  }`}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
+                Current streak
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Trophy aria-hidden="true" className="size-5 text-amber-500" />
+                <SummaryValue
+                  value={`${statistics.longestStreak} ${
+                    statistics.longestStreak === 1 ? "day" : "days"
+                  }`}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
+                Longest streak
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
+                <SummaryValue
+                  value={`${formatAverage(statistics.calendarDayAverage)} ${
+                    statistics.calendarDayAverage === 1 ? "word" : "words"
+                  }`}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
+                Average / calendar day
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
+                <SummaryValue
+                  value={`${formatAverage(statistics.activeDayAverage)} ${
+                    statistics.activeDayAverage === 1 ? "word" : "words"
+                  }`}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
+                Average / study day
+              </span>
+            </div>
+          </section>
+        </div>
 
-        <section
-          aria-label="Vocabulary summary"
-          className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-6"
-        >
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <SummaryValue value={statistics.totalWords.toLocaleString("en")} />
-            <span className="text-sm text-slate-500">Words ({activeYear})</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <SummaryValue value={statistics.activeDays} />
-            <span className="text-sm text-slate-500">Active days</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <span className="inline-flex items-baseline justify-center gap-1">
-              <Flame aria-hidden="true" className="size-5 text-orange-500" />
-              <SummaryValue
-                value={`${statistics.currentStreak} ${
-                  statistics.currentStreak === 1 ? "day" : "days"
-                }`}
-              />
-            </span>
-            <span className="block text-sm text-slate-500">Current streak</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <span className="inline-flex items-baseline justify-center gap-1">
-              <Trophy aria-hidden="true" className="size-5 text-amber-500" />
-              <SummaryValue
-                value={`${statistics.longestStreak} ${
-                  statistics.longestStreak === 1 ? "day" : "days"
-                }`}
-              />
-            </span>
-            <span className="block text-sm text-slate-500">Longest streak</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <span className="inline-flex items-baseline justify-center gap-1">
-              <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
-              <SummaryValue
-                value={`${formatAverage(statistics.calendarDayAverage)} ${
-                  statistics.calendarDayAverage === 1 ? "word" : "words"
-                }`}
-              />
-            </span>
-            <span className="block text-sm text-slate-500">
-              Average / calendar day
-            </span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <span className="inline-flex items-baseline justify-center gap-1">
-              <Gauge aria-hidden="true" className="size-5 text-emerald-500" />
-              <SummaryValue
-                value={`${formatAverage(statistics.activeDayAverage)} ${
-                  statistics.activeDayAverage === 1 ? "word" : "words"
-                }`}
-              />
-            </span>
-            <span className="block text-sm text-slate-500">
-              Average / study day
-            </span>
-          </div>
-        </section>
-
-        <section className="mx-auto mt-8 max-w-3xl border-t border-slate-200 pt-6">
+        <section className="mx-auto mt-7 max-w-3xl border-t border-slate-200 pt-5">
           <div className="flex items-center justify-between gap-4">
             <button
               type="button"
@@ -997,7 +1120,7 @@ export function VocabularyWorkspace({
           </div>
 
           {selectedTotal ? (
-            <article className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+            <article className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white p-4">
               <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700">
                 <BookOpen aria-hidden="true" className="size-5" />
               </span>
@@ -1056,13 +1179,13 @@ export function VocabularyWorkspace({
               </form>
             </article>
           ) : (
-            <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-6 text-center">
+            <div className="mt-5 rounded-2xl bg-white px-4 py-8 text-center">
               <BookOpen
                 aria-hidden="true"
                 className="mx-auto size-7 text-slate-400"
               />
-              <p className="mt-2 text-sm font-medium text-slate-700">
-                No new words learned on this day yet.
+              <p className="mt-3 text-base font-semibold text-slate-800">
+                No new words yet
               </p>
               <p className="mt-1 text-sm text-slate-500">
                 Record only words you actively learned—not words you simply
@@ -1072,30 +1195,43 @@ export function VocabularyWorkspace({
           )}
 
           {!formOpen ? (
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              {!selectedTotal && (
-                <button
-                  type="button"
-                  onClick={() => openCreate("single")}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-emerald-500 font-semibold text-emerald-700 hover:bg-emerald-50"
-                >
-                  <Plus aria-hidden="true" className="size-5" />
-                  Add word total
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => openCreate("range")}
-                className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-emerald-500 font-semibold text-emerald-700 hover:bg-emerald-50 ${
-                  selectedTotal ? "sm:col-span-2" : ""
-                }`}
-              >
-                <CalendarRange aria-hidden="true" className="size-5" />
-                Add date range
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => openCreate("single")}
+              className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 text-base font-bold text-white shadow-sm transition hover:bg-emerald-700"
+            >
+              <Plus aria-hidden="true" className="size-5" />
+              Add words
+            </button>
           ) : formMode === "range" ? (
             <div className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
+              <div
+                role="group"
+                aria-label="Vocabulary entry date mode"
+                className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormMode("single");
+                    setRangeReviewOpen(false);
+                    setBatchOperationId(null);
+                  }}
+                  aria-pressed={false}
+                  className="min-h-10 rounded-lg px-3 text-sm font-semibold text-slate-600 hover:text-slate-950"
+                >
+                  Single day
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormMode("range")}
+                  aria-pressed={true}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-white px-3 text-sm font-semibold text-emerald-700 shadow-sm"
+                >
+                  <CalendarRange aria-hidden="true" className="size-4" />
+                  Date range
+                </button>
+              </div>
               {rangeReviewOpen ? (
                 <>
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5">
@@ -1303,6 +1439,37 @@ export function VocabularyWorkspace({
               }}
               className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5"
             >
+              {!editing && (
+                <div
+                  role="group"
+                  aria-label="Vocabulary entry date mode"
+                  className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setFormMode("single")}
+                    aria-pressed={formMode === "single"}
+                    className="min-h-10 rounded-lg bg-white px-3 text-sm font-semibold text-emerald-700 shadow-sm"
+                  >
+                    Single day
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormMode("range");
+                      setRangeStart(activeDate);
+                      setRangeEnd(activeDate);
+                      setRangeReviewOpen(false);
+                      setBatchOperationId(null);
+                    }}
+                    aria-pressed={false}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold text-slate-600 hover:text-slate-950"
+                  >
+                    <CalendarRange aria-hidden="true" className="size-4" />
+                    Date range
+                  </button>
+                </div>
+              )}
               <input type="hidden" name="boardId" value={activeBoard.id} />
               <input type="hidden" name="studyDate" value={activeDate} />
               <label className="block font-semibold text-slate-950">
@@ -1349,6 +1516,12 @@ export function VocabularyWorkspace({
           )}
         </section>
 
+        {vocabularyForecast.status !== "no-level" && (
+          <div
+            aria-hidden="true"
+            className="mx-auto mt-8 max-w-6xl border-t border-slate-200"
+          />
+        )}
         <VocabularyForecastCard forecast={vocabularyForecast} />
       </div>
     </main>
