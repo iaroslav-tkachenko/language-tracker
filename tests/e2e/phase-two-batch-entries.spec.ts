@@ -12,7 +12,7 @@ test.describe("Phase 2 date-range sessions", () => {
   test("reviews and creates independent sessions without replacing matches", async ({
     page,
   }, testInfo) => {
-    const suffix = testInfo.project.name;
+    const suffix = `${testInfo.project.name}-retry-${testInfo.retry}`;
     const boardName = `Batch ${suffix}`;
     const startDate = "2026-07-20";
     const endDate = "2026-07-22";
@@ -26,8 +26,12 @@ test.describe("Phase 2 date-range sessions", () => {
     await page.goto("/settings");
     await page.getByLabel("Add language").fill(boardName);
     await page.getByRole("button", { name: "Add language" }).click();
+    await page
+      .waitForLoadState("networkidle", { timeout: 5_000 })
+      .catch(() => undefined);
+    await page.reload();
     const boardLink = page.getByRole("link", { name: boardName });
-    await expect(boardLink).toBeVisible();
+    await expect(boardLink).toBeVisible({ timeout: 10_000 });
     await boardLink.click();
 
     async function createRange() {

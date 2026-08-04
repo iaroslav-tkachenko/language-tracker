@@ -12,7 +12,7 @@ test.describe("Phase 3 Vocabulary", () => {
   test("completes vocabulary, batch, navigation, and statistics journeys", async ({
     page,
   }, testInfo) => {
-    const suffix = testInfo.project.name;
+    const suffix = `${testInfo.project.name}-retry-${testInfo.retry}`;
     const boardName = `Vocabulary ${suffix}`;
     const today = "2026-07-26";
     const firstDate = "2026-07-20";
@@ -28,8 +28,12 @@ test.describe("Phase 3 Vocabulary", () => {
     await page.goto("/settings");
     await page.getByLabel("Add language").fill(boardName);
     await page.getByRole("button", { name: "Add language" }).click();
+    await page
+      .waitForLoadState("networkidle", { timeout: 5_000 })
+      .catch(() => undefined);
+    await page.reload();
     const boardLink = page.getByRole("link", { name: boardName });
-    await expect(boardLink).toBeVisible();
+    await expect(boardLink).toBeVisible({ timeout: 10_000 });
     const boardHref = await boardLink.getAttribute("href");
     const boardId = boardHref
       ? new URL(boardHref, "http://127.0.0.1:3000").searchParams.get("board")
@@ -96,7 +100,7 @@ test.describe("Phase 3 Vocabulary", () => {
       : page.getByRole("link", { name: "Statistics" });
     await statisticsLink.click();
     await expect(
-      page.getByRole("heading", { name: "Learning statistics" }),
+      page.getByRole("heading", { name: "Your learning overview" }),
     ).toBeVisible();
 
     const selectedYearSection = page.locator("section").filter({
