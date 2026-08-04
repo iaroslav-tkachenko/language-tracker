@@ -101,11 +101,17 @@ test.describe("Phase 3 Vocabulary", () => {
     const selectedYearSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Selected year" }),
     });
+    const selectedYearVocabulary = selectedYearSection
+      .locator("div")
+      .filter({
+        has: page.getByRole("heading", { name: "New words" }),
+      })
+      .first();
     await expect(
-      selectedYearSection
+      selectedYearVocabulary
         .locator("article")
         .filter({ hasText: "Total in 2026" })
-        .filter({ hasText: "8 words" }),
+        .first(),
     ).toContainText("8 words");
     await expect(
       selectedYearSection.getByText("Active days in 2026"),

@@ -18,12 +18,11 @@ test.describe("Phase 4C CEFR history", () => {
     const today = "2026-08-03";
     const chooseLevel = async (level: string) => {
       const dialog = page.getByRole("dialog");
-      await dialog
-        .locator("label")
-        .filter({
-          has: dialog.locator(`input[name="level"][value="${level}"]`),
-        })
-        .click();
+      const levelInput = dialog.locator(
+        `input[name="level"][value="${level}"]`,
+      );
+      await levelInput.check({ force: true });
+      await expect(levelInput).toBeChecked();
     };
 
     await page.goto("/sign-in");
