@@ -14,7 +14,7 @@ test.describe("Phase 3 Vocabulary", () => {
   test("completes vocabulary, batch, navigation, and statistics journeys", async ({
     page,
   }, testInfo) => {
-    const suffix = testInfo.project.name;
+    const suffix = `${testInfo.project.name} retry ${testInfo.retry}`;
     const boardName = `Vocabulary ${suffix}`;
     const today = "2026-07-26";
     const firstDate = "2026-07-20";
@@ -112,7 +112,7 @@ test.describe("Phase 3 Vocabulary", () => {
         .locator("article")
         .filter({ hasText: "Total in 2026" })
         .first(),
-    ).toContainText("8 words");
+    ).toContainText(/8\s*words/);
     await expect(
       selectedYearSection.getByText("Active days in 2026"),
     ).toBeVisible();
@@ -124,18 +124,18 @@ test.describe("Phase 3 Vocabulary", () => {
       currentProgressSection
         .locator("article")
         .filter({ hasText: "All-time total" }),
-    ).toContainText("8 words");
+    ).toContainText(/8\s*words/);
     await expect(
       currentProgressSection
         .locator("article")
         .filter({ hasText: "Current week" })
-        .filter({ hasText: "8 words" }),
+        .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
     await expect(
       currentProgressSection
         .locator("article")
         .filter({ hasText: "Current month" })
-        .filter({ hasText: "8 words" }),
+        .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
 
     const wordsChart = page.locator("section").filter({

@@ -14,7 +14,7 @@ test.describe("Phase 4C CEFR history", () => {
   test("creates, edits, rejects conflicts, deletes, and navigates CEFR history", async ({
     page,
   }, testInfo) => {
-    const boardName = `CEFR ${testInfo.project.name}`;
+    const boardName = `CEFR ${testInfo.project.name} retry ${testInfo.retry}`;
     const today = "2026-08-03";
     const chooseLevel = async (level: string) => {
       const dialog = page.getByRole("dialog");
@@ -23,6 +23,12 @@ test.describe("Phase 4C CEFR history", () => {
       );
       await levelInput.check({ force: true });
       await expect(levelInput).toBeChecked();
+    };
+    const submitLevelUpdate = async () => {
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "Add level update" })
+        .click();
     };
 
     await page.goto("/sign-in");
@@ -50,30 +56,30 @@ test.describe("Phase 4C CEFR history", () => {
     await page.getByRole("button", { name: "Set current level" }).click();
     await chooseLevel("A0");
     await page.getByLabel("Date this level started").fill("2026-01-01");
-    await page.getByRole("button", { name: "Add level update" }).click();
+    await submitLevelUpdate();
     await expect(
       page.getByRole("heading", { name: "Level A0 - Absolute zero" }),
     ).toBeVisible();
-    await expect(page.getByText("Since January 1, 2026")).toBeVisible();
+    await expect(page.getByText("Since January 1, 2026").first()).toBeVisible();
 
     await page.getByRole("button", { name: "Add update" }).click();
     await chooseLevel("B1");
     await page.getByLabel("Date this level started").fill("2026-07-12");
-    await page.getByRole("button", { name: "Add level update" }).click();
+    await submitLevelUpdate();
     await expect(page.getByRole("heading", { name: "Level B1" })).toBeVisible();
-    await expect(page.getByText("Since July 12, 2026")).toBeVisible();
+    await expect(page.getByText("Since July 12, 2026").first()).toBeVisible();
     await expect(page.getByText("From January 1, 2026")).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
     await chooseLevel("B2");
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page.getByRole("heading", { name: "Level B2" })).toBeVisible();
-    await expect(page.getByText("Since July 12, 2026")).toBeVisible();
+    await expect(page.getByText("Since July 12, 2026").first()).toBeVisible();
 
     await page.getByRole("button", { name: "Add update" }).click();
     await chooseLevel("A2");
     await page.getByLabel("Date this level started").fill("2026-07-12");
-    await page.getByRole("button", { name: "Add level update" }).click();
+    await submitLevelUpdate();
     await expect(
       page
         .getByRole("alert")
@@ -86,7 +92,7 @@ test.describe("Phase 4C CEFR history", () => {
     await expect(
       page.getByRole("heading", { name: "Level A0 - Absolute zero" }),
     ).toBeVisible();
-    await expect(page.getByText("Since January 1, 2026")).toBeVisible();
+    await expect(page.getByText("Since January 1, 2026").first()).toBeVisible();
 
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Delete" }).click();
