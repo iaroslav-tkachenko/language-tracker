@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  createLanguageBoardFromSettings,
+  removeSettingsResourceIfPresent,
+} from "./helpers";
+
 const email = process.env.E2E_USER_EMAIL;
 const password = process.env.E2E_USER_PASSWORD;
 
@@ -12,7 +17,7 @@ test.describe("Phase 1 Study Time", () => {
   test("completes the private Study Time lifecycle", async ({
     page,
   }, testInfo) => {
-    const suffix = `${testInfo.project.name}-retry-${testInfo.retry}`;
+    const suffix = testInfo.project.name;
     const boardName = `E2E ${suffix}`;
     const activityName = `Review ${suffix}`;
     const mobile = testInfo.project.name.includes("mobile");
@@ -24,14 +29,8 @@ test.describe("Phase 1 Study Time", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     await page.goto("/settings");
-    await page.getByLabel("Add language").fill(boardName);
-    await page.getByRole("button", { name: "Add language" }).click();
-    await page
-      .waitForLoadState("networkidle", { timeout: 5_000 })
-      .catch(() => undefined);
-    await page.reload();
-    const boardLink = page.getByRole("link", { name: boardName });
-    await expect(boardLink).toBeVisible({ timeout: 10_000 });
+    await removeSettingsResourceIfPresent(page, activityName);
+    const boardLink = await createLanguageBoardFromSettings(page, boardName);
     await boardLink.click();
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole("heading", { name: /^\d{4}$/ })).toBeVisible();

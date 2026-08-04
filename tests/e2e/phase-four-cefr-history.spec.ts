@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { createLanguageBoardFromSettings } from "./helpers";
+
 const email = process.env.E2E_USER_EMAIL;
 const password = process.env.E2E_USER_PASSWORD;
 
@@ -12,13 +14,14 @@ test.describe("Phase 4C CEFR history", () => {
   test("creates, edits, rejects conflicts, deletes, and navigates CEFR history", async ({
     page,
   }, testInfo) => {
-    const boardName = `CEFR ${testInfo.project.name}-retry-${testInfo.retry}`;
+    const boardName = `CEFR ${testInfo.project.name}`;
     const today = "2026-08-03";
     const chooseLevel = async (level: string) => {
-      await page
+      const dialog = page.getByRole("dialog");
+      await dialog
         .locator("label")
         .filter({
-          has: page.locator(`input[name="level"][value="${level}"]`),
+          has: dialog.locator(`input[name="level"][value="${level}"]`),
         })
         .click();
     };
@@ -30,15 +33,7 @@ test.describe("Phase 4C CEFR history", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     await page.goto("/settings");
-    await page.getByLabel("Add language").fill(boardName);
-    await page.getByRole("button", { name: "Add language" }).click();
-    await page
-      .waitForLoadState("networkidle", { timeout: 5_000 })
-      .catch(() => undefined);
-    await page.reload();
-
-    const boardLink = page.getByRole("link", { name: boardName });
-    await expect(boardLink).toBeVisible({ timeout: 10_000 });
+    const boardLink = await createLanguageBoardFromSettings(page, boardName);
     const boardHref = await boardLink.getAttribute("href");
     const boardId = boardHref
       ? new URL(boardHref, "http://127.0.0.1:3000").searchParams.get("board")
@@ -55,9 +50,7 @@ test.describe("Phase 4C CEFR history", () => {
 
     await page.getByRole("button", { name: "Set current level" }).click();
     await chooseLevel("A0");
-    await page
-      .getByLabel("Date when this level became current")
-      .fill("2026-01-01");
+    await page.getByLabel("Date this level started").fill("2026-01-01");
     await page.getByRole("button", { name: "Add level update" }).click();
     await expect(
       page.getByRole("heading", { name: "Level A0 - Absolute zero" }),
@@ -66,9 +59,7 @@ test.describe("Phase 4C CEFR history", () => {
 
     await page.getByRole("button", { name: "Add update" }).click();
     await chooseLevel("B1");
-    await page
-      .getByLabel("Date when this level became current")
-      .fill("2026-07-12");
+    await page.getByLabel("Date this level started").fill("2026-07-12");
     await page.getByRole("button", { name: "Add level update" }).click();
     await expect(page.getByRole("heading", { name: "Level B1" })).toBeVisible();
     await expect(page.getByText("Since July 12, 2026")).toBeVisible();
@@ -82,9 +73,7 @@ test.describe("Phase 4C CEFR history", () => {
 
     await page.getByRole("button", { name: "Add update" }).click();
     await chooseLevel("A2");
-    await page
-      .getByLabel("Date when this level became current")
-      .fill("2026-07-12");
+    await page.getByLabel("Date this level started").fill("2026-07-12");
     await page.getByRole("button", { name: "Add level update" }).click();
     await expect(
       page
