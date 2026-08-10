@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Language Tracker</title>
+  <rect width="64" height="64" rx="14" fill="#2563eb" />
+  <path
+    d="M12 16.5c7.8-2.1 14.5-.1 20 5.2v28c-5.5-5.3-12.2-7.3-20-5.2v-28Z"
+    fill="#ffffff"
+  />
+  <path
+    d="M52 16.5c-7.8-2.1-14.5-.1-20 5.2v28c5.5-5.3 12.2-7.3 20-5.2v-28Z"
+    fill="#d1fae5"
+  />
+  <circle cx="47" cy="17" r="6" fill="#10b981" />
+</svg>
