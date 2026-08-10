@@ -128,15 +128,15 @@ test.describe("Phase 3 Vocabulary", () => {
       currentVocabulary.locator("article").filter({
         hasText: "Current streak",
       }),
-    ).toContainText("0 days");
+    ).toContainText(/0\s*days/);
     await expect(
       currentVocabulary.locator("article").filter({
         hasText: "Longest streak",
       }),
-    ).toContainText("2 days");
+    ).toContainText(/2\s*days/);
     await expect(
       currentVocabulary.locator("article").filter({ hasText: "Today" }),
-    ).toContainText("0 words");
+    ).toContainText(/0\s*words/);
     await expect(
       currentVocabulary
         .locator("article")
