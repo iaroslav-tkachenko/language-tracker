@@ -10,8 +10,8 @@ advancing. Production user data must never be reset as part of a deployment.
 | ----- | ------------------------- | ----------- |
 | R0    | Release preflight         | Complete    |
 | R1    | Database safety           | In progress |
-| R2    | Production authentication | Not started |
-| R3    | Hosting and domain        | Not started |
+| R2    | Production authentication | Complete    |
+| R3    | Hosting and domain        | Complete    |
 | R4    | Release quality gate      | Not started |
 | R5    | Production smoke test     | Not started |
 | R6    | Operations and recovery   | Not started |
@@ -107,6 +107,11 @@ or reset operations; backup and restore ownership are assigned.
 Goal: make signup, confirmation, sign-in, recovery, and sign-out reliable on the
 real domain.
 
+**Completed August 10, 2026.** The canonical production deployment uses custom
+Brevo SMTP with a dedicated verified sender. A real external account completed
+signup, email confirmation, sign-out, password recovery, password update, and
+sign-in with the new password without callback errors.
+
 1. Set Supabase Auth Site URL to the canonical HTTPS production origin.
 2. Add the exact production callback URL to the redirect allow-list.
 3. Add only deliberate Preview and localhost patterns; do not use a broad production
@@ -125,6 +130,12 @@ production domain without callback errors.
 ## R3 - Hosting and domain
 
 Goal: deploy one immutable release candidate before exposing it to users.
+
+**Completed August 10, 2026.** Vercel serves the application at
+`https://language-tracker-phi.vercel.app`. The canonical URL is configured as
+`NEXT_PUBLIC_SITE_URL` in the Production environment only, and both public
+Supabase variables point to project `fbkwirzlvyaykrimpqhy`. Preview deployments
+do not receive production database variables.
 
 1. Import the GitHub repository into Vercel and select the Next.js preset.
 2. Set `main` as the Production Branch.
