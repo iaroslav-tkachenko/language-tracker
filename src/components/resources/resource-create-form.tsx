@@ -44,10 +44,7 @@ export function ResourceCreateForm({
         />
       </label>
       {state.status === "error" && state.message && (
-        <p
-          role="alert"
-          className="text-sm text-red-700"
-        >
+        <p role="alert" className="text-sm text-red-700">
           {state.message}
         </p>
       )}

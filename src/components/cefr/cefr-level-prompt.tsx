@@ -32,9 +32,7 @@ export function CefrLevelPrompt({
             <h2 className="text-lg font-black text-slate-950">
               Add your current level
             </h2>
-            <p className="mt-1 max-w-3xl leading-7 text-slate-700">
-              {text}
-            </p>
+            <p className="mt-1 max-w-3xl leading-7 text-slate-700">{text}</p>
           </div>
         </div>
         <Link
