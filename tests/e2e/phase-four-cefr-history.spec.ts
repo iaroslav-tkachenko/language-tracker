@@ -23,6 +23,14 @@ test.describe("Phase 4C CEFR history", () => {
       );
       await levelInput.check({ force: true });
       await expect(levelInput).toBeChecked();
+      const selectedOption = levelInput.locator(
+        "xpath=following-sibling::span",
+      );
+      await expect(selectedOption).toHaveCSS(
+        "background-color",
+        "rgb(124, 58, 237)",
+      );
+      await expect(selectedOption).toHaveCSS("color", "rgb(255, 255, 255)");
     };
     const submitLevelUpdate = async () => {
       await page
@@ -31,6 +39,9 @@ test.describe("Phase 4C CEFR history", () => {
         .click();
     };
 
+    await page.addInitScript(() => {
+      window.localStorage.setItem("language-tracker-theme", "dark");
+    });
     await page.goto("/sign-in");
     await page.getByLabel("Email").fill(email ?? "");
     await page.getByLabel("Password").fill(password ?? "");

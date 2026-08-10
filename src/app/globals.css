@@ -273,3 +273,11 @@ html.dark [class~="hover:bg-red-50"]:hover {
 html.dark ::selection {
   background: #244b7d;
 }
+
+.cefr-level-option-selected,
+html.dark .cefr-level-option-selected {
+  border-color: #a78bfa;
+  background-color: #7c3aed;
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgb(167 139 250 / 0.2);
+}
