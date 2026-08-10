@@ -28,6 +28,19 @@ advancing. Production user data must never be reset as part of a deployment.
   remove obsolete fields only in a later release.
 - Do not expose a service-role or secret key through a `NEXT_PUBLIC_*` variable.
 
+## Selected environment topology
+
+The product owner selected a separate production project on August 10, 2026.
+
+| Environment | Supabase organization         | Plan | Project                        | Region                     |
+| ----------- | ----------------------------- | ---- | ------------------------------ | -------------------------- |
+| Development | `iaroslav_tkachenko_org`      | Free | `Language Tracker Development` | Ireland (`eu-west-1`)      |
+| Production  | `Language Tracker Production` | Pro  | `Language Tracker Production`  | Frankfurt (`eu-central-1`) |
+
+Supabase billing is organization-scoped, so production must use a separate Pro
+organization if development is to remain on the Free plan. Do not transfer the
+development project into the production organization.
+
 ## R0 - Release preflight
 
 Goal: prove that the repository is ready to become a release candidate.
@@ -48,6 +61,20 @@ Exit: application checks pass and the release process is documented.
 
 Goal: prove that the complete schema can be built safely and preserves ownership.
 
+Owner action required in the Supabase Dashboard:
+
+1. Open [Create organization](https://supabase.com/dashboard/new).
+2. Create `Language Tracker Production` on the Pro plan and keep the spend cap enabled.
+3. Inside that organization, create `Language Tracker Production` in Frankfurt.
+4. Generate a unique database password and save it in the owner's password manager.
+   Never send or commit this password.
+5. Wait for project status `ACTIVE_HEALTHY`, then share only the project ref from the
+   dashboard URL. The project ref and publishable key are not secrets.
+
+After the project exists, the engineer will inspect the empty migration history,
+link deliberately, apply the repository migrations once, verify RLS, and return the
+repository to its development-safe state.
+
 - [x] Start the local Supabase stack with `pnpm db:start`.
 - [x] Rebuild only the local database with `pnpm db:reset`.
 - [x] Run all 118 pgTAP tests with `pnpm db:test`.
@@ -55,7 +82,9 @@ Goal: prove that the complete schema can be built safely and preserves ownership
 - [ ] Review every migration in `supabase/migrations` in timestamp order.
 - [ ] Confirm RLS is enabled for every user-facing table and Security Advisor has no
       unresolved critical finding.
-- [ ] Create a dedicated production Supabase project in the nearest suitable region.
+- [x] Select a separate Pro organization and dedicated production-project topology.
+- [ ] Create the `Language Tracker Production` Pro organization.
+- [ ] Create the `Language Tracker Production` project in Frankfurt (`eu-central-1`).
 - [ ] Record the project reference and database password in the owner's password manager.
 - [ ] Create or verify a production backup before applying migrations.
 - [ ] Link deliberately, inspect `pnpm db:migrations`, then apply `pnpm db:push` once.
