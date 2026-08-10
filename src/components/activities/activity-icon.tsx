@@ -5,6 +5,7 @@ import {
   Layers3,
   MessagesSquare,
   PenLine,
+  Presentation,
   Repeat2,
   Shapes,
   SpellCheck2,
@@ -22,6 +23,7 @@ const activityIcons = {
   tv_show_film: Clapperboard,
   youtube: Youtube,
   shadowing: Repeat2,
+  lesson: Presentation,
 };
 
 type ActivityIconProps = LucideProps & {

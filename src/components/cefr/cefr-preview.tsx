@@ -23,6 +23,8 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { progressForecastDescription } from "@/lib/cefr/copy";
+
 type CefrLevel = "A0" | "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 type Scenario =
   | "active"
@@ -429,12 +431,9 @@ function PaceComparison({
       className={`overflow-hidden rounded-2xl border ${accentClasses.border} ${accentClasses.background}`}
     >
       <div className="border-b border-slate-200/80 p-4">
-        <strong className={`text-lg font-bold ${accentClasses.heading}`}>
-          Forecast to reach {next}
+        <strong className="text-base font-bold text-slate-700">
+          Forecast to reach {next} with your current pace
         </strong>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          Based on every calendar day, including days with no entries.
-        </p>
       </div>
 
       <div className="overflow-x-auto">
@@ -561,7 +560,7 @@ function ForecastCard({
         isStudy ? "border-blue-200" : "border-emerald-200"
       }`}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-4">
         <span
           className={`inline-flex size-11 shrink-0 items-center justify-center rounded-2xl ${
             isStudy
@@ -575,9 +574,16 @@ function ForecastCard({
             <BookOpen aria-hidden="true" className="size-5" />
           )}
         </span>
-        <h2 className="text-xl font-bold text-slate-950">
-          {isStudy ? "Study Time progress" : "Vocabulary progress"}
-        </h2>
+        <div className="min-w-0">
+          <h2 className="text-lg font-bold text-slate-950">
+            {isStudy ? "Study Time progress" : "Vocabulary progress"}
+          </h2>
+          {next && (
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              {progressForecastDescription(level, next)}
+            </p>
+          )}
+        </div>
       </div>
 
       {next === null ? (
@@ -612,53 +618,53 @@ function ForecastCard({
       ) : (
         <>
           <div className="mt-6">
-            <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
-              <span className="text-[11px] font-bold tracking-wide text-slate-500 uppercase">
+            <div className="grid grid-cols-3 items-end gap-2 sm:gap-5">
+              <span className="text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Current
               </span>
               <span
-                className={`text-center text-[11px] font-bold tracking-wide uppercase ${
+                className={`text-center text-xs font-bold tracking-wide uppercase ${
                   isStudy ? "text-blue-700" : "text-emerald-700"
                 }`}
               >
                 Progress
               </span>
-              <span className="text-right text-[11px] font-bold tracking-wide text-slate-500 uppercase">
+              <span className="text-right text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Next
               </span>
             </div>
 
-            <div className="mt-2 grid grid-cols-3 items-center gap-2 sm:gap-4">
+            <div className="mt-2 grid grid-cols-3 items-center gap-2 sm:gap-5">
               <div className="flex justify-start">
                 <LevelBadge level={level} small />
               </div>
-              <strong className="block whitespace-nowrap text-center text-base text-slate-950 sm:text-lg">
+              <strong className="block whitespace-nowrap text-center text-xl leading-6 text-slate-950">
                 +{eligible.toLocaleString("en")}
-                {isStudy ? "h" : " words"}
+                {isStudy ? " hours" : " words"}
               </strong>
               <div className="flex justify-end">
                 <LevelBadge level={next} small muted />
               </div>
             </div>
 
-            <div className="mt-1 grid grid-cols-3 items-start gap-2 text-xs leading-5 text-slate-500 sm:gap-4 sm:text-sm">
+            <div className="mt-1 grid grid-cols-3 items-start gap-2 text-sm leading-5 text-slate-600 sm:gap-5">
               <span className="text-left">
                 ≈ {currentBaseline.toLocaleString("en")}
-                {isStudy ? "h" : " words"}
+                {isStudy ? " h" : " w"}
               </span>
               <span className="text-center">
                 ≈ {estimatedTotal.toLocaleString("en")}
-                {isStudy ? "h" : " words"} now
+                {isStudy ? " h" : " w"} now
               </span>
               <span className="text-right">
                 ≈ {nextTotal.toLocaleString("en")}
-                {isStudy ? "h total" : " words total"}
+                {isStudy ? " h total" : " w total"}
               </span>
             </div>
           </div>
 
           <div
-            className="relative mt-5 h-3 overflow-hidden rounded-full bg-slate-100"
+            className="relative mt-6 h-3 overflow-hidden rounded-full bg-slate-100"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
@@ -672,7 +678,7 @@ function ForecastCard({
               style={{ width: `${percentage(eligible, target)}%` }}
             />
           </div>
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base font-bold">
             <strong className={isStudy ? "text-blue-700" : "text-emerald-700"}>
               {percentage(eligible, target)}% completed
             </strong>
@@ -681,7 +687,7 @@ function ForecastCard({
                 <span aria-hidden="true" className="text-slate-300">
                   •
                 </span>
-                <span className="font-semibold text-slate-600">
+                <span className="text-slate-700">
                   ≈ {remaining.toLocaleString("en")}{" "}
                   {isStudy ? "hours" : "words"} left
                 </span>
@@ -691,9 +697,7 @@ function ForecastCard({
                 <span aria-hidden="true" className="text-slate-300">
                   •
                 </span>
-                <span className="font-semibold text-slate-600">
-                  Reference reached
-                </span>
+                <span className="text-slate-700">Reference reached</span>
               </>
             )}
           </div>
@@ -710,7 +714,7 @@ function ForecastCard({
               </p>
             </div>
           ) : (
-            <div className="mt-5">
+            <div className="mt-8">
               <PaceComparison
                 sevenAverage={sevenAverage}
                 thirtyAverage={thirtyAverage}

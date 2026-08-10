@@ -34,6 +34,10 @@ import {
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
 import {
+  highestLevelDescription,
+  progressForecastDescription,
+} from "@/lib/cefr/copy";
+import {
   fromDateKey,
   getCalendarCells,
   getCalendarRangeCells,
@@ -81,16 +85,16 @@ type VocabularyWorkspaceProps = {
 
 const initialActionState: ResourceActionState = { status: "idle" };
 const heatColors = [
-  "#f8fafc",
-  "#dcfce7",
-  "#bbf7d0",
-  "#86efac",
-  "#4ade80",
-  "#22c55e",
-  "#15803d",
-  "#166534",
+  "var(--vocabulary-heat-empty)",
+  "var(--vocabulary-heat-1)",
+  "var(--vocabulary-heat-2)",
+  "var(--vocabulary-heat-3)",
+  "var(--vocabulary-heat-4)",
+  "var(--vocabulary-heat-5)",
+  "var(--vocabulary-heat-6)",
+  "var(--vocabulary-heat-7)",
 ];
-const missedColor = "#f2aaa4";
+const missedColor = "var(--study-heat-missed)";
 
 function formatLongDate(dateKey: string) {
   return new Intl.DateTimeFormat("en", {
@@ -176,6 +180,10 @@ function createOperationId() {
   ].join("-");
 }
 
+function formatCompactForecastValue(value: string) {
+  return value.replace(/\s+(?:word|words)$/, " w");
+}
+
 function VocabularyForecastCard({
   forecast,
 }: {
@@ -187,22 +195,20 @@ function VocabularyForecastCard({
     return (
       <section className="mx-auto mt-5 max-w-6xl rounded-3xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-4">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700">
-            <BookOpen aria-hidden="true" className="size-6" />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-700">
+            <BookOpen aria-hidden="true" className="size-5" />
           </span>
           <div>
-            <h2 className="text-2xl font-black text-slate-950">
+            <h2 className="text-xl font-bold text-slate-950">
               Vocabulary progress
             </h2>
-            <p className="mt-2 max-w-3xl leading-7 text-slate-700">
-              {forecast.currentLevel} is the highest level in this model, so
-              there is no next-level forecast. Your estimated vocabulary size is
-              still visible.
+            <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-700">
+              {highestLevelDescription(forecast.currentLevel)}
             </p>
             <p className="mt-4 text-sm font-bold tracking-wide text-slate-500 uppercase">
               Estimated vocabulary size
             </p>
-            <p className="mt-1 text-3xl font-black text-slate-950">
+            <p className="mt-1 text-2xl font-bold text-slate-950">
               &gt; {formatVocabularyWords(forecast.estimatedVocabularySize)}
             </p>
           </div>
@@ -220,56 +226,69 @@ function VocabularyForecastCard({
   return (
     <section className="mx-auto mt-5 max-w-6xl rounded-3xl border border-emerald-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start gap-4">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
-          <BookOpen aria-hidden="true" className="size-6" />
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+          <BookOpen aria-hidden="true" className="size-5" />
         </span>
         <div>
-          <h2 className="text-2xl font-black text-slate-950">
+          <h2 className="text-lg font-bold text-slate-950">
             Vocabulary progress
           </h2>
-          <p className="mt-1 text-slate-600">
-            Approximate progress from {forecast.currentLevel} to{" "}
-            {forecast.nextLevel}, based on words recorded since this level.
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {progressForecastDescription(
+              forecast.currentLevel,
+              forecast.nextLevel,
+            )}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_1.2fr_1fr]">
-        <div>
-          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+      <div className="mt-5 grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
           </p>
-          <p className="mt-2 flex items-center gap-3">
-            <span className="flex size-13 items-center justify-center rounded-full bg-slate-950 text-lg font-black text-white">
+          <p className="mt-2 flex min-h-11 items-center gap-2">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
               {forecast.currentLevel}
             </span>
-            <span className="text-xl text-slate-600">
-              ≈ {formatVocabularyWords(forecast.baselineWords)}
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈{" "}
+              {formatCompactForecastValue(
+                formatVocabularyWords(forecast.baselineWords),
+              )}
             </span>
           </p>
         </div>
 
-        <div className="text-left lg:text-center">
-          <p className="text-sm font-black tracking-wide text-emerald-700 uppercase">
+        <div className="min-w-0 text-left md:text-center">
+          <p className="text-xs font-bold tracking-wide text-emerald-700 uppercase">
             Progress
           </p>
-          <p className="mt-2 text-3xl font-black text-slate-950">
+          <p className="mt-2 text-xl font-bold leading-6 text-slate-950">
             +{formatVocabularyWords(forecast.eligibleWords)}
           </p>
-          <p className="mt-1 text-xl text-slate-600">
-            ≈ {formatVocabularyWords(forecast.estimatedVocabularySize)} now
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            ≈{" "}
+            {formatCompactForecastValue(
+              formatVocabularyWords(forecast.estimatedVocabularySize),
+            )}{" "}
+            now
           </p>
         </div>
 
-        <div className="lg:text-right">
-          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+        <div className="min-w-0 md:text-right">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Next
           </p>
-          <p className="mt-2 flex items-center gap-3 lg:justify-end">
-            <span className="text-xl text-slate-600">
-              ≈ {formatVocabularyWords(forecast.nextLevelBaselineWords)} total
+          <p className="mt-2 flex min-h-11 items-center gap-2 md:justify-end">
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈{" "}
+              {formatCompactForecastValue(
+                formatVocabularyWords(forecast.nextLevelBaselineWords),
+              )}{" "}
+              total
             </span>
-            <span className="flex size-13 items-center justify-center rounded-full bg-slate-100 text-lg font-black text-slate-500">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
               {forecast.nextLevel}
             </span>
           </p>
@@ -283,92 +302,108 @@ function VocabularyForecastCard({
             style={{ width: `${completedPercent}%` }}
           />
         </div>
-        <p className="mt-3 text-center text-lg font-black text-emerald-700">
-          {completedPercent}% completed
-          <span className="px-2 text-slate-300">•</span>
+        <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold text-emerald-700">
+          <span>{completedPercent}% completed</span>
+          <span className="text-slate-300">•</span>
           <span className="text-slate-700">
             ≈ {formatVocabularyWords(forecast.remainingWords)} left
           </span>
         </p>
       </div>
 
-      <div className="mt-6 rounded-3xl border border-emerald-100 bg-emerald-50/70 p-4">
-        <h3 className="text-xl font-black text-emerald-700 sm:text-2xl">
+      <div className="mt-8 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
+        <h3 className="break-words text-base font-bold text-slate-700">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h3>
-        <p className="mt-1 text-slate-600">
-          Based on your activity across every calendar day in the last 7 and 30
-          days, including days with no entries.
-        </p>
-        <div className="mt-4 max-w-3xl overflow-x-auto rounded-2xl border border-emerald-100 bg-white/80">
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100 text-lg font-black text-emerald-700">
-            <div className="px-4 py-3 text-slate-500" />
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3">
-                Last {pace.periodDays} days
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
-            <div className="px-4 py-3 text-slate-500">Active days</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
-            <div className="px-4 py-3 text-slate-500">Average pace</div>
-            {paceColumns.map((pace) => (
-              <div
-                key={pace.periodDays}
-                className="px-4 py-3 font-semibold text-slate-950"
-              >
-                {formatVocabularyPace(pace.averageWords)}
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-emerald-100">
-            <div className="px-4 py-3 text-slate-500">
-              Reach {forecast.nextLevel} in
+        <div className="relative mt-4">
+          <div className="w-full max-w-3xl overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-emerald-100 text-sm font-bold text-slate-700">
+              <div className="px-3 py-3 text-slate-500" />
+              {paceColumns.map((pace) => (
+                <div key={pace.periodDays} className="px-3 py-3">
+                  Last {pace.periodDays} days
+                </div>
+              ))}
             </div>
-            {paceColumns.map((pace) => (
-              <div
-                key={pace.periodDays}
-                className="px-4 py-3 font-semibold text-slate-950"
-              >
-                {pace.estimate
-                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
-                  : "Not available"}
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-emerald-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Active days
               </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr]">
-            <div className="px-4 py-3 text-slate-500">Estimated date</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.estimate
-                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
-                  : "Not available"}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-emerald-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Average pace
               </div>
-            ))}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {formatVocabularyPace(pace.averageWords)}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-emerald-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Reach {forecast.nextLevel} in
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr]">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Estimated date
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
           </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm md:hidden"
+          >
+            <ChevronRight className="size-4" />
+          </span>
         </div>
       </div>
 
       <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <summary className="cursor-pointer font-bold text-slate-700">
+        <summary className="cursor-pointer text-sm font-bold text-slate-700">
           How we calculate this
         </summary>
-        <p className="mt-3 leading-7 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {VOCABULARY_DISCLOSURE_INTRO}
         </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600">
           {VOCABULARY_DISCLOSURE_ITEMS.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-        <p className="mt-3 leading-7 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {VOCABULARY_DISCLOSURE_NOTE}
         </p>
       </details>
@@ -606,9 +641,9 @@ export function VocabularyWorkspace({
         onClick={() => navigateToDate(cell.dateKey)}
         aria-label={label}
         title={label}
-        className={`${compact ? "size-2.5 rounded-[2px]" : "h-[1.0625rem] w-full rounded-[3px]"} border ${
+        className={`heatmap-cell ${compact ? "size-2.5 rounded-[2px]" : "h-[1.0625rem] w-full rounded-[3px]"} border ${
           cell.dateKey === activeDate
-            ? "border-slate-950 ring-1 ring-slate-950"
+            ? "heatmap-cell-selected border-slate-950 ring-1 ring-slate-950"
             : "border-white"
         } disabled:invisible`}
         style={{
@@ -738,21 +773,14 @@ export function VocabularyWorkspace({
             >
               <Settings aria-hidden="true" className="size-4.5" />
             </Link>
-            <ConfirmSignOutForm className="sm:hidden">
+            <ConfirmSignOutForm>
               <button
                 type="submit"
                 aria-label="Sign out"
+                title="Sign out"
                 className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 <LogOut aria-hidden="true" className="size-4.5" />
-              </button>
-            </ConfirmSignOutForm>
-            <ConfirmSignOutForm className="hidden sm:block">
-              <button
-                type="submit"
-                className="min-h-9 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-              >
-                Sign out
               </button>
             </ConfirmSignOutForm>
           </div>
@@ -1012,7 +1040,7 @@ export function VocabularyWorkspace({
                   >
                     <span
                       aria-hidden="true"
-                      className="size-3 rounded-sm border border-slate-100"
+                      className="heatmap-cell size-3 rounded-sm border border-slate-100"
                       style={{
                         backgroundColor:
                           level === 0 ? missedColor : heatColors[level],

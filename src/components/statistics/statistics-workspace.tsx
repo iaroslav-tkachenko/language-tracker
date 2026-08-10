@@ -4,9 +4,11 @@ import {
   BarChart3,
   BookOpen,
   CalendarDays,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Ellipsis,
   Flame,
   Gauge,
   GraduationCap,
@@ -20,11 +22,17 @@ import { useMemo, useState } from "react";
 
 import { ActivityIcon } from "@/components/activities/activity-icon";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
+import { AddLanguageMenuAction } from "@/components/boards/add-language-menu-action";
 import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
 import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
+import {
+  PROGRESS_FORECAST_DESCRIPTION,
+  highestLevelDescription,
+  progressForecastDescription,
+} from "@/lib/cefr/copy";
 import type { CefrLevel } from "@/lib/cefr/reference";
 import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
 import {
@@ -54,6 +62,10 @@ import {
   type ChartPoint,
   type StudyStatisticsEntry,
 } from "@/lib/statistics/study-statistics";
+import {
+  groupActivityDonutRows,
+  type ActivityDonutRow,
+} from "@/lib/statistics/activity-donut";
 import {
   calculateVocabularyStatistics,
   getVocabularyDayDistribution,
@@ -262,7 +274,7 @@ function CompactForecastCard({
 
     return (
       <section
-        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5`}
+        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5 sm:p-6`}
       >
         <div className="flex min-w-0 items-start gap-4">
           <span
@@ -273,8 +285,7 @@ function CompactForecastCard({
           <div className="min-w-0">
             <h3 className="text-xl font-bold text-slate-950">{title}</h3>
             <p className="mt-1 leading-7 text-slate-600">
-              {forecast.currentLevel} is the highest level in this model, so
-              there is no next-level forecast.
+              {highestLevelDescription(forecast.currentLevel)}
             </p>
             <p className="mt-3 text-sm font-bold tracking-wide text-slate-500 uppercase">
               {totalLabel}
@@ -318,7 +329,7 @@ function CompactForecastCard({
 
   return (
     <section
-      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-4 shadow-sm`}
+      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-5 shadow-sm sm:p-6`}
     >
       <div className="flex min-w-0 items-start gap-4">
         <span
@@ -329,13 +340,15 @@ function CompactForecastCard({
         <div className="min-w-0">
           <h3 className="text-lg font-bold text-slate-950">{title}</h3>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Approximate progress from {forecast.currentLevel} to{" "}
-            {forecast.nextLevel}.
+            {progressForecastDescription(
+              forecast.currentLevel,
+              forecast.nextLevel,
+            )}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+      <div className="mt-6 grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="min-w-0">
           <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
@@ -379,7 +392,7 @@ function CompactForecastCard({
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-6">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full ${accentClasses.bar}`}
@@ -387,7 +400,7 @@ function CompactForecastCard({
           />
         </div>
         <p
-          className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold ${accentClasses.text}`}
+          className={`mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold ${accentClasses.text}`}
         >
           <span>{completedPercent}% completed</span>
           <span className="text-slate-300">•</span>
@@ -502,6 +515,18 @@ const activityChartColors = [
   "#475569",
 ];
 
+function ActivityLegendDuration({ minutes }: { minutes: number }) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return (
+    <span className="grid w-full grid-cols-[3.5rem_2.75rem] tabular-nums">
+      <span className="text-right">{hours > 0 ? `${hours}h` : ""}</span>
+      <span className="text-right">{remainingMinutes}m</span>
+    </span>
+  );
+}
+
 function ActivityDonut({
   title,
   subtitle,
@@ -513,24 +538,46 @@ function ActivityDonut({
   totals: Map<string, number>;
   activities: ActivitySummary[];
 }) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const highlightedId = hoveredId ?? selectedId;
   const activityById = new Map(
     activities.map((activity) => [activity.id, activity]),
   );
-  const rows = [...totals.entries()]
-    .map(([activityId, minutes]) => ({
-      activity: activityById.get(activityId),
+  const sourceRows = [...totals.entries()].map(([activityId, minutes]) => {
+    const activity = activityById.get(activityId);
+    return {
+      id: activityId,
+      name: activity?.name ?? "Archived activity",
       minutes,
-    }))
-    .sort((left, right) => right.minutes - left.minutes);
-  const totalMinutes = rows.reduce((total, row) => total + row.minutes, 0);
-  let accumulatedPercentage = 0;
-  const chartStops = rows.map((row, index) => {
-    const start = accumulatedPercentage;
-    accumulatedPercentage += (row.minutes / totalMinutes) * 100;
-    return `${activityChartColors[index % activityChartColors.length]} ${start}% ${accumulatedPercentage}%`;
+      systemKey: activity?.systemKey ?? null,
+    };
   });
-  const chartBackground =
-    rows.length === 0 ? "#e2e8f0" : `conic-gradient(${chartStops.join(", ")})`;
+  const rows = groupActivityDonutRows(sourceRows);
+  const totalMinutes = rows.reduce((total, row) => total + row.minutes, 0);
+  const segments = rows.reduce<
+    Array<
+      ActivityDonutRow & {
+        color: string;
+        percentage: number;
+        start: number;
+        end: number;
+      }
+    >
+  >((result, row, index) => {
+    const start = result.at(-1)?.end ?? 0;
+    const percentage = (row.minutes / totalMinutes) * 100;
+    return [
+      ...result,
+      {
+        ...row,
+        color: activityChartColors[index % activityChartColors.length],
+        percentage,
+        start,
+        end: start + percentage,
+      },
+    ];
+  }, []);
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -538,66 +585,208 @@ function ActivityDonut({
       <p className="mt-1 text-sm leading-6 text-slate-500">{subtitle}</p>
       {rows.length > 0 ? (
         <div className="mt-6 grid items-center gap-7 sm:grid-cols-[190px_1fr]">
-          <div
-            role="img"
-            aria-label={`${title}: ${rows
-              .map(
-                ({ activity, minutes }) =>
-                  `${activity?.name ?? "Archived activity"} ${Math.round(
-                    (minutes / totalMinutes) * 100,
-                  )} percent`,
-              )
-              .join(", ")}`}
-            className="relative mx-auto aspect-square w-44 rounded-full"
-            style={{ background: chartBackground }}
-          >
-            <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-full bg-white text-center shadow-sm">
+          <div className="relative mx-auto aspect-square w-44">
+            <svg
+              viewBox="0 0 120 120"
+              role="group"
+              aria-label={`${title}: ${segments
+                .map(
+                  (segment) =>
+                    `${segment.name} ${Math.round(segment.percentage)} percent`,
+                )
+                .join(", ")}`}
+              className="size-full -rotate-90 overflow-visible"
+            >
+              <circle
+                aria-hidden="true"
+                cx="60"
+                cy="60"
+                r="48"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="10"
+                className="text-slate-100"
+              />
+              {segments.map((segment) => (
+                <circle
+                  key={segment.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${segment.name}: ${formatDuration(segment.minutes)}, ${segment.percentage.toLocaleString("en", { maximumFractionDigits: 1 })} percent`}
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  fill="none"
+                  pathLength="100"
+                  stroke={segment.color}
+                  strokeWidth="10"
+                  strokeDasharray={`${segment.percentage} ${100 - segment.percentage}`}
+                  strokeDashoffset={-segment.start}
+                  className={`cursor-pointer transition-[filter,opacity] duration-150 outline-none focus-visible:stroke-[12] ${
+                    highlightedId && highlightedId !== segment.id
+                      ? "brightness-[0.35] opacity-70"
+                      : ""
+                  }`}
+                  onPointerEnter={() => setHoveredId(segment.id)}
+                  onPointerLeave={() => setHoveredId(null)}
+                  onFocus={() => setHoveredId(segment.id)}
+                  onBlur={() => setHoveredId(null)}
+                  onClick={() =>
+                    setSelectedId((current) =>
+                      current === segment.id ? null : segment.id,
+                    )
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    setSelectedId((current) =>
+                      current === segment.id ? null : segment.id,
+                    );
+                  }}
+                >
+                  <title>
+                    {segment.name}: {formatDuration(segment.minutes)} (
+                    {segment.percentage.toLocaleString("en", {
+                      maximumFractionDigits: 1,
+                    })}
+                    %)
+                  </title>
+                </circle>
+              ))}
+            </svg>
+            <div className="pointer-events-none absolute inset-[14%] flex items-center justify-center rounded-full bg-white text-center">
               <strong className="text-xl text-slate-950">
                 {formatDuration(totalMinutes)}
               </strong>
-              <span className="text-xs text-slate-500">total</span>
             </div>
           </div>
           <div className="space-y-3">
-            {rows.map(({ activity, minutes }, index) => {
-              const percentage = (minutes / totalMinutes) * 100;
-              return (
-                <div
-                  key={activity?.id ?? `archived-${index}`}
-                  className="flex items-center justify-between gap-4 text-sm"
-                >
-                  <span className="inline-flex min-w-0 items-center gap-2 font-medium text-slate-700">
+            {segments.map((segment) => {
+              const content = (
+                <>
+                  <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-slate-700">
                     <span
                       aria-hidden="true"
                       className="size-3 shrink-0 rounded-full"
-                      style={{
-                        backgroundColor:
-                          activityChartColors[
-                            index % activityChartColors.length
-                          ],
-                      }}
+                      style={{ backgroundColor: segment.color }}
                     />
-                    <ActivityIcon
-                      systemKey={activity?.systemKey ?? null}
-                      aria-hidden="true"
-                      className="size-4 shrink-0"
-                    />
-                    <span className="truncate">
-                      {activity?.name ?? "Archived activity"}
-                    </span>
+                    {segment.items ? (
+                      <Ellipsis
+                        aria-hidden="true"
+                        className="size-4 shrink-0"
+                      />
+                    ) : (
+                      <ActivityIcon
+                        systemKey={segment.systemKey}
+                        aria-hidden="true"
+                        className="size-4 shrink-0"
+                      />
+                    )}
+                    <span className="truncate">{segment.name}</span>
                   </span>
-                  <span className="shrink-0 text-right">
-                    <strong className="text-slate-950">
-                      {formatDuration(minutes)}
-                    </strong>
-                    <span className="ml-2 tabular-nums text-slate-500">
-                      {percentage.toLocaleString("en", {
-                        maximumFractionDigits: 1,
-                      })}
-                      %
-                    </span>
+                  <strong className="text-sm text-slate-950">
+                    <ActivityLegendDuration minutes={segment.minutes} />
+                  </strong>
+                  <span className="text-right text-sm tabular-nums text-slate-500">
+                    {segment.percentage.toLocaleString("en", {
+                      maximumFractionDigits: 1,
+                    })}
+                    %
                   </span>
-                </div>
+                </>
+              );
+
+              if (segment.items) {
+                return (
+                  <details key={segment.id} className="group text-sm">
+                    <summary
+                      className="grid cursor-pointer list-none grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 rounded-lg outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden"
+                      onPointerEnter={() => setHoveredId(segment.id)}
+                      onPointerLeave={() => setHoveredId(null)}
+                      onFocus={() => setHoveredId(segment.id)}
+                      onBlur={() => setHoveredId(null)}
+                      onClick={() =>
+                        setSelectedId((current) =>
+                          current === segment.id ? null : segment.id,
+                        )
+                      }
+                    >
+                      <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-slate-700">
+                        <span
+                          aria-hidden="true"
+                          className="size-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: segment.color }}
+                        />
+                        <Ellipsis
+                          aria-hidden="true"
+                          className="size-4 shrink-0"
+                        />
+                        <span className="truncate">{segment.name}</span>
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="size-3.5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                        />
+                      </span>
+                      <strong className="text-sm text-slate-950">
+                        <ActivityLegendDuration minutes={segment.minutes} />
+                      </strong>
+                      <span className="text-right text-sm tabular-nums text-slate-500">
+                        {segment.percentage.toLocaleString("en", {
+                          maximumFractionDigits: 1,
+                        })}
+                        %
+                      </span>
+                    </summary>
+                    <div className="mt-2 space-y-2 border-l border-slate-200 pl-5">
+                      {segment.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="grid grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 text-xs"
+                        >
+                          <span className="inline-flex min-w-0 items-center gap-2 text-slate-600">
+                            <ActivityIcon
+                              systemKey={item.systemKey}
+                              aria-hidden="true"
+                              className="size-3.5 shrink-0"
+                            />
+                            <span className="truncate">{item.name}</span>
+                          </span>
+                          <span className="text-slate-500">
+                            <ActivityLegendDuration minutes={item.minutes} />
+                          </span>
+                          <span className="text-right tabular-nums text-slate-500">
+                            {(
+                              (item.minutes / totalMinutes) *
+                              100
+                            ).toLocaleString("en", {
+                              maximumFractionDigits: 1,
+                            })}
+                            %
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                );
+              }
+
+              return (
+                <button
+                  key={segment.id}
+                  type="button"
+                  className="grid w-full grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 rounded-lg text-left text-sm outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  onPointerEnter={() => setHoveredId(segment.id)}
+                  onPointerLeave={() => setHoveredId(null)}
+                  onFocus={() => setHoveredId(segment.id)}
+                  onBlur={() => setHoveredId(null)}
+                  onClick={() =>
+                    setSelectedId((current) =>
+                      current === segment.id ? null : segment.id,
+                    )
+                  }
+                >
+                  {content}
+                </button>
               );
             })}
           </div>
@@ -849,6 +1038,11 @@ export function StatisticsWorkspace({
                   {board.name}
                 </Link>
               ))}
+              <AddLanguageMenuAction
+                boards={boards}
+                destination="statistics"
+                accent="blue"
+              />
             </div>
           </details>
 
@@ -898,15 +1092,10 @@ export function StatisticsWorkspace({
               <button
                 type="submit"
                 aria-label="Sign out"
-                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:hidden"
+                title="Sign out"
+                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
               >
                 <LogOut aria-hidden="true" className="size-4.5" />
-              </button>
-              <button
-                type="submit"
-                className="hidden min-h-9 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:block"
-              >
-                Sign out
               </button>
             </ConfirmSignOutForm>
           </div>
@@ -1010,33 +1199,6 @@ export function StatisticsWorkspace({
                   cefrOverview.estimatedWordsKnown,
                 )}`}
                 label="Estimated words known"
-              />
-            </div>
-          </section>
-        )}
-
-        {cefrOverview && (
-          <section className="mt-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-bold text-slate-950">
-                Progress toward the next level
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Approximate Study Time and Vocabulary forecasts for this board.
-              </p>
-            </div>
-            <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-              <CompactForecastCard
-                accent="blue"
-                forecast={cefrOverview.studyTimeForecast}
-                icon={<Clock3 aria-hidden="true" className="size-5" />}
-                title="Study Time progress"
-              />
-              <CompactForecastCard
-                accent="green"
-                forecast={cefrOverview.vocabularyForecast}
-                icon={<BookOpen aria-hidden="true" className="size-5" />}
-                title="Vocabulary progress"
               />
             </div>
           </section>
@@ -1356,6 +1518,33 @@ export function StatisticsWorkspace({
               recommendation={cefrOverview.weeklyRecommendation}
             />
           </div>
+        )}
+
+        {cefrOverview && (
+          <section className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-slate-950">
+                Progress toward the next level
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                {PROGRESS_FORECAST_DESCRIPTION}
+              </p>
+            </div>
+            <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+              <CompactForecastCard
+                accent="blue"
+                forecast={cefrOverview.studyTimeForecast}
+                icon={<Clock3 aria-hidden="true" className="size-5" />}
+                title="Study Time progress"
+              />
+              <CompactForecastCard
+                accent="green"
+                forecast={cefrOverview.vocabularyForecast}
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                title="Vocabulary progress"
+              />
+            </div>
+          </section>
         )}
       </div>
     </main>

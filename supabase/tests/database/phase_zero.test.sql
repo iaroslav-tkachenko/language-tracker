@@ -67,14 +67,42 @@ values
   );
 
 select is(
-  (select count(*) from public.profiles),
+  (
+    select count(*)
+    from public.profiles
+    where user_id in (
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000002'
+    )
+  ),
   2::bigint,
   'new auth users receive profiles'
 );
 select is(
-  (select count(*) from public.activity_types),
-  18::bigint,
-  'new auth users receive nine standard activities each'
+  (
+    select count(*)
+    from public.activity_types
+    where user_id in (
+      '10000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000002'
+    )
+  ),
+  20::bigint,
+  'new auth users receive ten standard activities each'
+);
+
+select is(
+  (
+    select count(*)
+    from public.activity_types
+    where system_key = 'lesson'
+      and user_id in (
+        '10000000-0000-0000-0000-000000000001',
+        '20000000-0000-0000-0000-000000000002'
+      )
+  ),
+  2::bigint,
+  'new auth users receive Lesson exactly once'
 );
 
 insert into public.language_boards (id, user_id, name)
@@ -106,7 +134,7 @@ select is(
 );
 select is(
   (select count(*) from public.activity_types),
-  10::bigint,
+  11::bigint,
   'user A can select only their own activities'
 );
 

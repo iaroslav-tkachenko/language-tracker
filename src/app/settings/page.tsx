@@ -13,6 +13,7 @@ import {
   ActivitySettingsList,
   BoardSettingsList,
 } from "@/components/settings/settings-resource-lists";
+import { ThemeSelector } from "@/components/settings/theme-selector";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -53,22 +54,24 @@ export default async function SettingsPage() {
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-14 max-w-4xl items-center justify-between px-4 sm:px-6">
-          <Link
-            href="/dashboard"
-            className="flex min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-          >
-            <ArrowLeft aria-hidden="true" className="size-4.5" />
-            Study Time
-          </Link>
-          <ConfirmSignOutForm>
-            <button
-              type="submit"
-              className="min-h-9 rounded-lg px-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 hover:text-red-800"
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="flex min-h-14 max-w-4xl items-center justify-between">
+            <Link
+              href="/dashboard"
+              className="flex min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             >
-              Sign out
-            </button>
-          </ConfirmSignOutForm>
+              <ArrowLeft aria-hidden="true" className="size-4.5" />
+              Home screen
+            </Link>
+            <ConfirmSignOutForm>
+              <button
+                type="submit"
+                className="min-h-9 rounded-lg px-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 hover:text-red-800"
+              >
+                Sign out
+              </button>
+            </ConfirmSignOutForm>
+          </div>
         </div>
       </header>
 
@@ -128,6 +131,8 @@ export default async function SettingsPage() {
           </section>
         </div>
 
+        <ThemeSelector />
+
         <section className="mt-6 max-w-4xl rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
@@ -144,11 +149,11 @@ export default async function SettingsPage() {
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
                   I&apos;m a Product Manager with more than five years of
-                  experience. I built Language Tracker for my own learning
-                  with Codex. I enjoy turning ideas into useful products with
-                  AI. If you are looking for a Product Manager who works
-                  confidently with AI, or know someone who is, I&apos;d love to
-                  connect on LinkedIn.
+                  experience. I built Language Tracker for my own learning with
+                  Codex. I enjoy turning ideas into useful products with AI. If
+                  you are looking for a Product Manager who works confidently
+                  with AI, or know someone who is, I&apos;d love to connect on
+                  LinkedIn.
                 </p>
               </div>
             </div>

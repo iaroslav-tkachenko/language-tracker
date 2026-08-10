@@ -37,6 +37,10 @@ import {
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
 import {
+  highestLevelDescription,
+  progressForecastDescription,
+} from "@/lib/cefr/copy";
+import {
   fromDateKey,
   getCalendarCells,
   getCalendarRangeCells,
@@ -88,9 +92,16 @@ type BoardWorkspaceProps = {
 const quickDurations = [10, 15, 20, 30, 45, 60, 90, 120];
 const initialActionState: ResourceActionState = { status: "idle" };
 const heatColors = {
-  missed: "#f2aaa4",
-  empty: "#f8fafc",
-  levels: ["#fff1b8", "#ffe18a", "#f7c95e", "#b8d79c", "#78b76d", "#3f8249"],
+  missed: "var(--study-heat-missed)",
+  empty: "var(--study-heat-empty)",
+  levels: [
+    "var(--study-heat-1)",
+    "var(--study-heat-2)",
+    "var(--study-heat-3)",
+    "var(--study-heat-4)",
+    "var(--study-heat-5)",
+    "var(--study-heat-6)",
+  ],
 };
 function formatDuration(minutes: number, precise = false) {
   const roundedMinutes = precise ? Math.round(minutes) : minutes;
@@ -173,6 +184,10 @@ function createOperationId() {
   ].join("-");
 }
 
+function formatCompactForecastValue(value: string) {
+  return value.replace(/\s+(?:hour|hours)$/, " h");
+}
+
 function StudyTimeForecastCard({
   forecast,
   compact = false,
@@ -188,22 +203,20 @@ function StudyTimeForecastCard({
         className={`${compact ? "mt-0 h-full" : "mx-auto mt-5 max-w-6xl"} rounded-3xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm sm:p-5`}
       >
         <div className="flex items-start gap-4">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600">
             <Clock3 aria-hidden="true" className="size-5" />
           </span>
           <div>
-            <h2 className="text-xl font-black text-slate-950">
+            <h2 className="text-xl font-bold text-slate-950">
               Study Time progress
             </h2>
             <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-700">
-              {forecast.currentLevel} is the highest level in this model, so
-              there is no next-level forecast. Your estimated total learning
-              time is still visible.
+              {highestLevelDescription(forecast.currentLevel)}
             </p>
             <p className="mt-4 text-sm font-bold tracking-wide text-slate-500 uppercase">
               Estimated total learning time
             </p>
-            <p className="mt-1 text-2xl font-black text-slate-950">
+            <p className="mt-1 text-2xl font-bold text-slate-950">
               &gt; {formatForecastHours(forecast.estimatedTotalLearningMinutes)}
             </p>
           </div>
@@ -223,56 +236,69 @@ function StudyTimeForecastCard({
       className={`${compact ? "mt-0 h-full" : "mx-auto mt-5 max-w-6xl"} rounded-3xl border border-blue-200 bg-white p-4 shadow-sm sm:p-5`}
     >
       <div className="flex items-start gap-4">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
           <Clock3 aria-hidden="true" className="size-5" />
         </span>
         <div>
-          <h2 className="text-xl font-black text-slate-950">
+          <h2 className="text-lg font-bold text-slate-950">
             Study Time progress
           </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Approximate progress from {forecast.currentLevel} to{" "}
-            {forecast.nextLevel}, based on study time since this level.
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {progressForecastDescription(
+              forecast.currentLevel,
+              forecast.nextLevel,
+            )}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1.2fr_1fr]">
-        <div>
-          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+      <div className="mt-5 grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
           </p>
-          <p className="mt-2 flex items-center gap-3">
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-950 text-base font-black text-white">
+          <p className="mt-2 flex min-h-11 items-center gap-2">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
               {forecast.currentLevel}
             </span>
-            <span className="text-lg text-slate-600">
-              ≈ {formatForecastHours(forecast.baselineMinutes)}
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈{" "}
+              {formatCompactForecastValue(
+                formatForecastHours(forecast.baselineMinutes),
+              )}
             </span>
           </p>
         </div>
 
-        <div className="text-left lg:text-center">
-          <p className="text-sm font-black tracking-wide text-blue-700 uppercase">
+        <div className="min-w-0 text-left md:text-center">
+          <p className="text-xs font-bold tracking-wide text-blue-700 uppercase">
             Progress
           </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">
+          <p className="mt-2 text-xl font-bold leading-6 text-slate-950">
             +{formatForecastHours(forecast.eligibleMinutes)}
           </p>
-          <p className="mt-1 text-lg text-slate-600">
-            ≈ {formatForecastHours(forecast.estimatedTotalLearningMinutes)} now
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            ≈{" "}
+            {formatCompactForecastValue(
+              formatForecastHours(forecast.estimatedTotalLearningMinutes),
+            )}{" "}
+            now
           </p>
         </div>
 
-        <div className="lg:text-right">
-          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+        <div className="min-w-0 md:text-right">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Next
           </p>
-          <p className="mt-2 flex items-center gap-3 lg:justify-end">
-            <span className="text-lg text-slate-600">
-              ≈ {formatForecastHours(forecast.nextLevelBaselineMinutes)} total
+          <p className="mt-2 flex min-h-11 items-center gap-2 md:justify-end">
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈{" "}
+              {formatCompactForecastValue(
+                formatForecastHours(forecast.nextLevelBaselineMinutes),
+              )}{" "}
+              total
             </span>
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-base font-black text-slate-500">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
               {forecast.nextLevel}
             </span>
           </p>
@@ -286,92 +312,108 @@ function StudyTimeForecastCard({
             style={{ width: `${completedPercent}%` }}
           />
         </div>
-        <p className="mt-3 text-center text-base font-black text-blue-700">
-          {completedPercent}% completed
-          <span className="px-2 text-slate-300">•</span>
+        <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold text-blue-700">
+          <span>{completedPercent}% completed</span>
+          <span className="text-slate-300">•</span>
           <span className="text-slate-700">
             ≈ {formatForecastHours(forecast.remainingMinutes)} left
           </span>
         </p>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
-        <h3 className="text-lg font-black text-blue-700 sm:text-xl">
+      <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+        <h3 className="break-words text-base font-bold text-slate-700">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h3>
-        <p className="mt-1 text-sm text-slate-600">
-          Based on your activity across every calendar day in the last 7 and 30
-          days, including days with no entries.
-        </p>
-        <div className="mt-3 max-w-3xl overflow-x-auto rounded-2xl border border-blue-100 bg-white/80 text-sm">
-          <div className="grid min-w-[520px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100 font-black text-blue-700">
-            <div className="px-4 py-3 text-slate-500" />
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3">
-                Last {pace.periodDays} days
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[520px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
-            <div className="px-4 py-3 text-slate-500">Active days</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[520px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
-            <div className="px-4 py-3 text-slate-500">Average pace</div>
-            {paceColumns.map((pace) => (
-              <div
-                key={pace.periodDays}
-                className="px-4 py-3 font-semibold text-slate-950"
-              >
-                {formatPaceMinutes(pace.averageMinutes)}
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[520px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
-            <div className="px-4 py-3 text-slate-500">
-              Reach {forecast.nextLevel} in
+        <div className="relative mt-4">
+          <div className="w-full max-w-3xl overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100 text-sm font-bold text-slate-700">
+              <div className="px-3 py-3 text-slate-500" />
+              {paceColumns.map((pace) => (
+                <div key={pace.periodDays} className="px-3 py-3">
+                  Last {pace.periodDays} days
+                </div>
+              ))}
             </div>
-            {paceColumns.map((pace) => (
-              <div
-                key={pace.periodDays}
-                className="px-4 py-3 font-semibold text-slate-950"
-              >
-                {pace.estimate
-                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
-                  : "Not available"}
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Active days
               </div>
-            ))}
-          </div>
-          <div className="grid min-w-[520px] grid-cols-[1.1fr_1fr_1fr]">
-            <div className="px-4 py-3 text-slate-500">Estimated date</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.estimate
-                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
-                  : "Not available"}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Average pace
               </div>
-            ))}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {formatPaceMinutes(pace.averageMinutes)}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Reach {forecast.nextLevel} in
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr]">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Estimated date
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
           </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm md:hidden"
+          >
+            <ChevronRight className="size-4" />
+          </span>
         </div>
       </div>
 
       <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <summary className="cursor-pointer font-bold text-slate-700">
+        <summary className="cursor-pointer text-sm font-bold text-slate-700">
           How we calculate this
         </summary>
-        <p className="mt-3 leading-7 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {STUDY_TIME_DISCLOSURE_INTRO}
         </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600">
           {STUDY_TIME_DISCLOSURE_ITEMS.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-        <p className="mt-3 leading-7 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {STUDY_TIME_DISCLOSURE_NOTE}
         </p>
       </details>
@@ -664,9 +706,9 @@ export function BoardWorkspace({
         onClick={() => navigateToDate(cell.dateKey)}
         aria-label={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
         title={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
-        className={`${compact ? "size-2.5 rounded-[2px]" : "h-[1.0625rem] w-full rounded-[3px]"} border ${
+        className={`heatmap-cell ${compact ? "size-2.5 rounded-[2px]" : "h-[1.0625rem] w-full rounded-[3px]"} border ${
           cell.dateKey === selectedDate
-            ? "border-slate-950 ring-1 ring-slate-950"
+            ? "heatmap-cell-selected border-slate-950 ring-1 ring-slate-950"
             : "border-white"
         } disabled:invisible`}
         style={{ backgroundColor: background }}
@@ -765,6 +807,7 @@ export function BoardWorkspace({
               <button
                 type="submit"
                 aria-label="Sign out"
+                title="Sign out"
                 className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
                 <LogOut aria-hidden="true" className="size-4.5" />

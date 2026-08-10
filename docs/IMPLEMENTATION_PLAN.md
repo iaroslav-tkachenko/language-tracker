@@ -81,7 +81,7 @@ Before changing the application layout, prepare two static screenshot alternativ
 - Reveal quick/custom duration, active activities, `Other`, disabled `Save`, and `Cancel` on demand.
 - Enable `Save` only when duration and activity are valid.
 - Render entry cards with duration and activity only; do not repeat the current board name.
-- Give standard activities distinct Lucide icons: Reading (`BookOpen`), Podcast (`Headphones`), Speaking (`MessagesSquare`), Writing (`PenLine`), Anki (`Layers3`), Grammar (`SpellCheck2`), and TV Show / Film (`Clapperboard`). Use `Shapes` as the one shared, visually distinct icon for every user-created activity.
+- Give standard activities distinct Lucide icons: Reading (`BookOpen`), Podcast (`Headphones`), Speaking (`MessagesSquare`), Writing (`PenLine`), Anki (`Layers3`), Grammar (`SpellCheck2`), TV Show / Film (`Clapperboard`), YouTube (`Youtube`), Shadowing (`Repeat2`), and Lesson (`Presentation`). Use `Shapes` as the one shared, visually distinct icon for every user-created activity.
 - Place prominent previous-day and next-day arrows beside the selected date; each activation changes the selected date by exactly one calendar day, including across month and year boundaries.
 - Use `Today` plus a date only for today; otherwise use the full weekday/date as the heading and never display `Selected day`. Use `No study session for this day yet.` for an empty date.
 - Preselect and highlight the saved duration and activity during edit; moving either selection moves its highlight, `Update` persists, and `Cancel` leaves the entry unchanged.

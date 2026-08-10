@@ -80,15 +80,18 @@ The activity picker presents these standard choices:
 - Anki
 - Grammar
 - TV Show / Film
+- YouTube
+- Shadowing
+- Lesson
 - Other
 
-The first seven choices are persisted activity types created for each new user. `Other` is a UI action for creating or restoring a named custom activity; it is not an unnamed activity type and an entry cannot be saved against a generic `Other` value.
+The first ten choices are persisted activity types created for each new user. `Other` is a UI action for creating or restoring a named custom activity; it is not an unnamed activity type and an entry cannot be saved against a generic `Other` value.
 
 ### 6.2 Global scope
 
 - Activity types belong to the user, not to a language board.
 - An activity is available for entries on every active board owned by that user.
-- A user can have at most 30 active persisted activities, including the seven seeded activities. The `Other` UI action does not count toward this limit.
+- A user can have at most 30 active persisted activities, including the ten seeded activities. The `Other` UI action does not count toward this limit.
 - An activity name contains 1–50 trimmed characters.
 - Active activity names are unique per user, case-insensitively.
 

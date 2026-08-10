@@ -4,6 +4,45 @@
   --background: #ffffff;
   --text: #0f172a;
   --primary: #155dfc;
+  --study-heat-missed: #f2aaa4;
+  --study-heat-empty: #f8fafc;
+  --study-heat-1: #fff1b8;
+  --study-heat-2: #ffe18a;
+  --study-heat-3: #f7c95e;
+  --study-heat-4: #b8d79c;
+  --study-heat-5: #78b76d;
+  --study-heat-6: #3f8249;
+  --vocabulary-heat-empty: #f8fafc;
+  --vocabulary-heat-1: #dcfce7;
+  --vocabulary-heat-2: #bbf7d0;
+  --vocabulary-heat-3: #86efac;
+  --vocabulary-heat-4: #4ade80;
+  --vocabulary-heat-5: #22c55e;
+  --vocabulary-heat-6: #15803d;
+  --vocabulary-heat-7: #166534;
+  color-scheme: light;
+}
+
+html.dark {
+  --background: #080c12;
+  --text: #e5e7eb;
+  --study-heat-missed: #4a2933;
+  --study-heat-empty: #18222e;
+  --study-heat-1: #172554;
+  --study-heat-2: #1e3a8a;
+  --study-heat-3: #1e40af;
+  --study-heat-4: #1d4ed8;
+  --study-heat-5: #2563eb;
+  --study-heat-6: #60a5fa;
+  --vocabulary-heat-empty: #18222e;
+  --vocabulary-heat-1: #123b38;
+  --vocabulary-heat-2: #155148;
+  --vocabulary-heat-3: #17685a;
+  --vocabulary-heat-4: #17816a;
+  --vocabulary-heat-5: #169a76;
+  --vocabulary-heat-6: #19b883;
+  --vocabulary-heat-7: #34d399;
+  color-scheme: dark;
 }
 
 * {
@@ -47,4 +86,190 @@ textarea:focus-visible {
 
 ::selection {
   background: #c7d7fe;
+}
+
+html.dark [class~="bg-white"] {
+  background-color: #111821;
+}
+
+html.dark [class~="bg-white/80"],
+html.dark [class~="bg-white/90"] {
+  background-color: rgb(17 24 33 / 0.92);
+}
+
+html.dark [class~="bg-slate-50"] {
+  background-color: #0b1220;
+}
+
+html.dark [class~="bg-slate-50/60"],
+html.dark [class~="bg-slate-50/70"] {
+  background-color: rgb(11 18 32 / 0.8);
+}
+
+html.dark [class~="bg-slate-100"] {
+  background-color: #1c2633;
+}
+
+html.dark [class~="bg-slate-200"] {
+  background-color: #2a3645;
+}
+
+html.dark [class~="text-slate-950"],
+html.dark [class~="text-slate-900"],
+html.dark [class~="text-slate-800"] {
+  color: #f8fafc;
+}
+
+html.dark [class~="text-slate-700"] {
+  color: #d5dde8;
+}
+
+html.dark [class~="text-slate-600"] {
+  color: #b7c2d0;
+}
+
+html.dark [class~="text-slate-500"] {
+  color: #94a3b8;
+}
+
+html.dark [class~="text-slate-400"] {
+  color: #7f8ea3;
+}
+
+html.dark [class~="border-slate-100"] {
+  border-color: #1c2633;
+}
+
+html.dark [class~="border-slate-200"] {
+  border-color: #2a3645;
+}
+
+html.dark [class~="border-slate-300"] {
+  border-color: #3a485a;
+}
+
+html.dark [class~="border-white/70"] {
+  border-color: #344255;
+}
+
+html.dark .heatmap-cell {
+  border-color: transparent;
+}
+
+html.dark .heatmap-cell-selected {
+  --tw-ring-color: #8da1b8;
+}
+
+html.dark [class~="bg-blue-50"],
+html.dark [class~="bg-blue-50/60"],
+html.dark [class~="bg-blue-50/70"],
+html.dark [class~="bg-blue-50/80"],
+html.dark [class~="bg-blue-100"] {
+  background-color: rgb(23 51 88 / 0.55);
+}
+
+html.dark [class~="bg-emerald-50"],
+html.dark [class~="bg-emerald-50/60"],
+html.dark [class~="bg-emerald-50/70"],
+html.dark [class~="bg-emerald-50/80"],
+html.dark [class~="bg-emerald-100"] {
+  background-color: rgb(11 62 50 / 0.58);
+}
+
+html.dark [class~="bg-violet-50"],
+html.dark [class~="bg-violet-50/60"],
+html.dark [class~="bg-violet-50/80"],
+html.dark [class~="bg-violet-100"] {
+  background-color: rgb(52 35 91 / 0.58);
+}
+
+html.dark [class~="bg-red-50"] {
+  background-color: rgb(83 28 35 / 0.55);
+}
+
+html.dark [class~="bg-orange-50"] {
+  background-color: rgb(83 48 19 / 0.55);
+}
+
+html.dark [class~="border-blue-100"],
+html.dark [class~="border-blue-200"] {
+  border-color: #294f7f;
+}
+
+html.dark [class~="border-emerald-100"],
+html.dark [class~="border-emerald-200"] {
+  border-color: #216451;
+}
+
+html.dark [class~="border-violet-100"],
+html.dark [class~="border-violet-200"] {
+  border-color: #563f86;
+}
+
+html.dark [class~="border-red-200"] {
+  border-color: #7f3942;
+}
+
+html.dark [class~="text-blue-600"],
+html.dark [class~="text-blue-700"],
+html.dark [class~="text-blue-800"],
+html.dark [class~="text-blue-900"] {
+  color: #60a5fa;
+}
+
+html.dark [class~="text-emerald-500"],
+html.dark [class~="text-emerald-600"],
+html.dark [class~="text-emerald-700"],
+html.dark [class~="text-emerald-800"] {
+  color: #34d399;
+}
+
+html.dark [class~="text-violet-600"],
+html.dark [class~="text-violet-700"],
+html.dark [class~="text-violet-800"],
+html.dark [class~="text-violet-950"] {
+  color: #a78bfa;
+}
+
+html.dark [class~="text-red-600"],
+html.dark [class~="text-red-700"],
+html.dark [class~="text-red-800"] {
+  color: #f87171;
+}
+
+html.dark [class~="text-orange-500"],
+html.dark [class~="text-orange-600"] {
+  color: #fb923c;
+}
+
+html.dark [class~="from-blue-50"] {
+  --tw-gradient-from: #111c2d;
+}
+
+html.dark [class~="to-emerald-50"] {
+  --tw-gradient-to: #10251f;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #f8fafc;
+}
+
+html.dark [class~="hover:bg-slate-50"]:hover,
+html.dark [class~="hover:bg-slate-100"]:hover,
+html.dark [class~="hover:bg-slate-200"]:hover {
+  background-color: #202c3a;
+}
+
+html.dark [class~="hover:bg-blue-50"]:hover {
+  background-color: rgb(23 51 88 / 0.75);
+}
+
+html.dark [class~="hover:bg-red-50"]:hover {
+  background-color: rgb(83 28 35 / 0.72);
+}
+
+html.dark ::selection {
+  background: #244b7d;
 }
