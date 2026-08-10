@@ -39,9 +39,11 @@ test.describe("Phase 3 Vocabulary", () => {
     const vocabularyUrl = (studyDate: string) =>
       `/dashboard?board=${boardId}&date=${studyDate}&today=${today}&tracker=vocabulary`;
     await page.goto(vocabularyUrl(firstDate));
-    await expect(page.getByText("New words", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Words learned", { exact: true }),
+    ).toBeVisible();
 
-    await page.getByRole("button", { name: "Add word total" }).click();
+    await page.getByRole("button", { name: "Add words" }).click();
     await page.getByLabel("Words learned", { exact: true }).fill("7");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     const selectedTotalCard = page
@@ -59,7 +61,8 @@ test.describe("Phase 3 Vocabulary", () => {
       }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Add date range" }).click();
+    await page.getByRole("button", { name: "Add words" }).click();
+    await page.getByRole("button", { name: "Date range" }).click();
     await page.getByLabel("Words learned per empty date").fill("4");
     await page.getByLabel("Start date").fill(firstDate);
     await page.getByLabel("End date").fill(thirdDate);
@@ -74,9 +77,7 @@ test.describe("Phase 3 Vocabulary", () => {
       page.getByText("1 existing total will be kept unchanged."),
     ).toBeVisible();
     await page.getByRole("button", { name: "Confirm and add" }).click();
-    await expect(
-      page.getByRole("button", { name: "Add date range" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add words" })).toBeVisible();
 
     await page.goto(vocabularyUrl(secondDate));
     const totalCard = page
@@ -104,7 +105,7 @@ test.describe("Phase 3 Vocabulary", () => {
     const selectedYearVocabulary = selectedYearSection
       .locator("div")
       .filter({
-        has: page.getByRole("heading", { name: "New words" }),
+        has: page.getByRole("heading", { name: "Vocabulary" }),
       })
       .first();
     await expect(
@@ -120,26 +121,37 @@ test.describe("Phase 3 Vocabulary", () => {
     const currentProgressSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Current progress" }),
     });
+    const currentVocabulary = currentProgressSection
+      .getByRole("heading", { name: "Vocabulary", exact: true })
+      .locator("xpath=parent::div");
     await expect(
-      currentProgressSection
-        .locator("article")
-        .filter({ hasText: "All-time total" }),
-    ).toContainText(/8\s*words/);
+      currentVocabulary.locator("article").filter({
+        hasText: "Current streak",
+      }),
+    ).toContainText(/0\s*days/);
     await expect(
-      currentProgressSection
+      currentVocabulary.locator("article").filter({
+        hasText: "Longest streak",
+      }),
+    ).toContainText(/2\s*days/);
+    await expect(
+      currentVocabulary.locator("article").filter({ hasText: "Today" }),
+    ).toContainText(/0\s*words/);
+    await expect(
+      currentVocabulary
         .locator("article")
         .filter({ hasText: "Current week" })
         .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
     await expect(
-      currentProgressSection
+      currentVocabulary
         .locator("article")
         .filter({ hasText: "Current month" })
         .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
 
     const wordsChart = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "New words distribution" }),
+      has: page.getByRole("heading", { name: "Vocabulary distribution" }),
     });
     await wordsChart.getByRole("button", { name: "Day" }).click();
     await expect(wordsChart.getByLabel("Month")).toBeVisible();
@@ -160,9 +172,7 @@ test.describe("Phase 3 Vocabulary", () => {
     await page.goto(vocabularyUrl(secondDate));
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Delete vocabulary total" }).click();
-    await expect(
-      page.getByText("No new words learned on this day yet."),
-    ).toBeVisible();
+    await expect(page.getByText("No new words yet")).toBeVisible();
 
     await page.getByLabel("Settings").click();
     page.once("dialog", (dialog) => dialog.accept());

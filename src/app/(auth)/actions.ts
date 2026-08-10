@@ -92,6 +92,16 @@ export async function signUp(
   });
   if (error) {
     logAuthProviderError("sign-up", error);
+    if (error.code === "user_already_exists") {
+      return authError(
+        "An account already exists for this email. Sign in or reset your password.",
+      );
+    }
+    if (error.status === 0 || error.message === "fetch failed") {
+      return authError(
+        "Authentication service is temporarily unreachable. Please try again.",
+      );
+    }
     return authError("Account creation failed. Please try again.");
   }
   if (data.session) redirect("/dashboard");

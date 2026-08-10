@@ -9,7 +9,7 @@ type SignInPageProps = {
 
 const errorMessages: Record<string, string> = {
   callback:
-    "The authentication link could not be completed. Request a new link and try again.",
+    "The authentication link could not sign you in automatically. Your email may already be confirmed, so try signing in with the password you chose.",
   confirmation:
     "This confirmation link is invalid or expired. Request a new link and try again.",
 };

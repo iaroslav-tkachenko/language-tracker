@@ -3,11 +3,9 @@ import Link from "next/link";
 
 export function CefrLevelPrompt({
   href,
-  context,
   accent = "violet",
 }: {
   href: string;
-  context: "study" | "vocabulary" | "statistics";
   accent?: "blue" | "green" | "violet";
 }) {
   const accentClasses = {
@@ -17,14 +15,8 @@ export function CefrLevelPrompt({
     violet:
       "border-violet-200 bg-violet-50/80 text-violet-700 hover:bg-violet-100",
   };
-  const text = {
-    study:
-      "Set your current language level to unlock more detailed Study Time progress analytics.",
-    vocabulary:
-      "Set your current language level to unlock more detailed Vocabulary progress analytics.",
-    statistics:
-      "Set your current language level to unlock estimated totals and richer progress analytics.",
-  };
+  const text =
+    "Set your current level to unlock detailed analytics and forecasts for reaching the next levels.";
 
   return (
     <section
@@ -40,9 +32,7 @@ export function CefrLevelPrompt({
             <h2 className="text-lg font-black text-slate-950">
               Add your current level
             </h2>
-            <p className="mt-1 max-w-3xl leading-7 text-slate-700">
-              {text[context]}
-            </p>
+            <p className="mt-1 max-w-3xl leading-7 text-slate-700">{text}</p>
           </div>
         </div>
         <Link
@@ -61,7 +51,7 @@ export function MissingLevelBubble() {
   return (
     <span
       aria-hidden="true"
-      className="absolute top-2 right-2 flex size-5 items-center justify-center rounded-full bg-amber-400 text-[13px] font-black leading-none text-slate-950 ring-2 ring-white"
+      className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold leading-none text-slate-950 ring-2 ring-white"
     >
       !
     </span>

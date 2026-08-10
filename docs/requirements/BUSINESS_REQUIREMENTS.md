@@ -91,13 +91,13 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-068`: The selected-day total receives stronger visual emphasis than supporting labels, while remaining understandable to assistive technology.
 - `BR-RULE-069`: The Study Time heatmap uses the approved soft red, warm-yellow, and muted-green visual direction while preserving the fixed semantic bands.
 - `BR-RULE-082`: Mobile Study Time uses two half-year heatmaps and a compact two-column primary summary.
-- `BR-RULE-083`: A non-today day view is headed by its full weekday/date rather than `Selected day`; the empty-state copy is `No study session for this day yet.`
+- `BR-RULE-083`: A non-today day view is headed by its full weekday/date rather than `Selected day`; an empty day uses `No study sessions yet` plus concise date-specific guidance.
 
 ### Vocabulary
 
 - `BR-RULE-060`: Vocabulary is board-specific and does not combine languages.
 - `BR-RULE-061`: A board and calendar date have at most one vocabulary record containing the final total of newly learned words for that day.
-- `BR-RULE-062`: A vocabulary total is a positive integer; zero is represented by the absence or deletion of a daily record.
+- `BR-RULE-062`: A vocabulary total is a non-negative integer; zero may be stored explicitly and remains distinct from the absence of a daily record.
 - `BR-RULE-063`: Vocabulary totals may be created for past, current, or future dates and may be edited or deleted.
 - `BR-RULE-064`: Vocabulary heatmap thresholds are `0`, `1–2`, `3–5`, `6–9`, `10–14`, `15–19`, `20–39`, and `40+` words.
 - `BR-RULE-065`: The Vocabulary heatmap uses a green visual scale and remains understandable without color.
@@ -106,7 +106,7 @@ Business requirements describe the outcomes and invariant rules the product must
 ### CEFR history and forecast
 
 - `BR-RULE-070`: CEFR level is declared manually per language board and the system never promotes it automatically.
-- `BR-RULE-071`: A declaration records A1, A2, B1, B2, C1, or C2 and an effective date no later than today.
+- `BR-RULE-071`: A declaration records A0, A1, A2, B1, B2, C1, or C2 and an effective date no later than today. A0 is the product's non-official absolute-beginner state.
 - `BR-RULE-072`: The current CEFR level is the latest effective declaration; earlier declarations remain visible in history.
 - `BR-RULE-073`: Forecasts use an approximate Cambridge English guided-learning-hours model for every language, with a prominent warning that it is guidance rather than an assessment or guarantee.
 - `BR-RULE-074`: Progress toward the next level subtracts eligible study time logged since the effective date of the current declaration from the reference hours between the two levels.
@@ -114,9 +114,9 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-076`: A zero seven-day pace produces no estimated achievement date; C2 has no next-level forecast.
 - `BR-RULE-077`: Reaching the estimated hour target does not change the declared level and instead prompts the user to reassess it.
 
-### Deferred product models
+### Product reference models
 
-- `BR-RULE-080`: Vocabulary-to-CEFR word-count cutoffs will be fixed and non-editable, but their values remain deferred until separate product approval.
+- `BR-RULE-080`: Vocabulary-to-CEFR midpoint references are fixed, non-editable, and used for the approved approximate vocabulary progress model.
 - `BR-RULE-081`: Ideal activity distributions will be fixed and non-editable per CEFR level, but their values remain deferred until separate product approval.
 
 ## 4. Business acceptance statement

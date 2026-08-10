@@ -3,6 +3,11 @@
 import { BookOpen, Clock3 } from "lucide-react";
 
 import {
+  PROGRESS_FORECAST_DESCRIPTION,
+  highestLevelDescription,
+  progressForecastDescription,
+} from "@/lib/cefr/copy";
+import {
   formatCalendarDuration,
   formatEstimatedMonth,
   formatForecastHours,
@@ -14,6 +19,10 @@ import {
   formatVocabularyWords,
   type VocabularyForecast,
 } from "@/lib/cefr/vocabulary";
+
+function formatCompactForecastValue(value: string, unit: "h" | "w") {
+  return value.replace(/\s+(?:hour|hours|word|words)$/, ` ${unit}`);
+}
 
 function CompactForecastCard({
   accent,
@@ -59,7 +68,7 @@ function CompactForecastCard({
 
     return (
       <section
-        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5`}
+        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5 sm:p-6`}
       >
         <div className="flex min-w-0 items-start gap-4">
           <span
@@ -68,15 +77,14 @@ function CompactForecastCard({
             {icon}
           </span>
           <div className="min-w-0">
-            <h3 className="text-xl font-black text-slate-950">{title}</h3>
-            <p className="mt-1 leading-7 text-slate-600">
-              {forecast.currentLevel} is the highest level in this model, so
-              there is no next-level forecast.
+            <h3 className="text-xl font-bold text-slate-950">{title}</h3>
+            <p className="mt-1 leading-6 text-slate-600">
+              {highestLevelDescription(forecast.currentLevel)}
             </p>
             <p className="mt-3 text-sm font-bold tracking-wide text-slate-500 uppercase">
               {totalLabel}
             </p>
-            <p className="mt-1 text-2xl font-black text-slate-950">
+            <p className="mt-1 text-2xl font-bold text-slate-950">
               &gt; {total}
             </p>
           </div>
@@ -87,18 +95,27 @@ function CompactForecastCard({
 
   const isStudyTime = "estimatedTotalLearningMinutes" in forecast;
   const completedPercent = Math.round(forecast.progressRatio * 100);
-  const baseline = isStudyTime
-    ? formatForecastHours(forecast.baselineMinutes)
-    : formatVocabularyWords(forecast.baselineWords);
+  const baseline = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.baselineMinutes)
+      : formatVocabularyWords(forecast.baselineWords),
+    isStudyTime ? "h" : "w",
+  );
   const added = isStudyTime
     ? formatForecastHours(forecast.eligibleMinutes)
     : formatVocabularyWords(forecast.eligibleWords);
-  const estimatedNow = isStudyTime
-    ? formatForecastHours(forecast.estimatedTotalLearningMinutes)
-    : formatVocabularyWords(forecast.estimatedVocabularySize);
-  const nextTotal = isStudyTime
-    ? formatForecastHours(forecast.nextLevelBaselineMinutes)
-    : formatVocabularyWords(forecast.nextLevelBaselineWords);
+  const estimatedNow = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.estimatedTotalLearningMinutes)
+      : formatVocabularyWords(forecast.estimatedVocabularySize),
+    isStudyTime ? "h" : "w",
+  );
+  const nextTotal = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.nextLevelBaselineMinutes)
+      : formatVocabularyWords(forecast.nextLevelBaselineWords),
+    isStudyTime ? "h" : "w",
+  );
   const remaining = isStudyTime
     ? formatForecastHours(forecast.remainingMinutes)
     : formatVocabularyWords(forecast.remainingWords);
@@ -106,7 +123,7 @@ function CompactForecastCard({
 
   return (
     <section
-      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-4 shadow-sm`}
+      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-5 shadow-sm sm:p-6`}
     >
       <div className="flex min-w-0 items-start gap-4">
         <span
@@ -115,53 +132,61 @@ function CompactForecastCard({
           {icon}
         </span>
         <div className="min-w-0">
-          <h3 className="text-lg font-black text-slate-950">{title}</h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Approximate progress from {forecast.currentLevel} to{" "}
-            {forecast.nextLevel}.
+          <h3 className="text-lg font-bold text-slate-950">{title}</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {progressForecastDescription(
+              forecast.currentLevel,
+              forecast.nextLevel,
+            )}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1.15fr_1fr]">
-        <div>
-          <p className="text-xs font-black tracking-wide text-slate-500 uppercase">
+      <div className="mt-6 grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
           </p>
-          <p className="mt-2 flex items-center gap-2">
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-950 text-base font-black text-white">
+          <p className="mt-2 flex min-h-11 items-center gap-2">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
               {forecast.currentLevel}
             </span>
-            <span className="text-base text-slate-600">≈ {baseline}</span>
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈ {baseline}
+            </span>
           </p>
         </div>
 
-        <div className="text-left md:text-center">
+        <div className="min-w-0 text-left md:text-center">
           <p
-            className={`text-xs font-black tracking-wide uppercase ${accentClasses.text}`}
+            className={`text-xs font-bold tracking-wide uppercase ${accentClasses.text}`}
           >
             Progress
           </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">+{added}</p>
-          <p className="mt-1 text-base text-slate-600">≈ {estimatedNow} now</p>
+          <p className="mt-2 text-xl font-bold leading-6 text-slate-950">
+            +{added}
+          </p>
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            ≈ {estimatedNow} now
+          </p>
         </div>
 
-        <div className="md:text-right">
-          <p className="text-xs font-black tracking-wide text-slate-500 uppercase">
+        <div className="min-w-0 md:text-right">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Next
           </p>
-          <p className="mt-2 flex items-center gap-2 md:justify-end">
-            <span className="text-base text-slate-600">
+          <p className="mt-2 flex min-h-11 items-center gap-2 md:justify-end">
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
               ≈ {nextTotal} total
             </span>
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-base font-black text-slate-500">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
               {forecast.nextLevel}
             </span>
           </p>
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-6">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full ${accentClasses.bar}`}
@@ -169,7 +194,7 @@ function CompactForecastCard({
           />
         </div>
         <p
-          className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-black ${accentClasses.text}`}
+          className={`mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold ${accentClasses.text}`}
         >
           <span>{completedPercent}% completed</span>
           <span className="text-slate-300">•</span>
@@ -178,41 +203,44 @@ function CompactForecastCard({
       </div>
 
       <div
-        className={`mt-5 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-3`}
+        className={`mt-8 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-4`}
       >
-        <h4 className={`break-words text-lg font-black ${accentClasses.text}`}>
+        <h4 className="break-words text-base font-bold text-slate-700">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h4>
-        <p className="mt-1 text-sm text-slate-600">
-          Based on every calendar day in the last 7 and 30 days.
-        </p>
-        <div className="mt-3 w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+        <div className="mt-4 w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
           <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-base font-black ${accentClasses.text}`}
+            className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-sm font-bold text-slate-700`}
           >
-            <div className="px-4 py-3 text-slate-500" />
+            <div className="px-3 py-3 text-slate-500" />
             {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3">
+              <div key={pace.periodDays} className="px-3 py-3">
                 Last {pace.periodDays} days
               </div>
             ))}
           </div>
           <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
           >
-            <div className="px-4 py-3 text-slate-500">Active days</div>
+            <div className="px-3 py-3 text-sm text-slate-700">Active days</div>
             {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
+              <div
+                key={pace.periodDays}
+                className="px-3 py-3 text-sm text-slate-700"
+              >
                 {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
               </div>
             ))}
           </div>
           <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
           >
-            <div className="px-4 py-3 text-slate-500">Average pace</div>
+            <div className="px-3 py-3 text-sm text-slate-700">Average pace</div>
             {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-950">
+              <div
+                key={pace.periodDays}
+                className="px-3 py-3 text-sm text-slate-700"
+              >
                 {"averageMinutes" in pace
                   ? formatPaceMinutes(pace.averageMinutes)
                   : formatVocabularyPace(pace.averageWords)}
@@ -220,23 +248,31 @@ function CompactForecastCard({
             ))}
           </div>
           <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
           >
-            <div className="px-4 py-3 text-slate-500">
+            <div className="px-3 py-3 text-sm text-slate-700">
               Reach {forecast.nextLevel} in
             </div>
             {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-950">
+              <div
+                key={pace.periodDays}
+                className="px-3 py-3 text-sm text-slate-700"
+              >
                 {pace.estimate
                   ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
                   : "Not available"}
               </div>
             ))}
           </div>
-          <div className="grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr]">
-            <div className="px-4 py-3 text-slate-500">Estimated date</div>
+          <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr]">
+            <div className="px-3 py-3 text-sm text-slate-700">
+              Estimated date
+            </div>
             {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
+              <div
+                key={pace.periodDays}
+                className="px-3 py-3 text-sm text-slate-700"
+              >
                 {pace.estimate
                   ? formatEstimatedMonth(pace.estimate.estimatedDate)
                   : "Not available"}
@@ -259,11 +295,11 @@ export function CefrProgressForecastCards({
   return (
     <section className="mt-6">
       <div className="mb-4">
-        <h2 className="text-2xl font-black text-slate-950">
+        <h2 className="text-xl font-bold text-slate-950">
           Progress toward the next level
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Approximate Study Time and Vocabulary forecasts for this language.
+        <p className="mt-1 text-sm leading-6 text-slate-500">
+          {PROGRESS_FORECAST_DESCRIPTION}
         </p>
       </div>
       <div className="grid min-w-0 gap-4 xl:grid-cols-2">

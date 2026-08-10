@@ -13,6 +13,7 @@ export type VocabularyStatistics = {
   longestStreak: number;
   calendarDayAverage: number;
   activeDayAverage: number;
+  currentDayWords: number;
   currentWeekWords: number;
   currentMonthWords: number;
 };
@@ -143,6 +144,9 @@ export function calculateVocabularyStatistics(
       elapsedDays === 0 ? 0 : eligibleSelectedYearWords / elapsedDays,
     activeDayAverage:
       activeDays === 0 ? 0 : eligibleSelectedYearWords / activeDays,
+    currentDayWords: sumWords(
+      eligibleTotals.filter((total) => total.studyDate === todayKey),
+    ),
     currentWeekWords: sumWords(
       eligibleTotals.filter((total) => total.studyDate >= currentWeekStart),
     ),

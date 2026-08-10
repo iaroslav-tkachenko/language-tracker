@@ -139,7 +139,7 @@ describe("vocabulary statistics", () => {
     expect(statistics.longestStreak).toBe(3);
   });
 
-  it("calculates current week and month totals through today", () => {
+  it("calculates current day, week, and month totals through today", () => {
     const statistics = calculateVocabularyStatistics(
       [
         { studyDate: "2026-06-30", wordsLearned: 100 },
@@ -153,6 +153,7 @@ describe("vocabulary statistics", () => {
       "2026-07-26",
     );
 
+    expect(statistics.currentDayWords).toBe(5);
     expect(statistics.currentWeekWords).toBe(10);
     expect(statistics.currentMonthWords).toBe(60);
   });

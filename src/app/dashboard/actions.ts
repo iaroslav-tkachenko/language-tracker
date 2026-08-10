@@ -128,6 +128,88 @@ export async function createLanguageBoard(
   return { status: "success", message: `${parsed.data} is ready.` };
 }
 
+export async function renameLanguageBoard(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsedId = resourceIdSchema.safeParse(formData.get("boardId"));
+  const parsedName = parseName(formData);
+  if (!parsedId.success || !parsedName.success) {
+    return {
+      status: "error",
+      message:
+        parsedName.error?.issues[0]?.message ?? "Invalid language board.",
+    };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase
+    .from("language_boards")
+    .update({ name: parsedName.data })
+    .eq("id", parsedId.data)
+    .is("archived_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { status: "error", message: providerMessage("board", error) };
+  }
+  if (!data) {
+    return {
+      status: "error",
+      message: "The language board could not be found.",
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  revalidatePath("/cefr");
+  revalidatePath("/settings");
+  return { status: "success", message: "Language renamed." };
+}
+
+export async function createLanguageBoardAndRedirect(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsed = parseName(formData);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data, error } = await supabase.rpc(
+    "create_or_restore_language_board",
+    { p_name: parsed.data },
+  );
+
+  if (error) {
+    return { status: "error", message: providerMessage("board", error) };
+  }
+
+  const tracker = formData.get("tracker") === "vocabulary" ? "vocabulary" : "";
+  const destination = formData.get("destination");
+
+  revalidatePath("/dashboard");
+  revalidatePath("/settings");
+  revalidatePath("/statistics");
+  revalidatePath("/cefr");
+
+  if (destination === "statistics") {
+    redirect(`/statistics?board=${data.id}`);
+  }
+  if (destination === "cefr") {
+    redirect(`/cefr?board=${data.id}`);
+  }
+  redirect(
+    `/dashboard?board=${data.id}${tracker ? `&tracker=${tracker}` : ""}`,
+  );
+}
+
 export async function createActivityType(
   _state: ResourceActionState,
   formData: FormData,
@@ -159,6 +241,58 @@ export async function createActivityType(
     resourceId: data.id,
     resourceName: data.name,
   };
+}
+
+export async function renameActivityType(
+  _state: ResourceActionState,
+  formData: FormData,
+): Promise<ResourceActionState> {
+  const parsedId = resourceIdSchema.safeParse(formData.get("activityTypeId"));
+  const parsedName = parseName(formData);
+  if (!parsedId.success || !parsedName.success) {
+    return {
+      status: "error",
+      message: parsedName.error?.issues[0]?.message ?? "Invalid activity.",
+    };
+  }
+
+  const supabase = await verifiedClient();
+  if (!supabase) return { status: "error", message: "Please sign in again." };
+
+  const { data: activity, error: activityError } = await supabase
+    .from("activity_types")
+    .select("id, system_key")
+    .eq("id", parsedId.data)
+    .is("archived_at", null)
+    .maybeSingle();
+
+  if (activityError || !activity) {
+    return { status: "error", message: "The activity could not be found." };
+  }
+  if (activity.system_key !== null) {
+    return { status: "error", message: "System activities cannot be renamed." };
+  }
+
+  const { data, error } = await supabase
+    .from("activity_types")
+    .update({ name: parsedName.data })
+    .eq("id", parsedId.data)
+    .is("archived_at", null)
+    .is("system_key", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return { status: "error", message: providerMessage("activity", error) };
+  }
+  if (!data) {
+    return { status: "error", message: "The activity could not be found." };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/statistics");
+  revalidatePath("/settings");
+  return { status: "success", message: "Activity renamed." };
 }
 
 export async function createStudyEntry(
@@ -545,6 +679,18 @@ export async function archiveActivityType(formData: FormData) {
 
   const supabase = await verifiedClient();
   if (!supabase) redirect("/sign-in");
+
+  const { data: activity, error: activityError } = await supabase
+    .from("activity_types")
+    .select("id, system_key")
+    .eq("id", parsed.data)
+    .maybeSingle();
+
+  if (activityError || !activity)
+    throw new Error("The activity could not be found.");
+  if (activity.system_key !== null) {
+    throw new Error("System activities cannot be removed.");
+  }
 
   const { data, error } = await supabase
     .from("activity_types")

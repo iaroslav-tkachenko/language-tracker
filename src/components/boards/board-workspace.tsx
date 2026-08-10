@@ -15,6 +15,7 @@ import {
   Plus,
   Settings,
   Trash2,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 
 import {
   createActivityType,
+  createLanguageBoardAndRedirect,
   createStudyEntryBatch,
   createStudyEntry,
   deleteStudyEntry,
@@ -34,6 +36,10 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import {
+  highestLevelDescription,
+  progressForecastDescription,
+} from "@/lib/cefr/copy";
 import {
   fromDateKey,
   getCalendarCells,
@@ -86,9 +92,16 @@ type BoardWorkspaceProps = {
 const quickDurations = [10, 15, 20, 30, 45, 60, 90, 120];
 const initialActionState: ResourceActionState = { status: "idle" };
 const heatColors = {
-  missed: "#f2aaa4",
-  empty: "#f8fafc",
-  levels: ["#fff1b8", "#ffe18a", "#f7c95e", "#b8d79c", "#78b76d", "#3f8249"],
+  missed: "var(--study-heat-missed)",
+  empty: "var(--study-heat-empty)",
+  levels: [
+    "var(--study-heat-1)",
+    "var(--study-heat-2)",
+    "var(--study-heat-3)",
+    "var(--study-heat-4)",
+    "var(--study-heat-5)",
+    "var(--study-heat-6)",
+  ],
 };
 function formatDuration(minutes: number, precise = false) {
   const roundedMinutes = precise ? Math.round(minutes) : minutes;
@@ -101,17 +114,15 @@ function formatDuration(minutes: number, precise = false) {
 function SummaryValue({
   value,
   accentClass = "text-blue-600",
-  sizeClass = "text-2xl",
 }: {
   value: string | number;
   accentClass?: string;
-  sizeClass?: string;
 }) {
   const tokens = String(value).split(" ");
 
   return (
     <strong
-      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 leading-tight ${sizeClass} ${accentClass}`}
+      className={`flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0.5 text-2xl leading-tight ${accentClass}`}
     >
       {tokens.map((token, index) => {
         const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
@@ -173,29 +184,39 @@ function createOperationId() {
   ].join("-");
 }
 
-function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
+function formatCompactForecastValue(value: string) {
+  return value.replace(/\s+(?:hour|hours)$/, " h");
+}
+
+function StudyTimeForecastCard({
+  forecast,
+  compact = false,
+}: {
+  forecast: StudyTimeForecast;
+  compact?: boolean;
+}) {
   if (forecast.status === "no-level") return null;
 
   if (forecast.status === "highest-level") {
     return (
-      <section className="mt-6 rounded-3xl border border-blue-200 bg-blue-50/70 p-5 shadow-sm sm:p-6">
+      <section
+        className={`${compact ? "mt-0 h-full" : "mx-auto mt-5 max-w-6xl"} rounded-3xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm sm:p-5`}
+      >
         <div className="flex items-start gap-4">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600">
-            <Clock3 aria-hidden="true" className="size-6" />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600">
+            <Clock3 aria-hidden="true" className="size-5" />
           </span>
           <div>
-            <h2 className="text-2xl font-black text-slate-950">
+            <h2 className="text-xl font-bold text-slate-950">
               Study Time progress
             </h2>
-            <p className="mt-2 max-w-3xl leading-7 text-slate-700">
-              {forecast.currentLevel} is the highest level in this model, so
-              there is no next-level forecast. Your estimated total learning
-              time is still visible.
+            <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-700">
+              {highestLevelDescription(forecast.currentLevel)}
             </p>
             <p className="mt-4 text-sm font-bold tracking-wide text-slate-500 uppercase">
               Estimated total learning time
             </p>
-            <p className="mt-1 text-3xl font-black text-slate-950">
+            <p className="mt-1 text-2xl font-bold text-slate-950">
               &gt; {formatForecastHours(forecast.estimatedTotalLearningMinutes)}
             </p>
           </div>
@@ -211,58 +232,73 @@ function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
   ];
 
   return (
-    <section className="mt-6 rounded-3xl border border-blue-200 bg-white p-5 shadow-sm sm:p-6">
+    <section
+      className={`${compact ? "mt-0 h-full" : "mx-auto mt-5 max-w-6xl"} rounded-3xl border border-blue-200 bg-white p-4 shadow-sm sm:p-5`}
+    >
       <div className="flex items-start gap-4">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-          <Clock3 aria-hidden="true" className="size-6" />
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+          <Clock3 aria-hidden="true" className="size-5" />
         </span>
         <div>
-          <h2 className="text-2xl font-black text-slate-950">
+          <h2 className="text-lg font-bold text-slate-950">
             Study Time progress
           </h2>
-          <p className="mt-1 text-slate-600">
-            Approximate progress from {forecast.currentLevel} to{" "}
-            {forecast.nextLevel}, based on study time since this level.
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {progressForecastDescription(
+              forecast.currentLevel,
+              forecast.nextLevel,
+            )}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_1.2fr_1fr]">
-        <div>
-          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+      <div className="mt-5 grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
           </p>
-          <p className="mt-2 flex items-center gap-3">
-            <span className="flex size-13 items-center justify-center rounded-full bg-slate-950 text-lg font-black text-white">
+          <p className="mt-2 flex min-h-11 items-center gap-2">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
               {forecast.currentLevel}
             </span>
-            <span className="text-xl text-slate-600">
-              ≈ {formatForecastHours(forecast.baselineMinutes)}
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈{" "}
+              {formatCompactForecastValue(
+                formatForecastHours(forecast.baselineMinutes),
+              )}
             </span>
           </p>
         </div>
 
-        <div className="text-left lg:text-center">
-          <p className="text-sm font-black tracking-wide text-blue-700 uppercase">
+        <div className="min-w-0 text-left md:text-center">
+          <p className="text-xs font-bold tracking-wide text-blue-700 uppercase">
             Progress
           </p>
-          <p className="mt-2 text-3xl font-black text-slate-950">
+          <p className="mt-2 text-xl font-bold leading-6 text-slate-950">
             +{formatForecastHours(forecast.eligibleMinutes)}
           </p>
-          <p className="mt-1 text-xl text-slate-600">
-            ≈ {formatForecastHours(forecast.estimatedTotalLearningMinutes)} now
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            ≈{" "}
+            {formatCompactForecastValue(
+              formatForecastHours(forecast.estimatedTotalLearningMinutes),
+            )}{" "}
+            now
           </p>
         </div>
 
-        <div className="lg:text-right">
-          <p className="text-sm font-black tracking-wide text-slate-500 uppercase">
+        <div className="min-w-0 md:text-right">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Next
           </p>
-          <p className="mt-2 flex items-center gap-3 lg:justify-end">
-            <span className="text-xl text-slate-600">
-              ≈ {formatForecastHours(forecast.nextLevelBaselineMinutes)} total
+          <p className="mt-2 flex min-h-11 items-center gap-2 md:justify-end">
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈{" "}
+              {formatCompactForecastValue(
+                formatForecastHours(forecast.nextLevelBaselineMinutes),
+              )}{" "}
+              total
             </span>
-            <span className="flex size-13 items-center justify-center rounded-full bg-slate-100 text-lg font-black text-slate-500">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
               {forecast.nextLevel}
             </span>
           </p>
@@ -276,92 +312,108 @@ function StudyTimeForecastCard({ forecast }: { forecast: StudyTimeForecast }) {
             style={{ width: `${completedPercent}%` }}
           />
         </div>
-        <p className="mt-3 text-center text-lg font-black text-blue-700">
-          {completedPercent}% completed
-          <span className="px-2 text-slate-300">•</span>
+        <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold text-blue-700">
+          <span>{completedPercent}% completed</span>
+          <span className="text-slate-300">•</span>
           <span className="text-slate-700">
             ≈ {formatForecastHours(forecast.remainingMinutes)} left
           </span>
         </p>
       </div>
 
-      <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/70 p-4">
-        <h3 className="text-xl font-black text-blue-700 sm:text-2xl">
+      <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+        <h3 className="break-words text-base font-bold text-slate-700">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h3>
-        <p className="mt-1 text-slate-600">
-          Based on your activity across every calendar day in the last 7 and 30
-          days, including days with no entries.
-        </p>
-        <div className="mt-4 max-w-3xl overflow-x-auto rounded-2xl border border-blue-100 bg-white/80">
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100 text-lg font-black text-blue-700">
-            <div className="px-4 py-3 text-slate-500" />
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3">
-                Last {pace.periodDays} days
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
-            <div className="px-4 py-3 text-slate-500">Active days</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
-            <div className="px-4 py-3 text-slate-500">Average pace</div>
-            {paceColumns.map((pace) => (
-              <div
-                key={pace.periodDays}
-                className="px-4 py-3 font-semibold text-slate-950"
-              >
-                {formatPaceMinutes(pace.averageMinutes)}
-              </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr] border-b border-blue-100">
-            <div className="px-4 py-3 text-slate-500">
-              Reach {forecast.nextLevel} in
+        <div className="relative mt-4">
+          <div className="w-full max-w-3xl overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100 text-sm font-bold text-slate-700">
+              <div className="px-3 py-3 text-slate-500" />
+              {paceColumns.map((pace) => (
+                <div key={pace.periodDays} className="px-3 py-3">
+                  Last {pace.periodDays} days
+                </div>
+              ))}
             </div>
-            {paceColumns.map((pace) => (
-              <div
-                key={pace.periodDays}
-                className="px-4 py-3 font-semibold text-slate-950"
-              >
-                {pace.estimate
-                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
-                  : "Not available"}
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Active days
               </div>
-            ))}
-          </div>
-          <div className="grid min-w-[560px] grid-cols-[1.1fr_1fr_1fr]">
-            <div className="px-4 py-3 text-slate-500">Estimated date</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.estimate
-                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
-                  : "Not available"}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Average pace
               </div>
-            ))}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {formatPaceMinutes(pace.averageMinutes)}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b border-blue-100">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Reach {forecast.nextLevel} in
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr]">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Estimated date
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
           </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm md:hidden"
+          >
+            <ChevronRight className="size-4" />
+          </span>
         </div>
       </div>
 
       <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <summary className="cursor-pointer font-bold text-slate-700">
+        <summary className="cursor-pointer text-sm font-bold text-slate-700">
           How we calculate this
         </summary>
-        <p className="mt-3 leading-7 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {STUDY_TIME_DISCLOSURE_INTRO}
         </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600">
           {STUDY_TIME_DISCLOSURE_ITEMS.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-        <p className="mt-3 leading-7 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           {STUDY_TIME_DISCLOSURE_NOTE}
         </p>
       </details>
@@ -410,6 +462,12 @@ export function BoardWorkspace({
     createActivityType,
     initialActionState,
   );
+  const [boardState, boardAction, boardPending] = useActionState(
+    createLanguageBoardAndRedirect,
+    initialActionState,
+  );
+  const [boardDialogOpen, setBoardDialogOpen] = useState(false);
+  const [newBoardName, setNewBoardName] = useState("");
 
   useEffect(() => {
     if (entryState.status !== "success") return;
@@ -483,6 +541,16 @@ export function BoardWorkspace({
     }
     return active;
   }, [activities, activityState]);
+  const trimmedBoardName = newBoardName.trim();
+  const duplicateBoardName = boards.some(
+    (board) => board.name.toLowerCase() === trimmedBoardName.toLowerCase(),
+  );
+  const boardLimitReached = boards.length >= 6;
+  const canCreateBoard =
+    trimmedBoardName.length > 0 &&
+    trimmedBoardName.length <= 50 &&
+    !duplicateBoardName &&
+    !boardLimitReached;
 
   const activityById = useMemo(
     () => new Map(activities.map((activity) => [activity.id, activity])),
@@ -638,9 +706,9 @@ export function BoardWorkspace({
         onClick={() => navigateToDate(cell.dateKey)}
         aria-label={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
         title={`${formatLongDate(cell.dateKey)}: ${minutes} minutes`}
-        className={`${compact ? "size-2.5 rounded-[2px]" : "size-3.5 rounded-[3px] sm:size-4"} border ${
+        className={`heatmap-cell ${compact ? "size-2.5 rounded-[2px]" : "h-[1.0625rem] w-full rounded-[3px]"} border ${
           cell.dateKey === selectedDate
-            ? "border-slate-950 ring-1 ring-slate-950"
+            ? "heatmap-cell-selected border-slate-950 ring-1 ring-slate-950"
             : "border-white"
         } disabled:invisible`}
         style={{ backgroundColor: background }}
@@ -651,9 +719,9 @@ export function BoardWorkspace({
   return (
     <main className="min-h-screen bg-white">
       <header className="border-b border-slate-200">
-        <div className="mx-auto flex min-h-17 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
           <details className="group relative">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xl px-3 text-lg font-bold text-slate-950 hover:bg-slate-50">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg px-2.5 text-base font-bold text-slate-950 hover:bg-slate-50">
               {selectedBoard.name}
               <span
                 aria-hidden="true"
@@ -676,27 +744,44 @@ export function BoardWorkspace({
                   {board.name}
                 </Link>
               ))}
+              <div className="mt-2 border-t border-slate-100 pt-2">
+                {boardLimitReached ? (
+                  <p className="rounded-xl bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-500">
+                    You can have up to 6 active language boards. Remove one in
+                    Settings before adding another.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setBoardDialogOpen(true)}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                  >
+                    <Plus aria-hidden="true" className="size-4" />
+                    Add language
+                  </button>
+                )}
+              </div>
             </div>
           </details>
 
           <nav aria-label="Primary" className="hidden items-stretch sm:flex">
-            <span className="flex min-h-17 items-center gap-2 border-b-3 border-blue-600 px-5 font-semibold text-blue-600">
-              <Clock3 aria-hidden="true" className="size-5" />
+            <span className="flex min-h-14 items-center gap-2 border-b-2 border-blue-600 px-4 text-sm font-semibold text-blue-600">
+              <Clock3 aria-hidden="true" className="size-4.5" />
               Study Time
             </span>
             <Link
               href={`/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}&tracker=vocabulary`}
-              className="flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
             >
-              <BookOpen aria-hidden="true" className="size-5" />
+              <BookOpen aria-hidden="true" className="size-4.5" />
               Vocabulary
             </Link>
             <Link
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              className="relative flex min-h-17 items-center gap-2 px-5 font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+              className="relative flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
             >
               {!hasCurrentCefrLevel && <MissingLevelBubble />}
-              <GraduationCap aria-hidden="true" className="size-5" />
+              <GraduationCap aria-hidden="true" className="size-4.5" />
               Level
             </Link>
           </nav>
@@ -704,33 +789,28 @@ export function BoardWorkspace({
           <div className="flex items-center gap-1">
             <Link
               href={`/statistics?board=${selectedBoard.id}&year=${year}&today=${todayKey}`}
-              className="hidden min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
+              className="hidden min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 sm:flex"
             >
-              <BarChart3 aria-hidden="true" className="size-5" />
+              <BarChart3 aria-hidden="true" className="size-4.5" />
               Statistics
             </Link>
             <Link
-              href="/settings"
+              href={`/settings?returnTo=${encodeURIComponent(
+                `/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}`,
+              )}`}
               aria-label="Settings"
-              className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
             >
-              <Settings aria-hidden="true" className="size-5" />
+              <Settings aria-hidden="true" className="size-4.5" />
             </Link>
-            <ConfirmSignOutForm className="sm:hidden">
+            <ConfirmSignOutForm>
               <button
                 type="submit"
                 aria-label="Sign out"
-                className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                title="Sign out"
+                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-950"
               >
-                <LogOut aria-hidden="true" className="size-5" />
-              </button>
-            </ConfirmSignOutForm>
-            <ConfirmSignOutForm className="hidden sm:block">
-              <button
-                type="submit"
-                className="min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-              >
-                Sign out
+                <LogOut aria-hidden="true" className="size-4.5" />
               </button>
             </ConfirmSignOutForm>
           </div>
@@ -739,20 +819,20 @@ export function BoardWorkspace({
           aria-label="Mobile primary"
           className="grid grid-cols-4 border-t border-slate-100 sm:hidden"
         >
-          <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
+          <span className="flex min-h-12 items-center justify-center gap-1.5 border-b-2 border-blue-600 px-2 text-xs font-semibold text-blue-600">
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </span>
           <Link
             href={`/dashboard?board=${selectedBoard.id}&date=${selectedDate}&today=${todayKey}&tracker=vocabulary`}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
           >
             <BookOpen aria-hidden="true" className="size-4.5" />
             Vocabulary
           </Link>
           <Link
             href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+            className="relative flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
           >
             {!hasCurrentCefrLevel && <MissingLevelBubble />}
             <GraduationCap aria-hidden="true" className="size-4.5" />
@@ -760,7 +840,7 @@ export function BoardWorkspace({
           </Link>
           <Link
             href={`/statistics?board=${selectedBoard.id}&year=${year}&today=${todayKey}`}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
@@ -768,184 +848,289 @@ export function BoardWorkspace({
         </nav>
       </header>
 
-      <div className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6">
+        {boardDialogOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-language-heading"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4"
+          >
+            <form
+              action={boardAction}
+              onSubmit={(event) => {
+                if (!canCreateBoard) event.preventDefault();
+              }}
+              className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+            >
+              <h2
+                id="add-language-heading"
+                className="text-lg font-bold text-slate-950"
+              >
+                Add language
+              </h2>
+              <label className="mt-4 block text-sm font-semibold text-slate-800">
+                Language name
+                <input
+                  name="name"
+                  required
+                  maxLength={50}
+                  autoComplete="off"
+                  value={newBoardName}
+                  onChange={(event) => setNewBoardName(event.target.value)}
+                  placeholder="German"
+                  className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 px-4 text-base text-slate-950 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+              {duplicateBoardName && (
+                <p role="alert" className="mt-2 text-sm text-red-700">
+                  You already have an active board with this name.
+                </p>
+              )}
+              {boardState.status === "error" && (
+                <p role="alert" className="mt-2 text-sm text-red-700">
+                  {boardState.message}
+                </p>
+              )}
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBoardDialogOpen(false);
+                    setNewBoardName("");
+                  }}
+                  className="min-h-11 flex-1 rounded-xl border border-slate-300 px-4 font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canCreateBoard || boardPending}
+                  className="min-h-11 flex-1 rounded-xl bg-blue-600 px-4 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
+                >
+                  {boardPending ? "Adding..." : "Confirm"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
         {!hasCurrentCefrLevel && (
           <div className="mb-6">
             <CefrLevelPrompt
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              context="study"
               accent="blue"
             />
           </div>
         )}
 
-        <section aria-labelledby="year-heading">
-          <div className="flex items-center justify-center gap-4">
-            <button
-              type="button"
-              aria-label="Previous year"
-              onClick={() => navigateYear(-1)}
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronLeft aria-hidden="true" className="size-5" />
-            </button>
-            <h1
-              id="year-heading"
-              className="min-w-24 text-center text-3xl font-bold text-slate-950"
-            >
-              {year}
-            </h1>
-            <button
-              type="button"
-              aria-label="Next year"
-              onClick={() => navigateYear(1)}
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronRight aria-hidden="true" className="size-5" />
-            </button>
-          </div>
-
-          <div className="mt-6 hidden overflow-x-auto pb-2 sm:block">
-            <div className="mx-auto w-max">
-              <div className="mb-2 flex justify-between px-1 text-xs text-slate-500">
-                {[
-                  "Jan",
-                  "Feb",
-                  "Mar",
-                  "Apr",
-                  "May",
-                  "Jun",
-                  "Jul",
-                  "Aug",
-                  "Sep",
-                  "Oct",
-                  "Nov",
-                  "Dec",
-                ].map((month) => (
-                  <span key={month}>{month}</span>
-                ))}
+        <div className="mx-auto max-w-6xl">
+          <section aria-labelledby="year-heading">
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                aria-label="Previous year"
+                onClick={() => navigateYear(-1)}
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronLeft aria-hidden="true" className="size-4.5" />
+              </button>
+              <div className="w-32 text-center">
+                <p className="h-4 text-xs leading-4 font-semibold tracking-wide text-blue-600 uppercase">
+                  Minutes studied
+                </p>
+                <h1
+                  id="year-heading"
+                  className="mt-0.5 text-2xl leading-7 font-bold text-slate-950"
+                >
+                  {year}
+                </h1>
               </div>
-              <div className="grid grid-flow-col grid-rows-7 gap-1">
-                {calendarCells.map((cell) =>
-                  renderHeatCell(
-                    { dateKey: cell.dateKey, visible: cell.inYear },
-                    false,
-                  ),
-                )}
-              </div>
+              <button
+                type="button"
+                aria-label="Next year"
+                onClick={() => navigateYear(1)}
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronRight aria-hidden="true" className="size-4.5" />
+              </button>
             </div>
-          </div>
 
-          <div className="mt-6 space-y-5 sm:hidden">
-            {[
-              {
-                label: "Jan–Jun",
-                months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-                cells: getCalendarRangeCells(`${year}-01-01`, `${year}-06-30`),
-              },
-              {
-                label: "Jul–Dec",
-                months: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                cells: getCalendarRangeCells(`${year}-07-01`, `${year}-12-31`),
-              },
-            ].map((halfYear) => (
-              <div key={halfYear.label}>
-                <h2 className="text-center text-sm font-semibold text-slate-600">
-                  {halfYear.label}
-                </h2>
-                <div className="mx-auto mt-2 w-max max-w-full">
-                  <div className="mb-1.5 flex justify-between px-0.5 text-[9px] text-slate-500">
-                    {halfYear.months.map((month) => (
-                      <span key={month}>{month}</span>
-                    ))}
-                  </div>
-                  <div className="grid grid-flow-col grid-rows-7 gap-0.5">
-                    {halfYear.cells.map((cell) =>
-                      renderHeatCell(
-                        {
-                          dateKey: cell.dateKey,
-                          visible: cell.inRange,
-                        },
-                        true,
-                      ),
-                    )}
-                  </div>
+            <div className="mt-5 hidden overflow-x-auto pb-2 sm:block">
+              <div className="grid min-w-[720px] grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2">
+                <div />
+                <div className="mb-2 flex justify-between px-0.5 text-xs text-slate-500">
+                  {[
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ].map((month) => (
+                    <span key={month}>{month}</span>
+                  ))}
+                </div>
+                <div className="grid grid-rows-7 gap-1 text-[10px] leading-none text-slate-500">
+                  {["M", "T", "W", "T", "F", "S", "S"].map((weekday, index) => (
+                    <span
+                      key={`${weekday}-${index}`}
+                      className="flex h-[1.0625rem] items-center justify-center"
+                    >
+                      {weekday}
+                    </span>
+                  ))}
+                </div>
+                <div className="grid grid-cols-[repeat(53,minmax(0,1fr))] grid-flow-col grid-rows-7 gap-1">
+                  {calendarCells.map((cell) =>
+                    renderHeatCell(
+                      { dateKey: cell.dateKey, visible: cell.inYear },
+                      false,
+                    ),
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
-            {[
-              ["0 min", heatColors.missed],
-              ["1–14", heatColors.levels[0]],
-              ["15–29", heatColors.levels[1]],
-              ["30–59", heatColors.levels[2]],
-              ["60–119", heatColors.levels[3]],
-              ["120–180", heatColors.levels[4]],
-              ["181+", heatColors.levels[5]],
-            ].map(([label, color]) => (
-              <span key={label} className="inline-flex items-center gap-1.5">
-                <span
-                  aria-hidden="true"
-                  className="size-3 rounded-sm"
-                  style={{ backgroundColor: color }}
+            <div className="mt-6 space-y-5 sm:hidden">
+              {[
+                {
+                  label: "Jan–Jun",
+                  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                  cells: getCalendarRangeCells(
+                    `${year}-01-01`,
+                    `${year}-06-30`,
+                  ),
+                },
+                {
+                  label: "Jul–Dec",
+                  months: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                  cells: getCalendarRangeCells(
+                    `${year}-07-01`,
+                    `${year}-12-31`,
+                  ),
+                },
+              ].map((halfYear) => (
+                <div key={halfYear.label}>
+                  <h2 className="text-center text-sm font-semibold text-slate-600">
+                    {halfYear.label}
+                  </h2>
+                  <div className="mx-auto mt-2 w-max max-w-full">
+                    <div className="mb-1.5 flex justify-between px-0.5 text-[9px] text-slate-500">
+                      {halfYear.months.map((month) => (
+                        <span key={month}>{month}</span>
+                      ))}
+                    </div>
+                    <div className="grid grid-flow-col grid-rows-7 gap-0.5">
+                      {halfYear.cells.map((cell) =>
+                        renderHeatCell(
+                          {
+                            dateKey: cell.dateKey,
+                            visible: cell.inRange,
+                          },
+                          true,
+                        ),
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 text-center text-xs text-slate-500">
+              <p>Minutes per day</p>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+                {[
+                  ["0", heatColors.missed],
+                  ["1–14", heatColors.levels[0]],
+                  ["15–29", heatColors.levels[1]],
+                  ["30–59", heatColors.levels[2]],
+                  ["60–119", heatColors.levels[3]],
+                  ["120–180", heatColors.levels[4]],
+                  ["181+", heatColors.levels[5]],
+                ].map(([label, color]) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1.5"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="size-3 rounded-sm"
+                      style={{ backgroundColor: color }}
+                    />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <SummaryValue value={formatDuration(annualTotal)} />
+              <span className="text-sm text-slate-500">Total ({year})</span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <SummaryValue value={activeDays} />
+              <span className="text-sm text-slate-500">Days studied</span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Flame aria-hidden="true" className="size-5 text-orange-500" />
+                <SummaryValue
+                  value={`${currentStreak} ${
+                    currentStreak === 1 ? "day" : "days"
+                  }`}
                 />
-                {label}
               </span>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <SummaryValue value={formatDuration(annualTotal)} />
-            <span className="text-sm text-slate-500">Total ({year})</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <SummaryValue value={activeDays} />
-            <span className="text-sm text-slate-500">Days studied</span>
-          </div>
-          <div className="rounded-2xl border border-slate-200 p-4 text-center">
-            <strong className="inline-flex items-baseline justify-center gap-1 text-2xl leading-tight text-blue-600">
-              <Flame aria-hidden="true" className="size-5 text-orange-500" />
-              {currentStreak}
-            </strong>
-            <span className="block text-sm text-slate-500">Current streak</span>
-          </div>
-          <div className="flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-slate-200 p-4">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Gauge aria-hidden="true" className="size-5" />
-            </span>
-            <span className="min-w-0">
-              <SummaryValue
-                value={formatDuration(statistics.calendarDayAverage, true)}
-                accentClass="text-slate-950"
-                sizeClass="text-xl sm:text-2xl"
-              />
-              <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
+              <span className="block text-sm text-slate-500">
+                Current streak
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Trophy aria-hidden="true" className="size-5 text-amber-500" />
+                <SummaryValue
+                  value={`${statistics.longestStreak} ${
+                    statistics.longestStreak === 1 ? "day" : "days"
+                  }`}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
+                Longest streak
+              </span>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Gauge aria-hidden="true" className="size-5 text-blue-600" />
+                <SummaryValue
+                  value={formatDuration(statistics.calendarDayAverage, true)}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
                 Average / calendar day
               </span>
-            </span>
-          </div>
-          <div className="flex min-w-0 items-center justify-center gap-3 rounded-2xl border border-slate-200 p-4">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Gauge aria-hidden="true" className="size-5" />
-            </span>
-            <span className="min-w-0">
-              <SummaryValue
-                value={formatDuration(statistics.activeDayAverage, true)}
-                accentClass="text-slate-950"
-                sizeClass="text-xl sm:text-2xl"
-              />
-              <span className="block text-xs leading-5 text-slate-500 sm:text-sm">
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-3 text-center">
+              <span className="inline-flex items-baseline justify-center gap-1">
+                <Gauge aria-hidden="true" className="size-5 text-blue-600" />
+                <SummaryValue
+                  value={formatDuration(statistics.activeDayAverage, true)}
+                />
+              </span>
+              <span className="block text-sm text-slate-500">
                 Average / active day
               </span>
-            </span>
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
 
-        <section className="mx-auto mt-8 max-w-3xl border-t border-slate-200 pt-6">
+        <section className="mx-auto mt-7 max-w-3xl border-t border-slate-200 pt-5">
           <div className="flex items-center justify-between gap-4">
             <button
               type="button"
@@ -977,12 +1162,14 @@ export function BoardWorkspace({
             </button>
           </div>
 
-          <p className="mt-5 text-right text-base text-slate-600">
-            <strong className="text-2xl text-blue-600">
-              {formatDuration(selectedTotal)}
-            </strong>{" "}
-            total
-          </p>
+          {selectedEntries.length > 0 && (
+            <p className="mt-5 text-right text-base text-slate-600">
+              <strong className="text-2xl text-blue-600">
+                {formatDuration(selectedTotal)}
+              </strong>{" "}
+              total
+            </p>
+          )}
 
           <div className="mt-4 space-y-3">
             {selectedEntries.map((entry) => (
@@ -1008,7 +1195,7 @@ export function BoardWorkspace({
                   type="button"
                   onClick={() => beginEdit(entry)}
                   aria-label={`Edit ${activityById.get(entry.activityTypeId)?.name ?? "study session"}`}
-                  className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-blue-700"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-blue-50 hover:text-blue-700"
                 >
                   <Pencil aria-hidden="true" className="size-4.5" />
                 </button>
@@ -1036,9 +1223,18 @@ export function BoardWorkspace({
               </article>
             ))}
             {selectedEntries.length === 0 && (
-              <p className="rounded-2xl bg-slate-50 px-4 py-5 text-center text-sm text-slate-500">
-                No study session for this day yet.
-              </p>
+              <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center">
+                <Clock3
+                  aria-hidden="true"
+                  className="mx-auto size-7 text-slate-400"
+                />
+                <p className="mt-3 text-base font-semibold text-slate-800">
+                  No study sessions yet
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Add the time you spent studying on this date.
+                </p>
+              </div>
             )}
           </div>
 
@@ -1057,7 +1253,7 @@ export function BoardWorkspace({
                 setBatchOperationId(null);
                 setFormOpen(true);
               }}
-              className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-400 font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
+              className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-base font-bold text-white shadow-sm transition hover:bg-blue-700"
             >
               <Plus aria-hidden="true" className="size-5" />
               Add study session
@@ -1068,7 +1264,7 @@ export function BoardWorkspace({
                 <div
                   role="group"
                   aria-label="Study session date mode"
-                  className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
+                  className="mb-4 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
                 >
                   <button
                     type="button"
@@ -1442,6 +1638,13 @@ export function BoardWorkspace({
             </div>
           )}
         </section>
+
+        {studyTimeForecast.status !== "no-level" && (
+          <div
+            aria-hidden="true"
+            className="mx-auto mt-8 max-w-6xl border-t border-slate-200"
+          />
+        )}
 
         <StudyTimeForecastCard forecast={studyTimeForecast} />
       </div>

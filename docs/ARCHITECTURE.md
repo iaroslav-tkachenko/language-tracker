@@ -331,7 +331,12 @@ Primary and unique constraints provide their own supporting indexes. Additional 
 
 ## 6. User initialization
 
-A tested database trigger on `auth.users` creates the application profile and the seven persisted standard activity rows in the same signup transaction. `Other` remains a UI command that creates or restores a named custom activity; it is not seeded as an `activity_types` row. The function must:
+A tested database trigger on `auth.users` creates the application profile and
+the ten persisted standard activity rows in the same signup transaction:
+Reading, Podcast, Speaking, Writing, Anki, Grammar, TV Show / Film, YouTube,
+Shadowing, and Lesson. `Other` remains a UI command that creates or restores a
+named custom activity; it is not seeded as an `activity_types` row. The function
+must:
 
 - be narrowly scoped;
 - use a fixed safe `search_path`;
@@ -369,12 +374,27 @@ Each Server Action follows this sequence:
 
 Board/activity creation and restoration use database functions so name restoration and active-count limits remain atomic under concurrent requests.
 
+Board and custom-activity rename operations update the existing owned row rather
+than replacing its identity. Study entries retain their `activity_type_id`, so a
+custom activity's current name is reflected across historical entry views and
+statistics. Server Actions reject rename/archive attempts for standard
+activities.
+
 Batch creation uses a single authenticated database function. The function derives the owner from `auth.uid()`, validates the owned board/activity and the complete range, records the operation ID, and inserts all generated entries atomically. Vocabulary uses an owned upsert constrained by the board/date uniqueness rule. CEFR create/edit/delete operations use owned constrained database functions that validate the browser-local effective date, reject an occupied effective date, serialize changes for one board, and preserve the no-adjacent-duplicate-level invariant.
 
 Vocabulary date-range creation similarly uses one authenticated transaction. It
 derives ownership from `auth.uid()`, preserves existing totals, inserts only
 empty dates, records inserted/preserved counts, and returns the original result
 when the same operation identifier and payload are retried.
+
+### 7.3 Client theme preference
+
+Theme preference is a browser-local UI setting with values `system`, `light`, or
+`dark`. The default is `system`. The selected value is stored under
+`language-tracker-theme` in `localStorage`; it contains no product or identity
+data. A small pre-hydration script applies the preference to the root document
+to avoid a light-theme flash, and system mode follows
+`prefers-color-scheme` changes.
 
 ## 8. Aggregation design
 
@@ -620,6 +640,5 @@ The following are intentionally outside the current expanded MVP or blocked unti
 
 - import/export format;
 - localization architecture;
-- theme system;
 - all-language analytics;
 - persisted aggregates or background processing.

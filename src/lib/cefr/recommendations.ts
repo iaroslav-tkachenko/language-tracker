@@ -41,28 +41,20 @@ export const WEEKLY_RECOMMENDATIONS = [
     ],
     advice: [
       {
-        title: "Build pronunciation early.",
-        body: "Study phonetics and get used to accurate pronunciation from the start.",
+        title: "Start with useful phrases.",
+        body: "Learn greetings, introductions, numbers, and short phrases you can use right away.",
       },
       {
-        title: "Use beginner videos and shadowing.",
-        body: "Watch level-appropriate YouTube videos and repeat after the speaker to build pronunciation habits.",
+        title: "Listen and repeat.",
+        body: "Use short beginner audio and repeat each phrase aloud to get comfortable with the language's sounds.",
       },
       {
-        title: "Learn basic sentence structure.",
-        body: "Focus on word order, present-tense word changes, and especially common verb forms.",
+        title: "Build simple sentences.",
+        body: "Practice a few common sentence patterns and replace one word at a time to create new meanings.",
       },
       {
-        title: "Notice grammar without getting stuck.",
-        body: "Learn to recognize cases and articles, but do not let them slow down daily practice.",
-      },
-      {
-        title: "Learn full sentences.",
-        body: "Study words inside useful sentences rather than memorizing isolated vocabulary.",
-      },
-      {
-        title: "Use spaced repetition.",
-        body: "Use Anki or a similar system, create cards for common present-tense verbs, and aim for at least 10 new cards per day.",
+        title: "Review a little every day.",
+        body: "Save new words inside short example sentences and review them regularly with cards or another simple system.",
       },
     ],
   },
@@ -77,28 +69,20 @@ export const WEEKLY_RECOMMENDATIONS = [
     ],
     advice: [
       {
-        title: "Keep practicing pronunciation.",
-        body: "Watch level-appropriate YouTube videos and repeat after the speaker with shadowing.",
+        title: "Turn phrases into conversations.",
+        body: "Practice short exchanges about your day, family, interests, shopping, and travel.",
       },
       {
-        title: "Learn the main verb tenses.",
-        body: "Build a practical foundation in the grammar of the most common tenses.",
+        title: "Learn grammar through examples.",
+        body: "Focus on the most common tenses and sentence patterns, then use them in your own examples.",
       },
       {
-        title: "Learn language in context.",
-        body: "Study complete sentences instead of isolated words.",
+        title: "Keep listening and repeating.",
+        body: "Use clear, level-appropriate audio and shadow short sections until they feel natural.",
       },
       {
-        title: "Use spaced repetition.",
-        body: "Use Anki or a similar system to review material consistently.",
-      },
-      {
-        title: "Create verb cards.",
-        body: "Make cards for common verbs in different tense forms.",
-      },
-      {
-        title: "Keep a daily target.",
-        body: "Aim to add at least 10 new cards each day.",
+        title: "Review words in context.",
+        body: "Save useful words with a complete sentence so you remember how to use them, not only what they mean.",
       },
     ],
   },
@@ -114,15 +98,15 @@ export const WEEKLY_RECOMMENDATIONS = [
     advice: [
       {
         title: "Start speaking regularly.",
-        body: "Practice with native speakers, AI, or at least by speaking aloud to yourself.",
+        body: "Have short conversations with a tutor, language partner, AI, or simply speak aloud about your day.",
       },
       {
-        title: "Increase listening volume.",
-        body: "Add more level-appropriate podcasts and YouTube videos to your routine.",
+        title: "Listen for the main idea.",
+        body: "Use level-appropriate podcasts and videos, and focus on understanding the message before every word.",
       },
       {
-        title: "Capture useful new words.",
-        body: "Write down important vocabulary, turn it into cards, and review it consistently.",
+        title: "Connect your ideas.",
+        body: "Practice telling short stories and explaining opinions with linking words such as because, although, and however.",
       },
     ],
   },
@@ -138,20 +122,20 @@ export const WEEKLY_RECOMMENDATIONS = [
     ],
     advice: [
       {
-        title: "Increase speaking practice.",
-        body: "Talk more with native speakers, AI, or aloud to yourself on varied everyday topics.",
+        title: "Explain and defend your ideas.",
+        body: "Discuss a wider range of topics and practice giving clear reasons, examples, and comparisons.",
       },
       {
-        title: "Move toward native content.",
-        body: "Start with cartoons or series you already know well in your own language.",
+        title: "Move toward authentic content.",
+        body: "Watch, listen to, and read content made for native speakers, starting with subjects you already know well.",
       },
       {
-        title: "Read approachable material.",
-        body: "Try comics, accessible fiction, or news articles simplified with AI for your level.",
+        title: "Read longer texts.",
+        body: "Build stamina with articles, accessible fiction, and other material that keeps you reading beyond short exercises.",
       },
       {
-        title: "Keep reviewing vocabulary.",
-        body: "Continue collecting useful new words, creating cards, and reviewing them consistently.",
+        title: "Learn vocabulary in context.",
+        body: "Save useful expressions and word combinations from real content, then reuse them in speech and writing.",
       },
     ],
   },
@@ -166,16 +150,16 @@ export const WEEKLY_RECOMMENDATIONS = [
     ],
     advice: [
       {
-        title: "Consume more native content.",
-        body: "At this stage, progress depends heavily on the amount of real, non-adapted content you consume.",
+        title: "Choose demanding content.",
+        body: "Use long-form native content on unfamiliar or complex topics to expand your range and comprehension.",
       },
       {
-        title: "Speak on varied topics.",
-        body: "Talk as much as possible with native speakers about different subjects.",
+        title: "Refine accuracy through feedback.",
+        body: "Ask tutors, language partners, or writing tools to identify recurring mistakes and awkward phrasing.",
       },
       {
-        title: "Change your environment.",
-        body: "Switch your devices, apps, and interfaces to the language you are learning.",
+        title: "Develop professional range.",
+        body: "Practice explaining ideas, presenting arguments, and writing clearly about topics that matter to your work or studies.",
       },
     ],
   },
@@ -190,16 +174,16 @@ export const WEEKLY_RECOMMENDATIONS = [
     ],
     advice: [
       {
-        title: "Consume more native content.",
-        body: "At this stage, progress depends heavily on the amount of real, non-adapted content you consume.",
+        title: "Focus on nuance and tone.",
+        body: "Compare how skilled speakers express the same idea in formal, casual, persuasive, and humorous situations.",
       },
       {
-        title: "Speak on varied topics.",
-        body: "Talk as much as possible with native speakers about different subjects.",
+        title: "Polish precision.",
+        body: "Notice small differences between similar words and expressions, then practice choosing the most natural one.",
       },
       {
-        title: "Change your environment.",
-        body: "Switch your devices, apps, and interfaces to the language you are learning.",
+        title: "Stay challenged.",
+        body: "Use demanding books, lectures, debates, and specialist material to keep expanding your range.",
       },
     ],
   },

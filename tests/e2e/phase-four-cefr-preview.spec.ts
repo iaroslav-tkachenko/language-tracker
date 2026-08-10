@@ -74,10 +74,10 @@ test.describe("Phase 4A CEFR visual review", () => {
     const studyProgress = page
       .getByRole("heading", { name: "Study Time progress" })
       .locator("xpath=ancestor::section[1]");
-    await expect(studyProgress.getByText("≈ 380h")).toBeVisible();
-    await expect(studyProgress.getByText("+60h")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 440h now")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 580h total")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 380 h")).toBeVisible();
+    await expect(studyProgress.getByText("+60 hours")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 440 h now")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 580 h total")).toBeVisible();
     await expect(studyProgress.getByText("≈ 140 hours left")).toBeVisible();
     await expect(studyProgress.getByText("30% completed")).toBeVisible();
     await expect(studyProgress.getByText(/200 hour interval/i)).toHaveCount(0);
@@ -96,14 +96,10 @@ test.describe("Phase 4A CEFR visual review", () => {
     const vocabularyProgress = page
       .getByRole("heading", { name: "Vocabulary progress" })
       .locator("xpath=ancestor::section[1]");
-    await expect(vocabularyProgress.getByText("≈ 2,500 words")).toBeVisible();
+    await expect(vocabularyProgress.getByText("≈ 2,500 w")).toBeVisible();
     await expect(vocabularyProgress.getByText("+400 words")).toBeVisible();
-    await expect(
-      vocabularyProgress.getByText("≈ 2,900 words now"),
-    ).toBeVisible();
-    await expect(
-      vocabularyProgress.getByText("≈ 3,700 words total"),
-    ).toBeVisible();
+    await expect(vocabularyProgress.getByText("≈ 2,900 w now")).toBeVisible();
+    await expect(vocabularyProgress.getByText("≈ 3,700 w total")).toBeVisible();
     await expect(
       vocabularyProgress.getByText("≈ 800 words left"),
     ).toBeVisible();
@@ -112,9 +108,7 @@ test.describe("Phase 4A CEFR visual review", () => {
       vocabularyProgress.getByText("Forecast to reach B2"),
     ).toBeVisible();
     await expect(
-      vocabularyProgress.getByText(
-        "Based on every calendar day, including days with no entries.",
-      ),
+      vocabularyProgress.getByText("Estimated progress from B1 to B2."),
     ).toBeVisible();
     await expect(vocabularyProgress.getByText("5 words/day")).toBeVisible();
     await expect(

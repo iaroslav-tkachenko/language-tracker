@@ -76,7 +76,7 @@ flowchart LR
 - Strict isolation of each user's data.
 - Up to six active language boards per user.
 - A global activity catalog shared across the user's boards.
-- Seven seeded activities and named custom activities.
+- Ten seeded activities and named custom activities.
 - Study entries with date, activity, and exact minutes; comments and notes are intentionally excluded.
 - A collapsed, selected-day study-session workflow with explicit create, edit, cancel, update, and confirmed-delete states.
 - Atomic creation of the same study entry across an inclusive range of at most 366 dates within one calendar year.
@@ -86,7 +86,7 @@ flowchart LR
 - User-declared CEFR history and an approximate Cambridge-based next-level forecast.
 - Board-specific totals, averages, active days, streaks, activity totals, and time distributions.
 - Actual activity distribution for the latest seven calendar days.
-- Responsive English-language, light-theme interface.
+- Responsive English-language interface with system, light, and dark themes.
 - Safe archival that preserves historical entries and statistics.
 
 ### Out of scope for MVP
@@ -98,7 +98,6 @@ flowchart LR
 - Administration interface.
 - Import or export.
 - Editable duration presets.
-- Theme selection or dark mode.
 - UI localization or language selection.
 - Offline mode.
 - Native mobile applications.

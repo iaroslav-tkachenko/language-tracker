@@ -76,6 +76,14 @@ values (
   'German'
 );
 
+insert into public.activity_types (id, user_id, name, position)
+values (
+  '31000000-0000-4000-8000-000000000010',
+  '30000000-0000-4000-8000-000000000001',
+  'Custom archive fixture',
+  9
+);
+
 create or replace function public.inject_phase_two_batch_failure()
 returns trigger
 language plpgsql
@@ -389,14 +397,14 @@ select set_config(
 
 update public.activity_types
 set archived_at = statement_timestamp()
-where system_key = 'podcast';
+where id = '31000000-0000-4000-8000-000000000010';
 
 select throws_ok(
   $$
     select public.create_study_entry_batch(
       '32000000-0000-4000-8000-000000000022',
       '31000000-0000-4000-8000-000000000001',
-      (select id from public.activity_types where system_key = 'podcast'),
+      '31000000-0000-4000-8000-000000000010',
       date '2026-09-01',
       date '2026-09-02',
       30::smallint

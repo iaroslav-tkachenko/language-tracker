@@ -5,8 +5,11 @@ import {
   Layers3,
   MessagesSquare,
   PenLine,
+  Presentation,
+  Repeat2,
   Shapes,
   SpellCheck2,
+  Youtube,
   type LucideProps,
 } from "lucide-react";
 
@@ -18,6 +21,9 @@ const activityIcons = {
   anki: Layers3,
   grammar: SpellCheck2,
   tv_show_film: Clapperboard,
+  youtube: Youtube,
+  shadowing: Repeat2,
+  lesson: Presentation,
 };
 
 type ActivityIconProps = LucideProps & {

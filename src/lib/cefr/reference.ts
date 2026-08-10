@@ -9,37 +9,37 @@ export const CEFR_LEVEL_DETAILS: Record<
   A0: {
     name: "Absolute zero",
     description:
-      "A0 is the absolute beginner stage before regular CEFR skills are in place. You are building the first sounds, letters, survival phrases, and confidence to recognize very simple language. At this stage, short daily practice and pronunciation habits matter more than complex explanations.",
+      "A0 is the starting point for complete beginners. You may recognize a few words, but you are still learning basic sounds, greetings, and useful everyday phrases. Short, regular practice will help you build confidence and a strong foundation.",
   },
   A1: {
     name: "Beginner",
     description:
-      "A1 is the beginner level for understanding and using very familiar everyday expressions. You can introduce yourself, ask simple questions, and handle basic needs when people speak slowly and clearly. Your main goal is to build a small practical vocabulary and simple sentence patterns.",
+      "You can understand and use familiar everyday phrases. You can introduce yourself, ask and answer simple questions, and handle basic needs when people speak slowly and clearly.",
   },
   A2: {
     name: "Elementary",
     description:
-      "A2 is the elementary level for communicating about routine, predictable situations. You can describe your background, daily life, shopping, travel, and immediate needs with simple language. Your main goal is to connect basic grammar with enough vocabulary to speak and understand more comfortably.",
+      "You can communicate in simple, routine situations. You can talk about daily life, family, shopping, travel, and other familiar topics using common words and sentence patterns.",
   },
   B1: {
     name: "Intermediate",
     description:
-      "B1 is the intermediate level for handling the main points of familiar work, study, travel, and leisure topics. You can produce connected speech, describe experiences, and explain opinions with some detail. Your main goal is to become consistent across listening, reading, and spontaneous speaking.",
+      "You can handle most everyday situations and understand the main points of clear content on familiar topics. You can describe experiences, explain plans, and give reasons for your opinions.",
   },
   B2: {
     name: "Upper-intermediate",
     description:
-      "B2 is the upper-intermediate level for understanding the main ideas of complex texts and discussions. You can interact with enough fluency and spontaneity to communicate comfortably with proficient speakers. Your main goal is to expand range, precision, and confidence with authentic content.",
+      "You can understand detailed content and discuss a wide range of topics. You can speak with growing fluency, explain your viewpoint, and communicate comfortably without relying on prepared phrases.",
   },
   C1: {
     name: "Advanced",
     description:
-      "C1 is the advanced level for understanding demanding texts, implicit meaning, and extended speech. You can express ideas fluently, flexibly, and effectively in social, academic, and professional situations. Your main goal is to refine nuance, style, accuracy, and topic breadth.",
+      "You can understand demanding content, including implied meaning, and express yourself fluently. You can adapt your language confidently for social, academic, and professional situations.",
   },
   C2: {
     name: "Proficient",
     description:
-      "C2 is the proficient level for understanding almost everything heard or read with ease. You can summarize information from different sources and express yourself very fluently, precisely, and naturally. Your main goal is ongoing maintenance, specialization, and near-native control of tone and nuance.",
+      "You can understand almost everything you hear or read and express precise ideas naturally. You can handle subtle meaning, complex topics, and different tones with ease.",
   },
 };
 

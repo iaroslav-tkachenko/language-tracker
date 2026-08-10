@@ -4,9 +4,11 @@ import {
   BarChart3,
   BookOpen,
   CalendarDays,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Ellipsis,
   Flame,
   Gauge,
   GraduationCap,
@@ -20,11 +22,17 @@ import { useMemo, useState } from "react";
 
 import { ActivityIcon } from "@/components/activities/activity-icon";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
+import { AddLanguageMenuAction } from "@/components/boards/add-language-menu-action";
 import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
 import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
+import {
+  PROGRESS_FORECAST_DESCRIPTION,
+  highestLevelDescription,
+  progressForecastDescription,
+} from "@/lib/cefr/copy";
 import type { CefrLevel } from "@/lib/cefr/reference";
 import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
 import {
@@ -54,6 +62,10 @@ import {
   type ChartPoint,
   type StudyStatisticsEntry,
 } from "@/lib/statistics/study-statistics";
+import {
+  groupActivityDonutRows,
+  type ActivityDonutRow,
+} from "@/lib/statistics/activity-donut";
 import {
   calculateVocabularyStatistics,
   getVocabularyDayDistribution,
@@ -172,6 +184,10 @@ function formatApproxDuration(minutes: number) {
   return `≈ ${formatDuration(Math.round(minutes))}`;
 }
 
+function formatCompactForecastValue(value: string, unit: "h" | "w") {
+  return value.replace(/\s+(?:hour|hours|word|words)$/, ` ${unit}`);
+}
+
 function sumTrackedMinutes(entries: StudyStatisticsEntry[]) {
   return entries.reduce((total, entry) => total + entry.durationMinutes, 0);
 }
@@ -258,7 +274,7 @@ function CompactForecastCard({
 
     return (
       <section
-        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5`}
+        className={`min-w-0 rounded-3xl border ${accentClasses.border} ${accentClasses.bg} p-5 sm:p-6`}
       >
         <div className="flex min-w-0 items-start gap-4">
           <span
@@ -267,15 +283,14 @@ function CompactForecastCard({
             {icon}
           </span>
           <div className="min-w-0">
-            <h3 className="text-xl font-black text-slate-950">{title}</h3>
+            <h3 className="text-xl font-bold text-slate-950">{title}</h3>
             <p className="mt-1 leading-7 text-slate-600">
-              {forecast.currentLevel} is the highest level in this model, so
-              there is no next-level forecast.
+              {highestLevelDescription(forecast.currentLevel)}
             </p>
             <p className="mt-3 text-sm font-bold tracking-wide text-slate-500 uppercase">
               {totalLabel}
             </p>
-            <p className="mt-1 text-2xl font-black text-slate-950">
+            <p className="mt-1 text-2xl font-bold text-slate-950">
               &gt; {total}
             </p>
           </div>
@@ -286,18 +301,27 @@ function CompactForecastCard({
 
   const isStudyTime = "estimatedTotalLearningMinutes" in forecast;
   const completedPercent = Math.round(forecast.progressRatio * 100);
-  const baseline = isStudyTime
-    ? formatForecastHours(forecast.baselineMinutes)
-    : formatVocabularyWords(forecast.baselineWords);
+  const baseline = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.baselineMinutes)
+      : formatVocabularyWords(forecast.baselineWords),
+    isStudyTime ? "h" : "w",
+  );
   const added = isStudyTime
     ? formatForecastHours(forecast.eligibleMinutes)
     : formatVocabularyWords(forecast.eligibleWords);
-  const estimatedNow = isStudyTime
-    ? formatForecastHours(forecast.estimatedTotalLearningMinutes)
-    : formatVocabularyWords(forecast.estimatedVocabularySize);
-  const nextTotal = isStudyTime
-    ? formatForecastHours(forecast.nextLevelBaselineMinutes)
-    : formatVocabularyWords(forecast.nextLevelBaselineWords);
+  const estimatedNow = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.estimatedTotalLearningMinutes)
+      : formatVocabularyWords(forecast.estimatedVocabularySize),
+    isStudyTime ? "h" : "w",
+  );
+  const nextTotal = formatCompactForecastValue(
+    isStudyTime
+      ? formatForecastHours(forecast.nextLevelBaselineMinutes)
+      : formatVocabularyWords(forecast.nextLevelBaselineWords),
+    isStudyTime ? "h" : "w",
+  );
   const remaining = isStudyTime
     ? formatForecastHours(forecast.remainingMinutes)
     : formatVocabularyWords(forecast.remainingWords);
@@ -305,7 +329,7 @@ function CompactForecastCard({
 
   return (
     <section
-      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-4 shadow-sm`}
+      className={`min-w-0 overflow-hidden rounded-3xl border ${accentClasses.border} bg-white p-5 shadow-sm sm:p-6`}
     >
       <div className="flex min-w-0 items-start gap-4">
         <span
@@ -314,53 +338,61 @@ function CompactForecastCard({
           {icon}
         </span>
         <div className="min-w-0">
-          <h3 className="text-lg font-black text-slate-950">{title}</h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Approximate progress from {forecast.currentLevel} to{" "}
-            {forecast.nextLevel}.
+          <h3 className="text-lg font-bold text-slate-950">{title}</h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {progressForecastDescription(
+              forecast.currentLevel,
+              forecast.nextLevel,
+            )}
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1.15fr_1fr]">
-        <div>
-          <p className="text-xs font-black tracking-wide text-slate-500 uppercase">
+      <div className="mt-6 grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Current
           </p>
-          <p className="mt-2 flex items-center gap-2">
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-950 text-base font-black text-white">
+          <p className="mt-2 flex min-h-11 items-center gap-2">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
               {forecast.currentLevel}
             </span>
-            <span className="text-base text-slate-600">≈ {baseline}</span>
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
+              ≈ {baseline}
+            </span>
           </p>
         </div>
 
-        <div className="text-left md:text-center">
+        <div className="min-w-0 text-left md:text-center">
           <p
-            className={`text-xs font-black tracking-wide uppercase ${accentClasses.text}`}
+            className={`text-xs font-bold tracking-wide uppercase ${accentClasses.text}`}
           >
             Progress
           </p>
-          <p className="mt-2 text-2xl font-black text-slate-950">+{added}</p>
-          <p className="mt-1 text-base text-slate-600">≈ {estimatedNow} now</p>
+          <p className="mt-2 text-xl font-bold leading-6 text-slate-950">
+            +{added}
+          </p>
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            ≈ {estimatedNow} now
+          </p>
         </div>
 
-        <div className="md:text-right">
-          <p className="text-xs font-black tracking-wide text-slate-500 uppercase">
+        <div className="min-w-0 md:text-right">
+          <p className="text-xs font-bold tracking-wide text-slate-500 uppercase">
             Next
           </p>
-          <p className="mt-2 flex items-center gap-2 md:justify-end">
-            <span className="text-base text-slate-600">
+          <p className="mt-2 flex min-h-11 items-center gap-2 md:justify-end">
+            <span className="min-w-0 text-sm leading-5 text-slate-600">
               ≈ {nextTotal} total
             </span>
-            <span className="flex size-11 items-center justify-center rounded-full bg-slate-100 text-base font-black text-slate-500">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-500">
               {forecast.nextLevel}
             </span>
           </p>
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-6">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full ${accentClasses.bar}`}
@@ -368,7 +400,7 @@ function CompactForecastCard({
           />
         </div>
         <p
-          className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-black ${accentClasses.text}`}
+          className={`mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-base font-bold ${accentClasses.text}`}
         >
           <span>{completedPercent}% completed</span>
           <span className="text-slate-300">•</span>
@@ -377,71 +409,94 @@ function CompactForecastCard({
       </div>
 
       <div
-        className={`mt-5 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-3`}
+        className={`mt-8 rounded-2xl border ${accentClasses.tableBorder} ${accentClasses.bg} p-4`}
       >
-        <h4 className={`break-words text-lg font-black ${accentClasses.text}`}>
+        <h4 className="break-words text-base font-bold text-slate-700">
           Forecast to reach {forecast.nextLevel} with your current pace
         </h4>
-        <p className="mt-1 text-sm text-slate-600">
-          Based on every calendar day in the last 7 and 30 days.
-        </p>
-        <div className="mt-3 w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-base font-black ${accentClasses.text}`}
-          >
-            <div className="px-4 py-3 text-slate-500" />
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3">
-                Last {pace.periodDays} days
-              </div>
-            ))}
-          </div>
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
-          >
-            <div className="px-4 py-3 text-slate-500">Active days</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
-              </div>
-            ))}
-          </div>
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
-          >
-            <div className="px-4 py-3 text-slate-500">Average pace</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-950">
-                {"averageMinutes" in pace
-                  ? formatPaceMinutes(pace.averageMinutes)
-                  : formatVocabularyPace(pace.averageWords)}
-              </div>
-            ))}
-          </div>
-          <div
-            className={`grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
-          >
-            <div className="px-4 py-3 text-slate-500">
-              Reach {forecast.nextLevel} in
+        <div className="relative mt-4">
+          <div className="w-full max-w-full overflow-x-auto rounded-2xl border border-white/70 bg-white/80">
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder} text-sm font-bold text-slate-700`}
+            >
+              <div className="px-3 py-3 text-slate-500" />
+              {paceColumns.map((pace) => (
+                <div key={pace.periodDays} className="px-3 py-3">
+                  Last {pace.periodDays} days
+                </div>
+              ))}
             </div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-950">
-                {pace.estimate
-                  ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
-                  : "Not available"}
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            >
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Active days
               </div>
-            ))}
-          </div>
-          <div className="grid min-w-[500px] grid-cols-[1.05fr_1fr_1fr]">
-            <div className="px-4 py-3 text-slate-500">Estimated date</div>
-            {paceColumns.map((pace) => (
-              <div key={pace.periodDays} className="px-4 py-3 text-slate-700">
-                {pace.estimate
-                  ? formatEstimatedMonth(pace.estimate.estimatedDate)
-                  : "Not available"}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.entryDays} {pace.entryDays === 1 ? "day" : "days"}
+                </div>
+              ))}
+            </div>
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            >
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Average pace
               </div>
-            ))}
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {"averageMinutes" in pace
+                    ? formatPaceMinutes(pace.averageMinutes)
+                    : formatVocabularyPace(pace.averageWords)}
+                </div>
+              ))}
+            </div>
+            <div
+              className={`grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr] border-b ${accentClasses.tableBorder}`}
+            >
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Reach {forecast.nextLevel} in
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? `≈ ${formatCalendarDuration(pace.estimate.duration)}`
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
+            <div className="grid min-w-[440px] grid-cols-[1.05fr_1fr_1fr]">
+              <div className="px-3 py-3 text-sm text-slate-700">
+                Estimated date
+              </div>
+              {paceColumns.map((pace) => (
+                <div
+                  key={pace.periodDays}
+                  className="px-3 py-3 text-sm text-slate-700"
+                >
+                  {pace.estimate
+                    ? formatEstimatedMonth(pace.estimate.estimatedDate)
+                    : "Not available"}
+                </div>
+              ))}
+            </div>
           </div>
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm md:hidden"
+          >
+            <ChevronRight className="size-4" />
+          </span>
         </div>
       </div>
     </section>
@@ -460,6 +515,18 @@ const activityChartColors = [
   "#475569",
 ];
 
+function ActivityLegendDuration({ minutes }: { minutes: number }) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return (
+    <span className="grid w-full grid-cols-[3.5rem_2.75rem] tabular-nums">
+      <span className="text-right">{hours > 0 ? `${hours}h` : ""}</span>
+      <span className="text-right">{remainingMinutes}m</span>
+    </span>
+  );
+}
+
 function ActivityDonut({
   title,
   subtitle,
@@ -471,91 +538,255 @@ function ActivityDonut({
   totals: Map<string, number>;
   activities: ActivitySummary[];
 }) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const highlightedId = hoveredId ?? selectedId;
   const activityById = new Map(
     activities.map((activity) => [activity.id, activity]),
   );
-  const rows = [...totals.entries()]
-    .map(([activityId, minutes]) => ({
-      activity: activityById.get(activityId),
+  const sourceRows = [...totals.entries()].map(([activityId, minutes]) => {
+    const activity = activityById.get(activityId);
+    return {
+      id: activityId,
+      name: activity?.name ?? "Archived activity",
       minutes,
-    }))
-    .sort((left, right) => right.minutes - left.minutes);
-  const totalMinutes = rows.reduce((total, row) => total + row.minutes, 0);
-  let accumulatedPercentage = 0;
-  const chartStops = rows.map((row, index) => {
-    const start = accumulatedPercentage;
-    accumulatedPercentage += (row.minutes / totalMinutes) * 100;
-    return `${activityChartColors[index % activityChartColors.length]} ${start}% ${accumulatedPercentage}%`;
+      systemKey: activity?.systemKey ?? null,
+    };
   });
-  const chartBackground =
-    rows.length === 0 ? "#e2e8f0" : `conic-gradient(${chartStops.join(", ")})`;
+  const rows = groupActivityDonutRows(sourceRows);
+  const totalMinutes = rows.reduce((total, row) => total + row.minutes, 0);
+  const segments = rows.reduce<
+    Array<
+      ActivityDonutRow & {
+        color: string;
+        percentage: number;
+        start: number;
+        end: number;
+      }
+    >
+  >((result, row, index) => {
+    const start = result.at(-1)?.end ?? 0;
+    const percentage = (row.minutes / totalMinutes) * 100;
+    return [
+      ...result,
+      {
+        ...row,
+        color: activityChartColors[index % activityChartColors.length],
+        percentage,
+        start,
+        end: start + percentage,
+      },
+    ];
+  }, []);
 
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
       <h2 className="text-xl font-bold text-slate-950">{title}</h2>
-      <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+      <p className="mt-1 text-sm leading-6 text-slate-500">{subtitle}</p>
       {rows.length > 0 ? (
         <div className="mt-6 grid items-center gap-7 sm:grid-cols-[190px_1fr]">
-          <div
-            role="img"
-            aria-label={`${title}: ${rows
-              .map(
-                ({ activity, minutes }) =>
-                  `${activity?.name ?? "Archived activity"} ${Math.round(
-                    (minutes / totalMinutes) * 100,
-                  )} percent`,
-              )
-              .join(", ")}`}
-            className="relative mx-auto aspect-square w-44 rounded-full"
-            style={{ background: chartBackground }}
-          >
-            <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-full bg-white text-center shadow-sm">
+          <div className="relative mx-auto aspect-square w-44">
+            <svg
+              viewBox="0 0 120 120"
+              role="group"
+              aria-label={`${title}: ${segments
+                .map(
+                  (segment) =>
+                    `${segment.name} ${Math.round(segment.percentage)} percent`,
+                )
+                .join(", ")}`}
+              className="size-full -rotate-90 overflow-visible"
+            >
+              <circle
+                aria-hidden="true"
+                cx="60"
+                cy="60"
+                r="48"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="10"
+                className="text-slate-100"
+              />
+              {segments.map((segment) => (
+                <circle
+                  key={segment.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${segment.name}: ${formatDuration(segment.minutes)}, ${segment.percentage.toLocaleString("en", { maximumFractionDigits: 1 })} percent`}
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  fill="none"
+                  pathLength="100"
+                  stroke={segment.color}
+                  strokeWidth="10"
+                  strokeDasharray={`${segment.percentage} ${100 - segment.percentage}`}
+                  strokeDashoffset={-segment.start}
+                  className={`cursor-pointer transition-[filter,opacity] duration-150 outline-none focus-visible:stroke-[12] ${
+                    highlightedId && highlightedId !== segment.id
+                      ? "brightness-[0.35] opacity-70"
+                      : ""
+                  }`}
+                  onPointerEnter={() => setHoveredId(segment.id)}
+                  onPointerLeave={() => setHoveredId(null)}
+                  onFocus={() => setHoveredId(segment.id)}
+                  onBlur={() => setHoveredId(null)}
+                  onClick={() =>
+                    setSelectedId((current) =>
+                      current === segment.id ? null : segment.id,
+                    )
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    setSelectedId((current) =>
+                      current === segment.id ? null : segment.id,
+                    );
+                  }}
+                >
+                  <title>
+                    {segment.name}: {formatDuration(segment.minutes)} (
+                    {segment.percentage.toLocaleString("en", {
+                      maximumFractionDigits: 1,
+                    })}
+                    %)
+                  </title>
+                </circle>
+              ))}
+            </svg>
+            <div className="pointer-events-none absolute inset-[14%] flex items-center justify-center rounded-full bg-white text-center">
               <strong className="text-xl text-slate-950">
                 {formatDuration(totalMinutes)}
               </strong>
-              <span className="text-xs text-slate-500">total</span>
             </div>
           </div>
           <div className="space-y-3">
-            {rows.map(({ activity, minutes }, index) => {
-              const percentage = (minutes / totalMinutes) * 100;
-              return (
-                <div
-                  key={activity?.id ?? `archived-${index}`}
-                  className="flex items-center justify-between gap-4 text-sm"
-                >
-                  <span className="inline-flex min-w-0 items-center gap-2 font-medium text-slate-700">
+            {segments.map((segment) => {
+              const content = (
+                <>
+                  <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-slate-700">
                     <span
                       aria-hidden="true"
                       className="size-3 shrink-0 rounded-full"
-                      style={{
-                        backgroundColor:
-                          activityChartColors[
-                            index % activityChartColors.length
-                          ],
-                      }}
+                      style={{ backgroundColor: segment.color }}
                     />
-                    <ActivityIcon
-                      systemKey={activity?.systemKey ?? null}
-                      aria-hidden="true"
-                      className="size-4 shrink-0"
-                    />
-                    <span className="truncate">
-                      {activity?.name ?? "Archived activity"}
-                    </span>
+                    {segment.items ? (
+                      <Ellipsis
+                        aria-hidden="true"
+                        className="size-4 shrink-0"
+                      />
+                    ) : (
+                      <ActivityIcon
+                        systemKey={segment.systemKey}
+                        aria-hidden="true"
+                        className="size-4 shrink-0"
+                      />
+                    )}
+                    <span className="truncate">{segment.name}</span>
                   </span>
-                  <span className="shrink-0 text-right">
-                    <strong className="text-slate-950">
-                      {formatDuration(minutes)}
-                    </strong>
-                    <span className="ml-2 tabular-nums text-slate-500">
-                      {percentage.toLocaleString("en", {
-                        maximumFractionDigits: 1,
-                      })}
-                      %
-                    </span>
+                  <strong className="text-sm text-slate-950">
+                    <ActivityLegendDuration minutes={segment.minutes} />
+                  </strong>
+                  <span className="text-right text-sm tabular-nums text-slate-500">
+                    {segment.percentage.toLocaleString("en", {
+                      maximumFractionDigits: 1,
+                    })}
+                    %
                   </span>
-                </div>
+                </>
+              );
+
+              if (segment.items) {
+                return (
+                  <details key={segment.id} className="group text-sm">
+                    <summary
+                      className="grid cursor-pointer list-none grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 rounded-lg outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden"
+                      onPointerEnter={() => setHoveredId(segment.id)}
+                      onPointerLeave={() => setHoveredId(null)}
+                      onFocus={() => setHoveredId(segment.id)}
+                      onBlur={() => setHoveredId(null)}
+                      onClick={() =>
+                        setSelectedId((current) =>
+                          current === segment.id ? null : segment.id,
+                        )
+                      }
+                    >
+                      <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-slate-700">
+                        <span
+                          aria-hidden="true"
+                          className="size-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: segment.color }}
+                        />
+                        <Ellipsis
+                          aria-hidden="true"
+                          className="size-4 shrink-0"
+                        />
+                        <span className="truncate">{segment.name}</span>
+                        <ChevronDown
+                          aria-hidden="true"
+                          className="size-3.5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                        />
+                      </span>
+                      <strong className="text-sm text-slate-950">
+                        <ActivityLegendDuration minutes={segment.minutes} />
+                      </strong>
+                      <span className="text-right text-sm tabular-nums text-slate-500">
+                        {segment.percentage.toLocaleString("en", {
+                          maximumFractionDigits: 1,
+                        })}
+                        %
+                      </span>
+                    </summary>
+                    <div className="mt-2 space-y-2 border-l border-slate-200 pl-5">
+                      {segment.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="grid grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 text-xs"
+                        >
+                          <span className="inline-flex min-w-0 items-center gap-2 text-slate-600">
+                            <ActivityIcon
+                              systemKey={item.systemKey}
+                              aria-hidden="true"
+                              className="size-3.5 shrink-0"
+                            />
+                            <span className="truncate">{item.name}</span>
+                          </span>
+                          <span className="text-slate-500">
+                            <ActivityLegendDuration minutes={item.minutes} />
+                          </span>
+                          <span className="text-right tabular-nums text-slate-500">
+                            {(
+                              (item.minutes / totalMinutes) *
+                              100
+                            ).toLocaleString("en", {
+                              maximumFractionDigits: 1,
+                            })}
+                            %
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                );
+              }
+
+              return (
+                <button
+                  key={segment.id}
+                  type="button"
+                  className="grid w-full grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 rounded-lg text-left text-sm outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  onPointerEnter={() => setHoveredId(segment.id)}
+                  onPointerLeave={() => setHoveredId(null)}
+                  onFocus={() => setHoveredId(segment.id)}
+                  onBlur={() => setHoveredId(null)}
+                  onClick={() =>
+                    setSelectedId((current) =>
+                      current === segment.id ? null : segment.id,
+                    )
+                  }
+                >
+                  {content}
+                </button>
               );
             })}
           </div>
@@ -782,9 +1013,9 @@ export function StatisticsWorkspace({
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-17 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
           <details className="group relative">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xl px-3 text-lg font-bold text-slate-950 hover:bg-slate-50">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 rounded-lg px-2.5 text-base font-bold text-slate-950 hover:bg-slate-50">
               {selectedBoard.name}
               <span
                 aria-hidden="true"
@@ -807,62 +1038,64 @@ export function StatisticsWorkspace({
                   {board.name}
                 </Link>
               ))}
+              <AddLanguageMenuAction
+                boards={boards}
+                destination="statistics"
+                accent="blue"
+              />
             </div>
           </details>
 
           <nav
             aria-label="Primary"
-            className="hidden min-h-17 items-stretch md:flex"
+            className="hidden min-h-14 items-stretch md:flex"
           >
             <Link
               href={`/dashboard?board=${selectedBoard.id}&date=${todayKey}&today=${todayKey}`}
-              className="flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-blue-600"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-blue-600"
             >
-              <Clock3 aria-hidden="true" className="size-5" />
+              <Clock3 aria-hidden="true" className="size-4.5" />
               Study Time
             </Link>
             <Link
               href={`/dashboard?board=${selectedBoard.id}&date=${vocabularyDate}&today=${todayKey}&tracker=vocabulary`}
-              className="flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-emerald-700"
+              className="flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-emerald-700"
             >
-              <BookOpen aria-hidden="true" className="size-5" />
+              <BookOpen aria-hidden="true" className="size-4.5" />
               Vocabulary
             </Link>
             <Link
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              className="relative flex items-center gap-2 px-5 font-semibold text-slate-600 hover:text-violet-700"
+              className="relative flex min-h-14 items-center gap-2 px-4 text-sm font-semibold text-slate-600 hover:text-violet-700"
             >
               {!hasCurrentCefrLevel && <MissingLevelBubble />}
-              <GraduationCap aria-hidden="true" className="size-5" />
+              <GraduationCap aria-hidden="true" className="size-4.5" />
               Level
             </Link>
           </nav>
 
           <div className="flex items-center gap-1">
-            <span className="hidden min-h-11 items-center gap-2 rounded-xl bg-blue-50 px-3 font-semibold text-blue-700 sm:flex">
-              <BarChart3 aria-hidden="true" className="size-5" />
+            <span className="hidden min-h-9 items-center gap-2 rounded-lg bg-blue-50 px-2.5 text-sm font-semibold text-blue-700 sm:flex">
+              <BarChart3 aria-hidden="true" className="size-4.5" />
               Statistics
             </span>
             <Link
-              href="/settings"
+              href={`/settings?returnTo=${encodeURIComponent(
+                `/statistics?board=${selectedBoard.id}&year=${selectedYear}&today=${todayKey}`,
+              )}`}
               aria-label="Settings"
-              className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+              className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             >
-              <Settings aria-hidden="true" className="size-5" />
+              <Settings aria-hidden="true" className="size-4.5" />
             </Link>
             <ConfirmSignOutForm>
               <button
                 type="submit"
                 aria-label="Sign out"
-                className="flex size-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:hidden"
+                title="Sign out"
+                className="flex size-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-950"
               >
-                <LogOut aria-hidden="true" className="size-5" />
-              </button>
-              <button
-                type="submit"
-                className="hidden min-h-11 rounded-xl px-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-950 md:block"
-              >
-                Sign out
+                <LogOut aria-hidden="true" className="size-4.5" />
               </button>
             </ConfirmSignOutForm>
           </div>
@@ -873,27 +1106,27 @@ export function StatisticsWorkspace({
         >
           <Link
             href={`/dashboard?board=${selectedBoard.id}&date=${todayKey}&today=${todayKey}`}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700"
           >
             <Clock3 aria-hidden="true" className="size-4.5" />
             Study Time
           </Link>
           <Link
             href={`/dashboard?board=${selectedBoard.id}&date=${vocabularyDate}&today=${todayKey}&tracker=vocabulary`}
-            className="flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+            className="flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
           >
             <BookOpen aria-hidden="true" className="size-4.5" />
             Vocabulary
           </Link>
           <Link
             href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-            className="relative flex min-h-14 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
+            className="relative flex min-h-12 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-violet-700"
           >
             {!hasCurrentCefrLevel && <MissingLevelBubble />}
             <GraduationCap aria-hidden="true" className="size-4.5" />
             Level
           </Link>
-          <span className="flex min-h-14 items-center justify-center gap-1.5 border-b-3 border-blue-600 px-2 text-xs font-semibold text-blue-600">
+          <span className="flex min-h-12 items-center justify-center gap-1.5 border-b-2 border-blue-600 px-2 text-xs font-semibold text-blue-600">
             <BarChart3 aria-hidden="true" className="size-4.5" />
             Statistics
           </span>
@@ -905,18 +1138,17 @@ export function StatisticsWorkspace({
           <div className="mb-6">
             <CefrLevelPrompt
               href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-              context="statistics"
               accent="violet"
             />
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
           <div>
             <p className="text-sm font-semibold tracking-wide text-blue-600 uppercase">
               {selectedBoard.name}
             </p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+            <h1 className="mt-1 text-3xl font-bold text-slate-950">
               Your learning overview
             </h1>
             {cefrOverview && (
@@ -926,49 +1158,19 @@ export function StatisticsWorkspace({
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigateYear(-1)}
-              aria-label="Previous year"
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronLeft aria-hidden="true" className="size-5" />
-            </button>
-            <strong className="min-w-16 text-center text-xl">
-              {selectedYear}
-            </strong>
-            <button
-              type="button"
-              onClick={() => navigateYear(1)}
-              aria-label="Next year"
-              className="flex size-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-            >
-              <ChevronRight aria-hidden="true" className="size-5" />
-            </button>
-          </div>
         </div>
 
         {cefrOverview && (
           <section className="mt-6 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="text-xl font-black text-slate-950">
-                  Recorded and estimated totals
-                </h2>
-                <p className="mt-1 max-w-3xl leading-7 text-slate-600">
-                  Estimated values combine your current level baseline with
-                  entries recorded since that level date. Tracker totals remain
-                  the exact values you saved.
-                </p>
-              </div>
-              <Link
-                href={`/cefr?board=${selectedBoard.id}&today=${todayKey}`}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-violet-50 px-4 text-sm font-bold text-violet-700 hover:bg-violet-100"
-              >
-                <GraduationCap aria-hidden="true" className="size-4" />
-                Level {cefrOverview.level}
-              </Link>
+            <div>
+              <h2 className="text-xl font-bold text-slate-950">
+                Recorded and estimated totals
+              </h2>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+                Estimates combine your current-level baseline with activity
+                recorded since its start date. Tracked totals always reflect the
+                entries you saved.
+              </p>
             </div>
 
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -1002,52 +1204,40 @@ export function StatisticsWorkspace({
           </section>
         )}
 
-        {cefrOverview && (
-          <section className="mt-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-black text-slate-950">
-                Progress toward the next level
+        <section aria-labelledby="year-summary-heading" className="mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2
+                id="year-summary-heading"
+                className="text-xl font-bold text-slate-950"
+              >
+                Selected year
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Approximate Study Time and Vocabulary forecasts for this board.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Metrics for the calendar year you select.
               </p>
             </div>
-            <div className="grid min-w-0 gap-4 xl:grid-cols-2">
-              <CompactForecastCard
-                accent="blue"
-                forecast={cefrOverview.studyTimeForecast}
-                icon={<Clock3 aria-hidden="true" className="size-5" />}
-                title="Study Time progress"
-              />
-              <CompactForecastCard
-                accent="green"
-                forecast={cefrOverview.vocabularyForecast}
-                icon={<BookOpen aria-hidden="true" className="size-5" />}
-                title="Vocabulary progress"
-              />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigateYear(-1)}
+                aria-label="Previous year"
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronLeft aria-hidden="true" className="size-4.5" />
+              </button>
+              <strong className="min-w-16 text-center text-xl text-slate-950">
+                {selectedYear}
+              </strong>
+              <button
+                type="button"
+                onClick={() => navigateYear(1)}
+                aria-label="Next year"
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronRight aria-hidden="true" className="size-4.5" />
+              </button>
             </div>
-          </section>
-        )}
-
-        {cefrOverview?.weeklyRecommendation && (
-          <div className="mt-6">
-            <WeeklyPlanCard
-              recommendation={cefrOverview.weeklyRecommendation}
-            />
-          </div>
-        )}
-
-        <section aria-labelledby="year-summary-heading" className="mt-6">
-          <div>
-            <h2
-              id="year-summary-heading"
-              className="text-xl font-bold text-slate-950"
-            >
-              Selected year
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              These values change when you select another year.
-            </p>
           </div>
           <div className="mt-5">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-blue-700 uppercase">
@@ -1080,7 +1270,7 @@ export function StatisticsWorkspace({
           <div className="mt-5">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
               <BookOpen aria-hidden="true" className="size-4" />
-              New words
+              Vocabulary
             </h3>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <MetricCard
@@ -1125,8 +1315,9 @@ export function StatisticsWorkspace({
             >
               Current progress
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Live values through today, independent of the selected year.
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Live totals through today. These values do not change when you
+              switch years.
             </p>
           </div>
           <div className="mt-5">
@@ -1169,15 +1360,9 @@ export function StatisticsWorkspace({
           <div className="mt-5">
             <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
               <BookOpen aria-hidden="true" className="size-4" />
-              New words
+              Vocabulary
             </h3>
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <MetricCard
-                accent="green"
-                icon={<BookOpen aria-hidden="true" className="size-5" />}
-                value={`${vocabularyStatistics.allTimeWords.toLocaleString("en")} words`}
-                label="All-time total"
-              />
               <MetricCard
                 accent="green"
                 icon={<Flame aria-hidden="true" className="size-5" />}
@@ -1193,6 +1378,12 @@ export function StatisticsWorkspace({
                   vocabularyStatistics.longestStreak === 1 ? "day" : "days"
                 }`}
                 label="Longest streak"
+              />
+              <MetricCard
+                accent="green"
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.currentDayWords.toLocaleString("en")} words`}
+                label="Today"
               />
               <MetricCard
                 accent="green"
@@ -1214,10 +1405,10 @@ export function StatisticsWorkspace({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                Time distribution
+                Study Time distribution
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Compare exact study minutes across calendar periods.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Compare tracked study time across calendar periods.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1262,11 +1453,10 @@ export function StatisticsWorkspace({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                New words distribution
+                Vocabulary distribution
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Compare the number of actively learned words across calendar
-                periods.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Compare words you actively learned across calendar periods.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1315,12 +1505,47 @@ export function StatisticsWorkspace({
             activities={activities}
           />
           <ActivityDonut
-            title="Activity totals latest 7 days"
-            subtitle="Today and the previous six calendar dates."
+            title="Activity totals in the last 7 days"
+            subtitle="Includes today and the previous six calendar dates."
             totals={recentTotals}
             activities={activities}
           />
         </div>
+
+        {cefrOverview?.weeklyRecommendation && (
+          <div className="mt-6">
+            <WeeklyPlanCard
+              recommendation={cefrOverview.weeklyRecommendation}
+            />
+          </div>
+        )}
+
+        {cefrOverview && (
+          <section className="mt-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-slate-950">
+                Progress toward the next level
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                {PROGRESS_FORECAST_DESCRIPTION}
+              </p>
+            </div>
+            <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+              <CompactForecastCard
+                accent="blue"
+                forecast={cefrOverview.studyTimeForecast}
+                icon={<Clock3 aria-hidden="true" className="size-5" />}
+                title="Study Time progress"
+              />
+              <CompactForecastCard
+                accent="green"
+                forecast={cefrOverview.vocabularyForecast}
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                title="Vocabulary progress"
+              />
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
