@@ -43,7 +43,7 @@ test.describe("Phase 3 Vocabulary", () => {
       page.getByText("Words learned", { exact: true }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Add word total" }).click();
+    await page.getByRole("button", { name: "Add words" }).click();
     await page.getByLabel("Words learned", { exact: true }).fill("7");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     const selectedTotalCard = page
@@ -61,7 +61,8 @@ test.describe("Phase 3 Vocabulary", () => {
       }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Add date range" }).click();
+    await page.getByRole("button", { name: "Add words" }).click();
+    await page.getByRole("button", { name: "Date range" }).click();
     await page.getByLabel("Words learned per empty date").fill("4");
     await page.getByLabel("Start date").fill(firstDate);
     await page.getByLabel("End date").fill(thirdDate);
@@ -76,9 +77,7 @@ test.describe("Phase 3 Vocabulary", () => {
       page.getByText("1 existing total will be kept unchanged."),
     ).toBeVisible();
     await page.getByRole("button", { name: "Confirm and add" }).click();
-    await expect(
-      page.getByRole("button", { name: "Add date range" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add words" })).toBeVisible();
 
     await page.goto(vocabularyUrl(secondDate));
     const totalCard = page

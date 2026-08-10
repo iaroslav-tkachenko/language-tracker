@@ -1,5 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 
+const testBoardNamePattern =
+  /^(?:CEFR|E2E|Vocabulary|Batch) (?:desktop|mobile)-chromium(?: retry \d+)?$/;
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function removeSettingsResourceIfPresent(
   page: Page,
   resourceName: string,
@@ -19,7 +26,19 @@ export async function createLanguageBoardFromSettings(
   page: Page,
   boardName: string,
 ) {
-  await removeSettingsResourceIfPresent(page, boardName);
+  const boardFamily = boardName.replace(/ retry \d+$/, "");
+  const cleanupPattern = process.env.CI
+    ? testBoardNamePattern
+    : new RegExp(`^${escapeRegExp(boardFamily)}(?: retry \\d+)?$`);
+
+  while (true) {
+    const staleBoard = page.getByRole("link", { name: cleanupPattern }).first();
+    if ((await staleBoard.count()) === 0) break;
+
+    const staleBoardName = (await staleBoard.textContent())?.trim();
+    if (!staleBoardName) break;
+    await removeSettingsResourceIfPresent(page, staleBoardName);
+  }
 
   await page.getByLabel("Add language").fill(boardName);
   const creationRequest = page
@@ -35,6 +54,13 @@ export async function createLanguageBoardFromSettings(
   await page.reload();
 
   const boardLink = page.getByRole("link", { name: boardName });
-  await expect(boardLink).toBeVisible({ timeout: 10_000 });
+  const errorMessage = await page
+    .getByRole("alert")
+    .textContent()
+    .catch(() => null);
+  await expect(
+    boardLink,
+    `Language board creation failed${errorMessage ? `: ${errorMessage}` : "."}`,
+  ).toBeVisible({ timeout: 10_000 });
   return boardLink;
 }
