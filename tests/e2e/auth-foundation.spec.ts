@@ -63,4 +63,16 @@ test.describe("authentication foundation", () => {
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
   });
+
+  test("publishes privacy information and a contact path", async ({ page }) => {
+    await page.goto("/privacy");
+
+    await expect(
+      page.getByRole("heading", { name: "Your learning data stays private" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "language.tracker.app@gmail.com" }),
+    ).toHaveAttribute("href", "mailto:language.tracker.app@gmail.com");
+    await expect(page.getByText("We do not sell your data")).toBeVisible();
+  });
 });

@@ -14,7 +14,7 @@ advancing. Production user data must never be reset as part of a deployment.
 | R3    | Hosting and domain        | Complete    |
 | R4    | Release quality gate      | Complete    |
 | R5    | Production smoke test     | Complete    |
-| R6    | Operations and recovery   | Not started |
+| R6    | Operations and recovery   | In progress |
 | R7    | Soft launch               | Not started |
 
 ## Non-negotiable data rules
@@ -297,6 +297,21 @@ Exit: every critical journey succeeds on the canonical domain.
 ## R6 - Operations and recovery
 
 Goal: know how to detect and recover from failures without erasing user progress.
+
+The detailed procedures and incident template live in the
+[production operations runbook](OPERATIONS.md).
+
+- [x] Primary ownership is assigned for Supabase, Vercel, the canonical domain,
+      Brevo, and GitHub.
+- [x] Weekly backup, monthly restore rehearsal, post-release log review, Supabase
+      resume, Vercel rollback, forward-migration recovery, and incident recording
+      procedures are documented.
+- [x] The first encrypted backup, off-site copy, and isolated restore rehearsal are
+      complete.
+- [x] A public contact path and privacy page are implemented.
+- [ ] Verify provider notification email and usage dashboards for Supabase, Vercel,
+      and Brevo after this runbook is deployed.
+- [ ] Designate a trusted backup owner before inviting a larger audience.
 
 - Assign an owner for Supabase, Vercel, DNS, SMTP, and GitHub access.
 - Enable billing and usage alerts before public invitations.

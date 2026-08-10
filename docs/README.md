@@ -2,8 +2,9 @@
 
 This directory is the documentation home for Language Tracker. It is organized so that a product owner, designer, engineer, or tester can start from the same approved product baseline and follow the level of detail relevant to their work.
 
-**Current status:** Product Phases 0-5 are complete, verified, and merged. The
-project is now in the hardening and production-launch stage.
+**Current status:** Product Phases 0-5 and production launch gates R0-R5 are
+complete. The public service is in operations-readiness and controlled soft-launch
+preparation.
 
 ## Start here
 
@@ -54,6 +55,8 @@ flowchart TD
 Additional release guide:
 
 - [Production launch runbook](development/PRODUCTION_LAUNCH.md) - ordered release, data-safety, deployment, verification, recovery, and soft-launch gates.
+- [Production operations](development/OPERATIONS.md) - release checks, monitoring,
+  backups, restore, rollback, incidents, ownership, and user-contact procedures.
 
 ## Documentation conventions
 

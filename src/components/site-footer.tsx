@@ -1,4 +1,5 @@
-import { Linkedin } from "lucide-react";
+import Link from "next/link";
+import { Linkedin, ShieldCheck } from "lucide-react";
 
 export function SiteFooter() {
   return (
@@ -14,6 +15,14 @@ export function SiteFooter() {
           <Linkedin aria-hidden="true" className="size-3.5" />
           LinkedIn
         </a>
+        <span aria-hidden="true">·</span>
+        <Link
+          href="/privacy"
+          className="inline-flex items-center gap-1 font-semibold text-slate-600 hover:text-blue-700 hover:underline"
+        >
+          <ShieldCheck aria-hidden="true" className="size-3.5" />
+          Privacy
+        </Link>
       </div>
     </footer>
   );
