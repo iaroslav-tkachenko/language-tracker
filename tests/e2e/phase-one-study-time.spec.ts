@@ -105,12 +105,12 @@ test.describe("Phase 1 Study Time", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "Activity totals latest 7 days",
+        name: "Activity totals in the last 7 days",
       }),
     ).toBeVisible();
     const recentActivitySection = page.locator("section").filter({
       has: page.getByRole("heading", {
-        name: "Activity totals latest 7 days",
+        name: "Activity totals in the last 7 days",
       }),
     });
     await expect(

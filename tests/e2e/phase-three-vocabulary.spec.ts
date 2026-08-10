@@ -39,7 +39,9 @@ test.describe("Phase 3 Vocabulary", () => {
     const vocabularyUrl = (studyDate: string) =>
       `/dashboard?board=${boardId}&date=${studyDate}&today=${today}&tracker=vocabulary`;
     await page.goto(vocabularyUrl(firstDate));
-    await expect(page.getByText("New words", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Words learned", { exact: true }),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Add word total" }).click();
     await page.getByLabel("Words learned", { exact: true }).fill("7");
@@ -104,7 +106,7 @@ test.describe("Phase 3 Vocabulary", () => {
     const selectedYearVocabulary = selectedYearSection
       .locator("div")
       .filter({
-        has: page.getByRole("heading", { name: "New words" }),
+        has: page.getByRole("heading", { name: "Vocabulary" }),
       })
       .first();
     await expect(
@@ -123,8 +125,16 @@ test.describe("Phase 3 Vocabulary", () => {
     await expect(
       currentProgressSection
         .locator("article")
-        .filter({ hasText: "All-time total" }),
-    ).toContainText(/8\s*words/);
+        .filter({ hasText: "Current streak" }),
+    ).toContainText("0 days");
+    await expect(
+      currentProgressSection
+        .locator("article")
+        .filter({ hasText: "Longest streak" }),
+    ).toContainText("2 days");
+    await expect(
+      currentProgressSection.locator("article").filter({ hasText: "Today" }),
+    ).toContainText("0 words");
     await expect(
       currentProgressSection
         .locator("article")
@@ -139,7 +149,7 @@ test.describe("Phase 3 Vocabulary", () => {
     ).toBeVisible();
 
     const wordsChart = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "New words distribution" }),
+      has: page.getByRole("heading", { name: "Vocabulary distribution" }),
     });
     await wordsChart.getByRole("button", { name: "Day" }).click();
     await expect(wordsChart.getByLabel("Month")).toBeVisible();
@@ -160,9 +170,7 @@ test.describe("Phase 3 Vocabulary", () => {
     await page.goto(vocabularyUrl(secondDate));
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Delete vocabulary total" }).click();
-    await expect(
-      page.getByText("No new words learned on this day yet."),
-    ).toBeVisible();
+    await expect(page.getByText("No new words yet")).toBeVisible();
 
     await page.getByLabel("Settings").click();
     page.once("dialog", (dialog) => dialog.accept());
