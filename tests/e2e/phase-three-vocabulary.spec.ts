@@ -121,27 +121,30 @@ test.describe("Phase 3 Vocabulary", () => {
     const currentProgressSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Current progress" }),
     });
+    const currentVocabulary = currentProgressSection
+      .getByRole("heading", { name: "Vocabulary", exact: true })
+      .locator("xpath=parent::div");
     await expect(
-      currentProgressSection
-        .locator("article")
-        .filter({ hasText: "Current streak" }),
+      currentVocabulary.locator("article").filter({
+        hasText: "Current streak",
+      }),
     ).toContainText("0 days");
     await expect(
-      currentProgressSection
-        .locator("article")
-        .filter({ hasText: "Longest streak" }),
+      currentVocabulary.locator("article").filter({
+        hasText: "Longest streak",
+      }),
     ).toContainText("2 days");
     await expect(
-      currentProgressSection.locator("article").filter({ hasText: "Today" }),
+      currentVocabulary.locator("article").filter({ hasText: "Today" }),
     ).toContainText("0 words");
     await expect(
-      currentProgressSection
+      currentVocabulary
         .locator("article")
         .filter({ hasText: "Current week" })
         .filter({ hasText: /8\s*words/ }),
     ).toBeVisible();
     await expect(
-      currentProgressSection
+      currentVocabulary
         .locator("article")
         .filter({ hasText: "Current month" })
         .filter({ hasText: /8\s*words/ }),
