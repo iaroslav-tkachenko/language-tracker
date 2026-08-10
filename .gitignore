@@ -29,6 +29,7 @@ recovery-codes.txt
 supabase/.branches/
 supabase/.temp/
 .cache/
+backups/
 
 # Logs
 *.log
