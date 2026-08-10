@@ -32,10 +32,10 @@ advancing. Production user data must never be reset as part of a deployment.
 
 The product owner selected a separate production project on August 10, 2026.
 
-| Environment | Supabase organization    | Plan | Project                        | Region                     |
-| ----------- | ------------------------ | ---- | ------------------------------ | -------------------------- |
-| Development | `iaroslav_tkachenko_org` | Free | `Language Tracker Development` | Ireland (`eu-west-1`)      |
-| Production  | `iaroslav_tkachenko_org` | Free | `Language Tracker Production`  | Frankfurt (`eu-central-1`) |
+| Environment | Supabase organization    | Plan | Project                        | Region                |
+| ----------- | ------------------------ | ---- | ------------------------------ | --------------------- |
+| Development | `iaroslav_tkachenko_org` | Free | `Language Tracker Development` | Ireland (`eu-west-1`) |
+| Production  | `iaroslav_tkachenko_org` | Free | `Language Tracker Production`  | Paris (`eu-west-3`)   |
 
 The product owner requires the production project to remain on the Free plan.
 Supabase currently permits two active Free projects; a paused project does not
@@ -71,7 +71,7 @@ Owner action required in the Supabase Dashboard:
 
 1. Open [Create project](https://supabase.com/dashboard/new) and select the existing
    `iaroslav_tkachenko_org` Free organization.
-2. Create `Language Tracker Production` in Frankfurt on the Free plan.
+2. Create `Language Tracker Production` in the European region selected by Supabase.
 3. Generate a unique database password and save it in the owner's password manager.
    Never send or commit this password.
 4. Wait for project status `ACTIVE_HEALTHY`, then share only the project ref from the
@@ -85,15 +85,19 @@ repository to its development-safe state.
 - [x] Rebuild only the local database with `pnpm db:reset`.
 - [x] Run all 118 pgTAP tests with `pnpm db:test`.
 - [x] Generate local types with `pnpm db:types` and confirm no schema diff.
-- [ ] Review every migration in `supabase/migrations` in timestamp order.
+- [x] Review every migration in `supabase/migrations` in timestamp order.
 - [ ] Confirm RLS is enabled for every user-facing table and Security Advisor has no
       unresolved critical finding.
 - [x] Select a separate Free production project in the existing Free organization.
-- [ ] Create the `Language Tracker Production` project in Frankfurt (`eu-central-1`).
-- [ ] Record the project reference and database password in the owner's password manager.
+- [x] Create the `Language Tracker Production` project in Paris (`eu-west-3`).
+- [x] Record project ref `fbkwirzlvyaykrimpqhy`; the database password remains only
+      in the owner's password manager.
 - [ ] Document the manual Free-plan backup command before real user data is created.
-- [ ] Link deliberately, inspect `pnpm db:migrations`, then apply `pnpm db:push` once.
-- [ ] Generate linked database types and confirm they match the committed schema.
+- [x] Link deliberately, confirm empty remote history, then apply all nine migrations
+      once with `pnpm db:push`.
+- [x] Confirm remote migration history matches all local migrations.
+- [x] Generate linked database types and confirm no schema difference. The hosted
+      generator adds only its PostgREST-version metadata.
 
 Exit: clean local replay and pgTAP pass; production schema is migrated without seed
 or reset operations; backup and restore ownership are assigned.
