@@ -186,7 +186,13 @@ function LevelForm({
                     onChange={() => setLevel(option)}
                     className="peer sr-only"
                   />
-                  <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-base font-bold text-slate-600 peer-checked:border-violet-600 peer-checked:bg-violet-600 peer-checked:text-white hover:bg-slate-50">
+                  <span
+                    className={`cefr-level-option flex min-h-11 cursor-pointer items-center justify-center rounded-xl border text-base font-bold peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet-500 ${
+                      level === option
+                        ? "cefr-level-option-selected"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
                     {option}
                   </span>
                 </label>

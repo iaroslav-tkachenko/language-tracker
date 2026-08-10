@@ -13,7 +13,7 @@ advancing. Production user data must never be reset as part of a deployment.
 | R2    | Production authentication | Complete    |
 | R3    | Hosting and domain        | Complete    |
 | R4    | Release quality gate      | Complete    |
-| R5    | Production smoke test     | Not started |
+| R5    | Production smoke test     | In progress |
 | R6    | Operations and recovery   | Not started |
 | R7    | Soft launch               | Not started |
 
@@ -265,6 +265,21 @@ Exit: the owner approves the exact deployment that will be promoted.
 Goal: confirm the public system works end to end after promotion.
 
 Use a dedicated smoke-test account and one temporary board.
+
+Automated post-merge evidence recorded on August 10, 2026:
+
+- [x] The canonical domain redirects an unauthenticated visitor to sign-in.
+- [x] Sign-in, sign-up, and password-recovery screens return successful responses
+      on desktop and mobile Chromium without horizontal overflow, unlabelled fields,
+      console errors, or failed application requests.
+- [x] Dashboard, Settings, Statistics, and Level routes reject unauthenticated access
+      and redirect to sign-in.
+- [x] The owner completed the authenticated smoke-test journey on desktop and a
+      physical phone on August 10, 2026. Board, activity, Study Time, Vocabulary,
+      CEFR, Statistics, theme persistence, account isolation, password recovery,
+      and UI-only cleanup all succeeded.
+- [ ] Deploy and recheck the dark-theme CEFR selected-level highlight found during
+      the smoke test. The local fix has desktop and mobile Playwright coverage.
 
 1. Open the canonical domain in a private desktop window and on a physical phone.
 2. Sign up, confirm email, sign in, recover the password, and sign out.
