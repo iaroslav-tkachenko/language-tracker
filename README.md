@@ -4,18 +4,13 @@ A responsive web application for recording and reviewing foreign-language study 
 
 ## Project status
 
-**Phases 0, 1, and 2 are complete and merged. Phase 3 Vocabulary is implemented,
-visually approved, and awaiting pull-request verification.**
+**Product Phases 0-5 and production launch gates R0-R5 are complete.** Language
+Tracker is deployed on Vercel with a separate production Supabase project, custom
+SMTP, encrypted off-site backups, tested recovery, and desktop/mobile release
+verification. Operations readiness and controlled soft launch are tracked in the
+[production launch runbook](docs/development/PRODUCTION_LAUNCH.md).
 
-Phase 0 authentication, hosted Supabase schema, RLS, email confirmation, and
-password recovery are complete. Phase 1 provides production-backed language
-boards, the responsive Study Time heatmap, single-day study-session CRUD,
-activity management, streaks, period statistics, distributions, and
-desktop/mobile navigation. Phase 2 adds an atomic, idempotent, confirmed date
-range flow that preserves existing entries. Phase 3 adds production-backed
-single-day and non-overwriting date-range Vocabulary totals, a responsive
-green/red yearly heatmap, word averages and streaks, and board-scoped word
-analytics on the shared Statistics screen.
+[Open Language Tracker production](https://language-tracker-phi.vercel.app/)
 
 ### Current local preview
 
@@ -107,6 +102,8 @@ The repository and installed dependencies live on drive `D:`. Package caches, br
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Repository instructions](AGENTS.md)
 - [Supabase setup and verification](docs/development/SUPABASE_SETUP.md)
+- [Production launch runbook](docs/development/PRODUCTION_LAUNCH.md)
+- [Production operations](docs/development/OPERATIONS.md)
 - [Phase 0 authentication screenshots](docs/design/phase-0/README.md)
 
 ## Source language

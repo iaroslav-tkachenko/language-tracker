@@ -17,6 +17,13 @@ Phase 5 passed local lint, strict type checking, 121 unit tests, database
 verification for its migrations, targeted browser checks, a production build,
 and the required GitHub Actions checks before merge.
 
+Production launch gates R0 through R5 are complete. The service runs on Vercel
+with a separate Supabase production project, custom SMTP, an encrypted off-site
+backup with a successful restore rehearsal, and approved desktop/mobile smoke
+tests. R6 operations readiness and R7 controlled soft launch are tracked in
+`docs/development/PRODUCTION_LAUNCH.md` and
+`docs/development/OPERATIONS.md`.
+
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 
 ## Sources of truth
