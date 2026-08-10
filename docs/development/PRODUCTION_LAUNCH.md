@@ -32,14 +32,20 @@ advancing. Production user data must never be reset as part of a deployment.
 
 The product owner selected a separate production project on August 10, 2026.
 
-| Environment | Supabase organization         | Plan | Project                        | Region                     |
-| ----------- | ----------------------------- | ---- | ------------------------------ | -------------------------- |
-| Development | `iaroslav_tkachenko_org`      | Free | `Language Tracker Development` | Ireland (`eu-west-1`)      |
-| Production  | `Language Tracker Production` | Pro  | `Language Tracker Production`  | Frankfurt (`eu-central-1`) |
+| Environment | Supabase organization    | Plan | Project                        | Region                     |
+| ----------- | ------------------------ | ---- | ------------------------------ | -------------------------- |
+| Development | `iaroslav_tkachenko_org` | Free | `Language Tracker Development` | Ireland (`eu-west-1`)      |
+| Production  | `iaroslav_tkachenko_org` | Free | `Language Tracker Production`  | Frankfurt (`eu-central-1`) |
 
-Supabase billing is organization-scoped, so production must use a separate Pro
-organization if development is to remain on the Free plan. Do not transfer the
-development project into the production organization.
+The product owner requires the production project to remain on the Free plan.
+Supabase currently permits two active Free projects; a paused project does not
+count toward that limit. Both environments may therefore remain in the existing
+Free organization while keeping separate databases, Auth users, and API keys.
+
+Free projects may be paused after a low-activity seven-day period and do not
+include downloadable automatic database backups. Production operations must
+monitor pause-warning emails and use scheduled manual exports. A normal Vercel
+health check does not prove that the database has remained active.
 
 ## R0 - Release preflight
 
@@ -63,12 +69,12 @@ Goal: prove that the complete schema can be built safely and preserves ownership
 
 Owner action required in the Supabase Dashboard:
 
-1. Open [Create organization](https://supabase.com/dashboard/new).
-2. Create `Language Tracker Production` on the Pro plan and keep the spend cap enabled.
-3. Inside that organization, create `Language Tracker Production` in Frankfurt.
-4. Generate a unique database password and save it in the owner's password manager.
+1. Open [Create project](https://supabase.com/dashboard/new) and select the existing
+   `iaroslav_tkachenko_org` Free organization.
+2. Create `Language Tracker Production` in Frankfurt on the Free plan.
+3. Generate a unique database password and save it in the owner's password manager.
    Never send or commit this password.
-5. Wait for project status `ACTIVE_HEALTHY`, then share only the project ref from the
+4. Wait for project status `ACTIVE_HEALTHY`, then share only the project ref from the
    dashboard URL. The project ref and publishable key are not secrets.
 
 After the project exists, the engineer will inspect the empty migration history,
@@ -82,11 +88,10 @@ repository to its development-safe state.
 - [ ] Review every migration in `supabase/migrations` in timestamp order.
 - [ ] Confirm RLS is enabled for every user-facing table and Security Advisor has no
       unresolved critical finding.
-- [x] Select a separate Pro organization and dedicated production-project topology.
-- [ ] Create the `Language Tracker Production` Pro organization.
+- [x] Select a separate Free production project in the existing Free organization.
 - [ ] Create the `Language Tracker Production` project in Frankfurt (`eu-central-1`).
 - [ ] Record the project reference and database password in the owner's password manager.
-- [ ] Create or verify a production backup before applying migrations.
+- [ ] Document the manual Free-plan backup command before real user data is created.
 - [ ] Link deliberately, inspect `pnpm db:migrations`, then apply `pnpm db:push` once.
 - [ ] Generate linked database types and confirm they match the committed schema.
 
@@ -180,8 +185,11 @@ Goal: know how to detect and recover from failures without erasing user progress
 - Enable billing and usage alerts before public invitations.
 - Check Vercel runtime logs, Supabase logs, Auth logs, database health, and SMTP
   delivery after each release.
-- Document the backup retention provided by the selected Supabase plan.
-- Perform a restore rehearsal into a separate non-production project.
+- Schedule manual logical database exports because the Free plan does not include
+  downloadable automatic backups.
+- Perform a manual export and restore rehearsal into a local or separate
+  non-production database.
+- Monitor Supabase pause-warning emails and record the dashboard resume procedure.
 - Roll back application failures by promoting the previous Vercel deployment.
 - Fix database failures with a reviewed forward migration; do not run an improvised
   production reset or destructive rollback.
