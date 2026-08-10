@@ -9,7 +9,7 @@ advancing. Production user data must never be reset as part of a deployment.
 | Phase | Name                      | Status      |
 | ----- | ------------------------- | ----------- |
 | R0    | Release preflight         | Complete    |
-| R1    | Database safety           | In progress |
+| R1    | Database safety           | Complete    |
 | R2    | Production authentication | Complete    |
 | R3    | Hosting and domain        | Complete    |
 | R4    | Release quality gate      | Not started |
@@ -94,7 +94,13 @@ repository to its development-safe state.
 - [x] Create the `Language Tracker Production` project in Paris (`eu-west-3`).
 - [x] Record project ref `fbkwirzlvyaykrimpqhy`; the database password remains only
       in the owner's password manager.
-- [ ] Document the manual Free-plan backup command before real user data is created.
+- [x] Document the manual Free-plan backup and restore-rehearsal commands before
+      real user data is created.
+- [x] Create the first AES-256-GCM encrypted production backup and verify its
+      external SHA-256 checksum.
+- [x] Restore the first backup into an isolated local Supabase baseline database,
+      verify representative Auth and application row counts, and remove the test
+      database and every plaintext temporary file.
 - [x] Link deliberately, confirm empty remote history, then apply all ten migrations
       with `pnpm db:push`.
 - [x] Confirm remote migration history matches all local migrations.
@@ -124,6 +130,50 @@ The August 10 production hardening removed direct Data API execution of
 `rls_auto_enable()` and verified the resulting privilege from a schema-only dump.
 After rerunning the Advisor, the expected baseline is nine accepted warnings: eight
 authenticated application RPCs and the Free-plan leaked-password limitation.
+
+### Free-plan backup procedure
+
+Supabase recommends regular CLI exports and off-site copies for Free projects.
+Run the repository workflow before every production migration and at least weekly
+while the service contains user data:
+
+```powershell
+pnpm backup:production
+```
+
+The command deliberately links project `fbkwirzlvyaykrimpqhy`, creates the three
+Supabase-recommended logical dumps (`roles.sql`, `schema.sql`, and `data.sql`), and
+immediately unlinks the project. It packages a manifest with SHA-256 checksums,
+encrypts the package with AES-256-GCM, and removes every plaintext temporary file.
+The passphrase must contain at least 16 characters, must be stored in the owner's
+password manager, and must never be sent through chat or committed to Git.
+
+Every backup is written to the ignored `backups/` directory as an `.ltbak` file
+with a `.sha256` sidecar. Copy both files to private off-site storage after the
+workflow succeeds. The encrypted backup contains Auth records, email addresses,
+and password hashes; do not place it in a public repository or shared folder.
+
+The same workflow decrypts the new archive, validates every member checksum, and
+restores `schema.sql` and `data.sql` into an isolated local database named
+`language_tracker_restore_test`. The database is deleted after verification.
+`roles.sql` is checksum-verified but is not replayed into the shared local cluster,
+whose Supabase-managed roles already exist. To rehearse an existing archive again:
+
+```powershell
+pnpm backup:verify -- backups\language-tracker-production-TIMESTAMP.ltbak
+```
+
+A backup is complete only when the command prints
+`Backup checksums and isolated local database restore passed.` and the encrypted
+file has been copied off the development machine.
+
+The first encrypted backup and local restore rehearsal completed on August 10, 2026. Artifact `language-tracker-production-20260810T194334Z.ltbak` has SHA-256
+`5c677aceb189c3f4ec58cfddf560c11ed8113e96c258f6134b790696ce183a47`. The restored
+database contained one Auth user, one profile, one language board, ten activity
+types, and zero Study Time, Vocabulary, and CEFR records, matching the production
+state at capture time. The production CLI link, plaintext dumps, and isolated test
+database were removed after verification. Copying the encrypted artifact and its
+checksum off the development machine remains an R6 operational requirement.
 
 ## R2 - Production authentication
 
@@ -259,6 +309,7 @@ manual production-data cleanup is required.
 - [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
 - [Supabase database advisors](https://supabase.com/docs/guides/database/database-advisors)
 - [Supabase database function privileges](https://supabase.com/docs/guides/database/functions)
+- [Supabase CLI backup and restore](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore)
 - [Supabase plan feature comparison](https://supabase.com/pricing)
 - [Vercel environments](https://vercel.com/docs/deployments/environments)
 - [Vercel environment variables](https://vercel.com/docs/environment-variables)
