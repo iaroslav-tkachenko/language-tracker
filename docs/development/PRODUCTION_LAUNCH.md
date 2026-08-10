@@ -86,7 +86,7 @@ repository to its development-safe state.
 - [x] Run all 118 pgTAP tests with `pnpm db:test`.
 - [x] Generate local types with `pnpm db:types` and confirm no schema diff.
 - [x] Review every migration in `supabase/migrations` in timestamp order.
-- [ ] Confirm RLS is enabled for every user-facing table and Security Advisor has no
+- [x] Confirm RLS is enabled for every user-facing table and Security Advisor has no
       unresolved critical finding. The production review found zero errors. Direct
       Data API access to Supabase's automatic-RLS event-trigger helper is removed by
       migration `20260810000200_restrict_automatic_rls_helper.sql`.
@@ -95,8 +95,8 @@ repository to its development-safe state.
 - [x] Record project ref `fbkwirzlvyaykrimpqhy`; the database password remains only
       in the owner's password manager.
 - [ ] Document the manual Free-plan backup command before real user data is created.
-- [x] Link deliberately, confirm empty remote history, then apply the first nine migrations
-      once with `pnpm db:push`.
+- [x] Link deliberately, confirm empty remote history, then apply all ten migrations
+      with `pnpm db:push`.
 - [x] Confirm remote migration history matches all local migrations.
 - [x] Generate linked database types and confirm no schema difference. The hosted
       generator adds only its PostgREST-version metadata.
@@ -119,6 +119,11 @@ Supabase Free does not include leaked-password protection. Keep strong password
 validation, confirmed email ownership, custom SMTP, and tested password recovery;
 record the Advisor warning as a Free-plan limitation rather than silently treating
 the control as enabled.
+
+The August 10 production hardening removed direct Data API execution of
+`rls_auto_enable()` and verified the resulting privilege from a schema-only dump.
+After rerunning the Advisor, the expected baseline is nine accepted warnings: eight
+authenticated application RPCs and the Free-plan leaked-password limitation.
 
 ## R2 - Production authentication
 
