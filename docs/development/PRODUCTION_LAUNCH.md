@@ -12,7 +12,7 @@ advancing. Production user data must never be reset as part of a deployment.
 | R1    | Database safety           | Complete    |
 | R2    | Production authentication | Complete    |
 | R3    | Hosting and domain        | Complete    |
-| R4    | Release quality gate      | Not started |
+| R4    | Release quality gate      | Complete    |
 | R5    | Production smoke test     | Not started |
 | R6    | Operations and recovery   | Not started |
 | R7    | Soft launch               | Not started |
@@ -173,7 +173,8 @@ database contained one Auth user, one profile, one language board, ten activity
 types, and zero Study Time, Vocabulary, and CEFR records, matching the production
 state at capture time. The production CLI link, plaintext dumps, and isolated test
 database were removed after verification. Copying the encrypted artifact and its
-checksum off the development machine remains an R6 operational requirement.
+checksum to private off-site storage was confirmed on August 10, 2026. R6 retains
+ownership of recurring backups and periodic restore rehearsals.
 
 ## R2 - Production authentication
 
@@ -235,15 +236,27 @@ without yet inviting users.
 
 Goal: run the same automated and human checks required for a product release.
 
-- [ ] GitHub Actions `application`, `database`, and `browser` jobs pass.
-- [ ] Playwright critical journeys pass on desktop and mobile Chromium.
-- [ ] Authentication is manually verified with real email delivery.
-- [ ] Study Time, Vocabulary, Level, Statistics, Settings, and theme switching are
-      checked on desktop and a physical phone.
-- [ ] Keyboard navigation, focus visibility, labels, contrast, overflow, and touch
-      targets are reviewed.
-- [ ] Representative multi-year data and more than six activities render correctly.
-- [ ] No browser console error, failed application request, or exposed secret remains.
+- [x] GitHub Actions `application`, `database`, and `browser` jobs pass. PR #13
+      completed all five required GitHub and Vercel checks.
+- [x] Local application checks pass: formatting, linting, TypeScript, 121 unit tests,
+      and the production Next.js build.
+- [x] Local database reset and all 118 pgTAP assertions pass.
+- [x] Playwright critical journeys pass on desktop and mobile Chromium: 24 of 24
+      tests passed in CI mode with one worker on August 10, 2026.
+- [x] Authentication is manually verified with real email delivery. The production
+      signup, confirmation, sign-out, recovery, password update, and new-password
+      sign-in journey completed during R2.
+- [x] Public production authentication screens pass desktop and mobile Chromium
+      smoke checks: successful responses, labelled form controls, no horizontal
+      overflow, and no runtime or console errors.
+- [x] Study Time, Vocabulary, Level, Statistics, Settings, and theme switching were
+      checked on desktop and a physical phone and approved by the owner on August 10, 2026.
+- [x] Keyboard navigation, focus visibility, labels, contrast, overflow, and touch
+      targets were reviewed as part of the owner approval.
+- [x] Representative multi-year data and more than six activities render correctly.
+- [x] No browser console error, failed application request, or exposed secret remains.
+      A tracked-file secret scan found only the expected `.env.example` template and
+      no production credentials, private keys, or backup artifacts.
 
 Exit: the owner approves the exact deployment that will be promoted.
 
