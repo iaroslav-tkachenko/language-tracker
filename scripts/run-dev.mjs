@@ -2,15 +2,19 @@ import { spawn } from "node:child_process";
 import { networkInterfaces } from "node:os";
 import { join } from "node:path";
 
-const localOrigins = Object.values(networkInterfaces())
-  .flat()
-  .filter(
-    (address) =>
-      address?.family === "IPv4" &&
-      !address.internal &&
-      !address.address.startsWith("169.254."),
-  )
-  .map((address) => address.address);
+const localOrigins = [
+  "localhost",
+  "127.0.0.1",
+  ...Object.values(networkInterfaces())
+    .flat()
+    .filter(
+      (address) =>
+        address?.family === "IPv4" &&
+        !address.internal &&
+        !address.address.startsWith("169.254."),
+    )
+    .map((address) => address.address),
+];
 
 const nextBinary = join(
   process.cwd(),

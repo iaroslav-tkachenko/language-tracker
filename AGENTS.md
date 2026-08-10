@@ -8,14 +8,14 @@ implemented, verified, and merged by July 30, 2026. They include authentication
 and owner isolation, Study Time, atomic date-range entry, Vocabulary, CEFR
 history, forecasts, and combined board-scoped analytics.
 
-Phase 5 final UX polish was implemented on `codex/final-ui-polish` in August
-2026 and reviewed incrementally on desktop and a physical mobile browser. It
+Phase 5 final UX polish was implemented and merged into `main` in August 2026
+after incremental review on desktop and a physical mobile browser. It
 includes consistent Study Time/Vocabulary layouts, Statistics and Level polish,
 full-screen Settings, system/light/dark themes, ten protected standard
 activities, custom-activity rename, and interactive activity-allocation charts.
-The Phase 5 branch has passed local lint, strict type checking, 121 unit tests,
-database verification for its migration, targeted browser checks, and a
-production build; it remains pending pull-request merge.
+Phase 5 passed local lint, strict type checking, 121 unit tests, database
+verification for its migrations, targeted browser checks, a production build,
+and the required GitHub Actions checks before merge.
 
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 

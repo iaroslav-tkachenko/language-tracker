@@ -2,9 +2,8 @@
 
 ## 1. Approval gate
 
-**Current status: Phases 0 through 4 are complete, visually approved, verified,
-and merged. Phase 5 final UX polish is implemented and locally verified on
-`codex/final-ui-polish`; it is pending pull-request merge.**
+**Current status: Phases 0 through 5 are complete, visually approved, verified,
+and merged into `main`.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -365,8 +364,8 @@ CI or a clean local Supabase/browser stack before merge.
 
 ## 8. Phase 5 — Final UX polish
 
-**Status:** implemented, incrementally reviewed on desktop and a physical mobile
-browser, and saved on `codex/final-ui-polish`.
+**Status:** complete and merged into `main` after incremental review on desktop
+and a physical mobile browser.
 
 ### Delivered scope
 
@@ -399,6 +398,8 @@ browser, and saved on `codex/final-ui-polish`.
 - The Lesson migration and database suite passed locally.
 - Theme behavior and representative desktop/mobile layouts were checked through
   Playwright and physical-device LAN review.
+- Required GitHub Actions application, database, and browser checks passed
+  before merge.
 
 ## 9. Hardening and deployment
 
