@@ -137,8 +137,8 @@ This document describes the main MVP interactions from the user's point of view.
 1. The learner sees one global catalog containing active standard and custom activities.
 2. The learner creates a custom activity with a unique name of 1–50 trimmed characters.
 3. The system makes the activity available on every active board.
-4. The learner may rename the activity; its current name is used in historical views.
-5. The learner may archive the activity; it disappears from new-entry choices while historical entries and statistics remain intact.
+4. The learner may rename a custom activity; its current name is used in historical views.
+5. The learner may archive a custom activity; it disappears from new-entry choices while historical entries and statistics remain intact.
 
 **Restoration scenario:**
 
@@ -149,6 +149,7 @@ This document describes the main MVP interactions from the user's point of view.
 **Alternatives and errors:**
 
 - Choosing `Other` requires a real custom name; an unnamed generic `Other` is never saved.
+- The ten standard activities cannot be renamed or archived.
 - Blank, overlong, or duplicate active names are rejected.
 - When 30 activities are active, creation or restoration is rejected clearly.
 
@@ -258,13 +259,15 @@ This document describes the main MVP interactions from the user's point of view.
 
 1. The system calculates statistics directly from owned study entries for the selected board.
 2. The learner sees total time for the selected year, current month, current Monday-based week, and current day.
-3. The learner sees selected-year activity allocation as a circular chart with
-   absolute duration and percentage, including historically used archived
-   activities.
+3. The learner sees selected-year activity allocation as an interactive
+   thin-ring chart with aligned duration and percentage values, including
+   historically used archived activities.
 4. The learner sees active-day count, calendar-day average, active-day average, current streak, and longest streak.
 5. The learner switches distribution granularity among day, week, month, and year.
-6. The learner reviews `Activity totals latest 7 days` as a circular chart with
-   absolute duration and percentage.
+6. The learner reviews `Activity totals in the last 7 days` using the same
+   interactive chart. With up to six activities, all remain separate; with
+   seven or more, the five largest remain visible and the sixth onward are
+   grouped into expandable `Other`.
 7. The learner reviews Study Time, Vocabulary, and CEFR information with clearly identified units and periods.
 8. The interface explains the period and methodology represented by each distribution or forecast.
 
@@ -345,7 +348,7 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Postconditions:** The board/date has at most one vocabulary record and all derived views agree with it.
 
-**Related requirements:** `FR-VOCAB-001`–`FR-VOCAB-011`, `NFR-DATA-007`, `NFR-A11Y-005`.
+**Related requirements:** `FR-VOCAB-001`–`FR-VOCAB-012`, `NFR-DATA-007`, `NFR-A11Y-005`.
 
 ### UC-12 — Declare CEFR and review forecast
 
@@ -357,7 +360,7 @@ This document describes the main MVP interactions from the user's point of view.
 
 **Main success scenario:**
 
-1. The learner chooses A1, A2, B1, B2, C1, or C2 and an effective past/current date.
+1. The learner chooses A0, A1, A2, B1, B2, C1, or C2 and an effective past/current date. A0 is clearly identified as the product's non-official absolute-beginner state.
 2. The system saves the declaration without deleting earlier history.
 3. The system displays the current level and a concise sourced description.
 4. For A1–C1, the system calculates approximate remaining hours using the fixed Cambridge-based model and logged Study Time since the effective date.

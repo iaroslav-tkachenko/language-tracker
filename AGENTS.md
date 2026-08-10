@@ -3,16 +3,19 @@
 ## Current project status
 
 The project owner approved the original implementation plan on July 14, 2026,
-the expanded phased scope on July 16, 2026, and the production-backed Phase 1
-Study Time implementation on desktop and a physical mobile browser on July 25, 2026. Phases 0, 1, and 2 are complete and merged. The project owner approved
-the clickable Phase 2 atomic batch entry flow on July 26, 2026, and all
-pull-request checks passed. Continue to use explicit visual review gates before
-advancing between product milestones.
+the expanded phased scope on July 16, 2026, and Phases 0 through 4 were
+implemented, verified, and merged by July 30, 2026. They include authentication
+and owner isolation, Study Time, atomic date-range entry, Vocabulary, CEFR
+history, forecasts, and combined board-scoped analytics.
 
-Phase 3 Vocabulary was implemented, visually approved, verified by green
-application, database, and browser pull-request jobs, and merged on July 26, 2026. It includes production-backed daily totals (including explicit zero),
-atomic non-overwriting date-range creation, the responsive Vocabulary heatmap,
-and combined board/year Study Time and Vocabulary analytics.
+Phase 5 final UX polish was implemented on `codex/final-ui-polish` in August
+2026 and reviewed incrementally on desktop and a physical mobile browser. It
+includes consistent Study Time/Vocabulary layouts, Statistics and Level polish,
+full-screen Settings, system/light/dark themes, ten protected standard
+activities, custom-activity rename, and interactive activity-allocation charts.
+The Phase 5 branch has passed local lint, strict type checking, 121 unit tests,
+database verification for its migration, targeted browser checks, and a
+production build; it remains pending pull-request merge.
 
 Notify the project owner whenever a new visual or clickable milestone is ready for review.
 

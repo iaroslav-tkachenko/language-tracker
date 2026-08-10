@@ -2,10 +2,9 @@
 
 ## 1. Approval gate
 
-**Current status: Phases 0, 1, 2, and 3 are complete, visually approved, verified
-by green pull-request checks, and merged. Phase 4 is implemented through the
-integrated CEFR screen, Study Time and Vocabulary forecasts, Statistics
-analytics, weekly recommendations, and final local verification.**
+**Current status: Phases 0 through 4 are complete, visually approved, verified,
+and merged. Phase 5 final UX polish is implemented and locally verified on
+`codex/final-ui-polish`; it is pending pull-request merge.**
 
 The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
@@ -83,7 +82,7 @@ Before changing the application layout, prepare two static screenshot alternativ
 - Render entry cards with duration and activity only; do not repeat the current board name.
 - Give standard activities distinct Lucide icons: Reading (`BookOpen`), Podcast (`Headphones`), Speaking (`MessagesSquare`), Writing (`PenLine`), Anki (`Layers3`), Grammar (`SpellCheck2`), TV Show / Film (`Clapperboard`), YouTube (`Youtube`), Shadowing (`Repeat2`), and Lesson (`Presentation`). Use `Shapes` as the one shared, visually distinct icon for every user-created activity.
 - Place prominent previous-day and next-day arrows beside the selected date; each activation changes the selected date by exactly one calendar day, including across month and year boundaries.
-- Use `Today` plus a date only for today; otherwise use the full weekday/date as the heading and never display `Selected day`. Use `No study session for this day yet.` for an empty date.
+- Use `Today` plus a date only for today; otherwise use the full weekday/date as the heading and never display `Selected day`. An empty date uses a clock icon, `No study sessions yet`, and its approved helper text.
 - Preselect and highlight the saved duration and activity during edit; moving either selection moves its highlight, `Update` persists, and `Cancel` leaves the entry unchanged.
 - Provide hover/focus edit and delete controls on desktop and keep both icons persistently visible on mobile/touch layouts.
 - Show `Add study session` below existing cards so the user can add another entry to a populated date.
@@ -108,7 +107,7 @@ Before changing the application layout, prepare two static screenshot alternativ
 
 - Unit: calendar boundaries, all heatmap bands and date states, averages, future exclusions, and streaks.
 - Database: aggregation and ownership fixtures.
-- Playwright: clock/open-book tracker icons, disabled `Vocabulary — Coming soon`, `Study Time` navigation back to the primary board, absence of the redundant Home icon, `Top activity`, and repeated board names on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, previous/next day navigation across calendar boundaries, standard/custom activity icons, create/edit/cancel/update/delete, two persistent mobile action icons, desktop 1366×768 visibility, keyboard flow, and non-color information.
+- Playwright: active Study Time/Vocabulary tracker navigation, clock/open-book tracker icons, absence of the redundant Home icon, `Top activity`, and repeated board names on the main screen, collapsed/expanded form, disabled-save prerequisites, add-another action, previous/next day navigation across calendar boundaries, standard/custom activity icons, create/edit/cancel/update/delete, persistent mobile actions, desktop 1366×768 visibility, keyboard flow, and non-color information.
 
 ### Phase exit criteria
 
@@ -364,7 +363,44 @@ CI or a clean local Supabase/browser stack before merge.
   documentation matches behavior, and the project owner approves the final
   Phase 4 visual and analytical milestone.
 
-## 8. Hardening and deployment
+## 8. Phase 5 — Final UX polish
+
+**Status:** implemented, incrementally reviewed on desktop and a physical mobile
+browser, and saved on `codex/final-ui-polish`.
+
+### Delivered scope
+
+- Added one consistent board-creation flow to Study Time, Vocabulary, Level,
+  Statistics, and Settings, with case-insensitive uniqueness and board limits.
+- Aligned Study Time and Vocabulary year headers, heatmaps, legends, summaries,
+  empty-day states, add flows, content widths, and next-level progress cards.
+- Reorganized and copy-edited Statistics, including selected-year controls,
+  current metrics, weekly recommendations, forecast tables, and consistent
+  typography and spacing.
+- Reworked Level copy, hierarchy, forecast presentation, and responsive layout.
+- Replaced the Settings overlay with a compact full-screen management view for
+  boards and activities; added custom-activity rename while preserving activity
+  identity and historical sessions.
+- Expanded the protected standard activity catalog to Reading, Podcast,
+  Speaking, Writing, Anki, Grammar, TV Show / Film, YouTube, Shadowing, and
+  Lesson.
+- Added system/light/dark theme selection with a system default, persisted local
+  preference, pre-hydration application, dark heatmap palettes, and subdued dark
+  table borders.
+- Added an application footer and creator profile block with an external
+  LinkedIn link.
+- Rebuilt activity-allocation donuts with thinner interactive SVG rings,
+  keyboard/touch highlighting, aligned duration/percentage columns, and a
+  top-five plus expandable `Other` rule when at least seven activities exist.
+
+### Verification
+
+- Full ESLint, strict TypeScript, 121 unit tests, and production build pass.
+- The Lesson migration and database suite passed locally.
+- Theme behavior and representative desktop/mobile layouts were checked through
+  Playwright and physical-device LAN review.
+
+## 9. Hardening and deployment
 
 ### Work
 
@@ -382,7 +418,7 @@ CI or a clean local Supabase/browser stack before merge.
 - No secret or service-role key is exposed to browser code or Git.
 - Product-owner acceptance passes on representative desktop and mobile viewports.
 
-## 9. Planned critical end-to-end journeys
+## 10. Planned critical end-to-end journeys
 
 1. Register, confirm email, sign in, recover password, and sign out.
 2. Manage two boards and prove their Study Time, Vocabulary, CEFR, and statistics remain separate.
@@ -395,7 +431,7 @@ CI or a clean local Supabase/browser stack before merge.
 9. Review current and longest Study Time streaks across an empty today.
 10. Prove User A cannot read, reference, aggregate, or mutate User B's data in any feature.
 
-## 10. Risks and mitigations
+## 11. Risks and mitigations
 
 | Risk                                         | Mitigation                                                                                             |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -410,11 +446,11 @@ CI or a clean local Supabase/browser stack before merge.
 | Future entries corrupt current metrics       | Centralized `local_today` cutoff and boundary fixtures for both trackers                               |
 | RLS policies miss new tables/functions       | Explicit allow/deny pgTAP coverage and composite ownership constraints before UI delivery              |
 
-## 11. Expanded MVP definition of done
+## 12. Expanded MVP definition of done
 
 The expanded MVP is done only when:
 
-- Phases 0–4 in the approved specification are implemented, except explicitly deferred reference models;
+- Phases 0–5 in the approved specification are implemented, except explicitly deferred reference models;
 - every user-owned table and callable mutation has verified owner isolation;
 - batch, Study Time, Vocabulary, CEFR, and statistics rules pass boundary fixtures;
 - critical Playwright journeys pass on representative desktop and mobile configurations;

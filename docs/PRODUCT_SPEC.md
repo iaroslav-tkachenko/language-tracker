@@ -25,7 +25,6 @@ The MVP is private and single-user in nature: it has no social graph, public dat
 - Subscriptions, payments, notifications, or an admin panel.
 - Import or export.
 - Editable duration presets.
-- Theme selection, dark theme, or system theme.
 - UI localization or an app-language selector.
 - Offline support or native mobile applications.
 - Automatic CEFR assessment, certification, or promotion.
@@ -109,7 +108,8 @@ The flow must obtain a non-empty custom name before saving the study entry.
 
 ### 6.4 Rename, archive, and restore
 
-- A user can rename, hide, and remove an activity from the available catalog.
+- The ten standard activities are fixed and cannot be renamed or removed.
+- A user can rename or archive a custom activity from the available catalog.
 - Renaming an activity changes its name in historical entry views and statistics because entries reference the activity identity, not a copied label.
 - Removing a used activity archives it. Historical entries remain intact and continue contributing to heatmaps and statistics.
 - Archived activities cannot be selected for new entries.
@@ -171,7 +171,8 @@ The user can also enter any valid custom integer duration. Values such as `3+ ho
 - Prominent previous-day and next-day arrow controls beside the selected date move the day view by exactly one calendar date while preserving the selected board.
 - The selected day's total is visually emphasized, with the numeric duration stronger than its supporting `total` label.
 - Today uses the `Today` heading with its full date beneath it. Any other selected date uses the full weekday and date as the heading and never displays the generic text `Selected day`.
-- An empty selected date displays `No study session for this day yet.`
+- An empty selected date displays a clock icon, `No study sessions yet`, and
+  `Add the time you spent studying on this date.`
 
 ### 7.5 Batch entry creation
 
@@ -243,6 +244,8 @@ Every language board provides a `Vocabulary` tab alongside `Study Time`.
 - Zero may be stored explicitly so the user can record, edit, and delete a
   zero-word day.
 - The Vocabulary heatmap uses a green visual scale and independent year navigation while preserving the selected board.
+- An empty selected date displays a book icon, `No new words yet`, and
+  `Record only words you actively learned, not words you simply heard or read.`
 - Its fixed thresholds are `0`, `1–2`, `3–5`, `6–9`, `10–14`, `15–19`, `20–39`, and `40+` words.
 - Each cell exposes its date and word count without requiring color perception.
 - Empty and explicit-zero dates from the board's first positive vocabulary
@@ -288,8 +291,8 @@ All statistics are scoped to the selected board.
   streak plus current day, week, and month belong to `Current progress`.
 - The same screen shows Vocabulary metrics for the selected board. Selected-year
   word total, active days, calendar-day average, and study-day average belong to
-  `Selected year`. All-time words, current and longest vocabulary streak, and
-  current-week/current-month word totals belong to `Current progress`.
+  `Selected year`. Current streak, longest streak, today, current-week, and
+  current-month word totals belong to `Current progress` in that order.
 - After the user declares a current level, detailed statistics also distinguish
   source-record totals from model-based estimates. The UI labels these metrics
   `Tracked study time`, `Estimated learning time`, `Tracked words`, and
@@ -346,10 +349,15 @@ Future entries can appear in selected-year and selected-month distributions, but
 
 Detailed statistics show actual Study Time grouped by activity across the
 selected year and across the latest seven calendar dates ending today. Both
-activity allocations use circular charts and a legend that shows absolute
-duration and percentage of the period total. The seven-date window includes
-zero-study dates and excludes future entries; its heading is
-`Activity totals latest 7 days`.
+activity allocations use interactive thin-ring circular charts and a legend
+that shows absolute duration and percentage of the period total. Hovering,
+focusing, or tapping one segment emphasizes it and dims the others. When a
+period has at most six activities, every activity is shown separately. When it
+has more than six, the five activities with the greatest total duration remain
+visible and the sixth and all later activities are grouped into an expandable
+`Other` row. Active and archived activity history is included. The seven-date
+window includes zero-study dates and excludes future entries; its heading is
+`Activity totals in the last 7 days`.
 
 The product also shows an approved suggested weekly learning mix for the
 transition from the current level to the next level. The reference week is ten
@@ -550,15 +558,15 @@ materially change progress. CEFR descriptions are based on the
 
 - The interface is responsive on desktop and mobile.
 - MVP UI copy is English only.
-- MVP uses a light theme only.
+- The interface supports `System`, `Light`, and `Dark` themes. `System` is the
+  default; the browser stores the user's choice and follows operating-system
+  changes while `System` remains selected.
 - The primary board screen contains board selection, year navigation, heatmap, summary metrics, the selected day's entries, and an entry form.
 - The primary board screen provides `Study Time` and `Vocabulary` tabs and places year navigation near the top without avoidable empty space.
 - The `Study Time` tab uses a clock icon and the `Vocabulary` tab uses an open-book icon. Activating `Study Time` returns to the primary Study Time board view, so the header does not include a separate Home icon.
-- During Phases 1 and 2, `Vocabulary` is visible but disabled with `Coming soon`; it becomes interactive only when Phase 3 is complete.
-- Mobile keeps `Study Time`, disabled `Vocabulary — Coming soon`, and
-  `Statistics` visible in a dedicated primary-navigation row. `Statistics`
-  remains interactive and `Sign out` remains available without opening
-  Settings.
+- Desktop and mobile navigation keep `Study Time`, `Vocabulary`, `Level`, and
+  `Statistics` reachable. Settings has a dedicated control, and sign-out uses a
+  door icon with an accessible label and confirmation.
 - At 1366×768 CSS pixels and 100% browser zoom, navigation, year, heatmap, primary summary, selected-day heading, and either the first entry or `Add study session` are visible without page scrolling. The fully expanded form may require scrolling.
 - The Study Time summary prioritizes selected-year total, selected-year active days, current streak with a flame treatment, and current CEFR/next-level forecast. `Top activity` is excluded from the main screen and may live only in detailed statistics.
 - When the current CEFR level appears in the primary summary, its value uses a circular badge rather than a pill or oval.
@@ -570,8 +578,8 @@ materially change progress. CEFR descriptions are based on the
 - Phase 1 screenshot reviews may use an isolated test-user fixture reading `Current level: B1` and `Estimated B2: in about 6 months at this pace`. This fixture must never be presented as real data to a production user and is replaced by the Phase 4 calculation.
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A board-scoped CEFR management screen is reachable from Study Time,
-  Vocabulary, Statistics, and Settings. Settings also manages boards and the
-  global activity catalog.
+  Vocabulary, and Statistics. The full-screen Settings section manages boards,
+  the global activity catalog, and theme preference.
 - If the selected board has no current CEFR declaration, the `Level` navigation
   item shows a small notification bubble with an exclamation mark. The bubble is
   hidden after the user adds the first current level for that board.
