@@ -87,13 +87,15 @@ repository to its development-safe state.
 - [x] Generate local types with `pnpm db:types` and confirm no schema diff.
 - [x] Review every migration in `supabase/migrations` in timestamp order.
 - [ ] Confirm RLS is enabled for every user-facing table and Security Advisor has no
-      unresolved critical finding.
+      unresolved critical finding. The production review found zero errors. Direct
+      Data API access to Supabase's automatic-RLS event-trigger helper is removed by
+      migration `20260810000200_restrict_automatic_rls_helper.sql`.
 - [x] Select a separate Free production project in the existing Free organization.
 - [x] Create the `Language Tracker Production` project in Paris (`eu-west-3`).
 - [x] Record project ref `fbkwirzlvyaykrimpqhy`; the database password remains only
       in the owner's password manager.
 - [ ] Document the manual Free-plan backup command before real user data is created.
-- [x] Link deliberately, confirm empty remote history, then apply all nine migrations
+- [x] Link deliberately, confirm empty remote history, then apply the first nine migrations
       once with `pnpm db:push`.
 - [x] Confirm remote migration history matches all local migrations.
 - [x] Generate linked database types and confirm no schema difference. The hosted
@@ -101,6 +103,22 @@ repository to its development-safe state.
 
 Exit: clean local replay and pgTAP pass; production schema is migrated without seed
 or reset operations; backup and restore ownership are assigned.
+
+### Security Advisor review
+
+The application intentionally exposes eight `SECURITY DEFINER` RPC functions to
+the `authenticated` role. They implement atomic operations that cannot be expressed
+safely as direct table writes. Each function has an empty fixed `search_path`,
+derives or verifies ownership with `auth.uid()`, rejects cross-user resources, and
+is covered by database authorization tests. `PUBLIC` and `anon` execution are
+revoked. Supabase Security Advisor reports authenticated execution as a warning;
+these eight warnings are accepted because removing the grants would break the
+corresponding signed-in workflows.
+
+Supabase Free does not include leaked-password protection. Keep strong password
+validation, confirmed email ownership, custom SMTP, and tested password recovery;
+record the Advisor warning as a Free-plan limitation rather than silently treating
+the control as enabled.
 
 ## R2 - Production authentication
 
@@ -234,5 +252,8 @@ manual production-data cleanup is required.
 - [Supabase deployment and branching](https://supabase.com/docs/guides/deployment)
 - [Supabase Auth redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls)
 - [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
+- [Supabase database advisors](https://supabase.com/docs/guides/database/database-advisors)
+- [Supabase database function privileges](https://supabase.com/docs/guides/database/functions)
+- [Supabase plan feature comparison](https://supabase.com/pricing)
 - [Vercel environments](https://vercel.com/docs/deployments/environments)
 - [Vercel environment variables](https://vercel.com/docs/environment-variables)

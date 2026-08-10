@@ -20,6 +20,7 @@ blob-report/
 .env
 .env.*
 !.env.example
+recovery-codes.txt
 
 # Vercel
 .vercel/
