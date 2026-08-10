@@ -403,6 +403,9 @@ and a physical mobile browser.
 
 ## 9. Hardening and deployment
 
+**Status:** in progress. Execution and evidence are tracked in the
+[production launch runbook](development/PRODUCTION_LAUNCH.md).
+
 ### Work
 
 - Complete critical Playwright journeys in desktop Chromium and emulated mobile, with targeted Firefox/WebKit coverage.

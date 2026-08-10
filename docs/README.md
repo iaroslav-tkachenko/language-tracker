@@ -2,9 +2,8 @@
 
 This directory is the documentation home for Language Tracker. It is organized so that a product owner, designer, engineer, or tester can start from the same approved product baseline and follow the level of detail relevant to their work.
 
-**Current status:** Phases 0, 1, and 2 are complete and merged. Phase 3
-Vocabulary is implemented and product-owner approved; automated pull-request
-verification is in progress.
+**Current status:** Product Phases 0-5 are complete, verified, and merged. The
+project is now in the hardening and production-launch stage.
 
 ## Start here
 
@@ -51,6 +50,10 @@ flowchart TD
 - [Implementation plan](IMPLEMENTATION_PLAN.md) — the current Phase 0–4 delivery sequence, review milestones, risks, exit criteria, and definition of done.
 - [Supabase setup and verification](development/SUPABASE_SETUP.md) — hosted/local setup, migrations, generated types, authentication redirects, and Phase 0 checks.
 - [Repository instructions](../AGENTS.md) — rules that apply to automated and human contributors.
+
+Additional release guide:
+
+- [Production launch runbook](development/PRODUCTION_LAUNCH.md) - ordered release, data-safety, deployment, verification, recovery, and soft-launch gates.
 
 ## Documentation conventions
 
