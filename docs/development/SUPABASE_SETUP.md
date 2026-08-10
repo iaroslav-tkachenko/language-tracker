@@ -1,6 +1,11 @@
-# Supabase Setup and Phase 0 Verification
+# Supabase Development Setup and Verification
 
 This guide connects Language Tracker to Supabase without committing credentials. The hosted-project path is recommended for product review. A local Docker-based stack is used for repeatable database and RLS tests.
+
+This document covers development and repeatable local verification. Before
+touching a production project, follow the ordered safeguards in the
+[production launch runbook](PRODUCTION_LAUNCH.md). In particular, never run a
+database reset against a linked production project.
 
 ## 1. Prerequisites
 
