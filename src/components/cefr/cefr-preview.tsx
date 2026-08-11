@@ -268,21 +268,21 @@ const levelRecommendations: Record<
   },
 };
 const studyTransitions: Record<Exclude<CefrLevel, "C2">, number> = {
-  A0: 100,
-  A1: 110,
-  A2: 170,
-  B1: 200,
-  B2: 250,
-  C1: 350,
+  A0: 40,
+  A1: 60,
+  A2: 140,
+  B1: 240,
+  B2: 300,
+  C1: 450,
 };
 const studyBaselines: Record<CefrLevel, number> = {
   A0: 0,
-  A1: 100,
-  A2: 210,
-  B1: 380,
-  B2: 580,
-  C1: 830,
-  C2: 1180,
+  A1: 40,
+  A2: 100,
+  B1: 240,
+  B2: 480,
+  C1: 780,
+  C2: 1230,
 };
 const vocabularyMidpoints: Record<CefrLevel, number> = {
   A0: 0,
@@ -864,16 +864,69 @@ function Disclosure() {
         <div>
           <strong className="text-slate-900">Study Time</strong>
           <p className="mt-2">
-            Reference ranges and values used for calculations:
+            The table shows typical hour ranges for each level step, the exact
+            value the app uses for calculations, and the cumulative totals from
+            A0.
           </p>
-          <ul className="mt-3 space-y-1.5">
-            <li>A0 to A1: 80–120 hours (calculation value: 100 hours)</li>
-            <li>A1 to A2: 90–140 hours (calculation value: 110 hours)</li>
-            <li>A2 to B1: 140–200 hours (calculation value: 170 hours)</li>
-            <li>B1 to B2: 160–240 hours (calculation value: 200 hours)</li>
-            <li>B2 to C1: 200–300 hours (calculation value: 250 hours)</li>
-            <li>C1 to C2: 280–450 hours (calculation value: 350 hours)</li>
-          </ul>
+          <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200">
+            <table className="min-w-[760px] text-left text-sm">
+              <thead className="border-b border-slate-200 text-xs font-bold tracking-wide text-slate-500 uppercase">
+                <tr>
+                  <th className="px-3 py-3">Step</th>
+                  <th className="px-3 py-3">Typical hours for this step</th>
+                  <th className="px-3 py-3">Hours used in the app</th>
+                  <th className="px-3 py-3">Total typical hours from A0</th>
+                  <th className="px-3 py-3">Total hours used in the app</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                <tr>
+                  <th className="px-3 py-3">A0 {"->"} A1</th>
+                  <td className="px-3 py-3">40-60 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">40 h</td>
+                  <td className="px-3 py-3">40-60 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">40 h</td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">A1 {"->"} A2</th>
+                  <td className="px-3 py-3">60-90 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">60 h</td>
+                  <td className="px-3 py-3">100-150 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">100 h</td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">A2 {"->"} B1</th>
+                  <td className="px-3 py-3">140-200 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">140 h</td>
+                  <td className="px-3 py-3">240-350 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">240 h</td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">B1 {"->"} B2</th>
+                  <td className="px-3 py-3">160-240 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">240 h</td>
+                  <td className="px-3 py-3">400-590 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">480 h</td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">B2 {"->"} C1</th>
+                  <td className="px-3 py-3">200-300 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">300 h</td>
+                  <td className="px-3 py-3">600-890 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">780 h</td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">C1 {"->"} C2</th>
+                  <td className="px-3 py-3">280-450 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">450 h</td>
+                  <td className="px-3 py-3">880-1,340 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    1,230 h
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <p className="mt-4 border-t border-slate-100 pt-3">
             These figures are based on averaged data from Cambridge English, the
             Goethe-Institut, and European language institutes. They are
@@ -883,16 +936,71 @@ function Disclosure() {
         <div>
           <strong className="text-slate-900">Vocabulary</strong>
           <p className="mt-2">
-            Reference ranges and values used for calculations:
+            The table shows typical vocabulary ranges for each level, and the
+            exact value the app uses for calculations.
           </p>
-          <ul className="mt-3 space-y-1.5">
-            <li>A1: 700–1,200 words (calculation value: 900 words)</li>
-            <li>A2: 1,200–2,000 words (calculation value: 1,600 words)</li>
-            <li>B1: 2,000–3,000 words (calculation value: 2,500 words)</li>
-            <li>B2: 3,000–4,500 words (calculation value: 3,700 words)</li>
-            <li>C1: 4,000–6,000 words (calculation value: 5,000 words)</li>
-            <li>C2: 5,000–8,000+ words (calculation value: 7,000 words)</li>
-          </ul>
+          <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200">
+            <table className="min-w-[500px] text-left text-sm">
+              <thead className="border-b border-slate-200 text-xs font-bold tracking-wide text-slate-500 uppercase">
+                <tr>
+                  <th className="px-3 py-3">Level</th>
+                  <th className="px-3 py-3">Typical vocabulary range</th>
+                  <th className="px-3 py-3">Words used in the app</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                <tr>
+                  <th className="px-3 py-3">A0</th>
+                  <td className="px-3 py-3">0 words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    0 words
+                  </td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">A1</th>
+                  <td className="px-3 py-3">700-1,200 words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    900 words
+                  </td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">A2</th>
+                  <td className="px-3 py-3">1,200-2,000 words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    1,600 words
+                  </td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">B1</th>
+                  <td className="px-3 py-3">2,000-3,000 words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    2,500 words
+                  </td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">B2</th>
+                  <td className="px-3 py-3">3,000-4,500 words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    3,700 words
+                  </td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">C1</th>
+                  <td className="px-3 py-3">4,000-6,000 words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    5,000 words
+                  </td>
+                </tr>
+                <tr>
+                  <th className="px-3 py-3">C2</th>
+                  <td className="px-3 py-3">5,000-8,000+ words</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">
+                    7,000 words
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <p className="mt-4 border-t border-slate-100 pt-3">
             These ranges are based on vocabulary research by Milton and by
             Finlayson, Marsden, and Hawkes. They are not official CEFR

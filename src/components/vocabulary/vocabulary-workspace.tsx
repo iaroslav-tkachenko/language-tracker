@@ -33,6 +33,7 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import { ForecastCalculationHelp } from "@/components/cefr/forecast-calculation-help";
 import {
   highestLevelDescription,
   progressForecastDescription,
@@ -51,9 +52,6 @@ import {
 import {
   formatVocabularyPace,
   formatVocabularyWords,
-  VOCABULARY_DISCLOSURE_INTRO,
-  VOCABULARY_DISCLOSURE_ITEMS,
-  VOCABULARY_DISCLOSURE_NOTE,
   VOCABULARY_MODEL_VERSION,
   type VocabularyForecast,
   type VocabularyPaceEstimate,
@@ -391,22 +389,10 @@ function VocabularyForecastCard({
         </div>
       </div>
 
-      <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <summary className="cursor-pointer text-sm font-bold text-slate-700">
-          How we calculate this
-        </summary>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          {VOCABULARY_DISCLOSURE_INTRO}
-        </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600">
-          {VOCABULARY_DISCLOSURE_ITEMS.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          {VOCABULARY_DISCLOSURE_NOTE}
-        </p>
-      </details>
+      <ForecastCalculationHelp
+        effectiveDate={forecast.effectiveDate}
+        mode="vocabulary"
+      />
     </section>
   );
 }

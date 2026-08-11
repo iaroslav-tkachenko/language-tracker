@@ -2,6 +2,7 @@
 
 import { BookOpen, Clock3 } from "lucide-react";
 
+import { ForecastCalculationHelp } from "@/components/cefr/forecast-calculation-help";
 import {
   PROGRESS_FORECAST_DESCRIPTION,
   highestLevelDescription,
@@ -285,6 +286,12 @@ function CompactForecastCard({
   );
 }
 
+function forecastEffectiveDate(
+  forecast: StudyTimeForecast | VocabularyForecast,
+) {
+  return forecast.status === "no-level" ? null : forecast.effectiveDate;
+}
+
 export function CefrProgressForecastCards({
   studyTimeForecast,
   vocabularyForecast,
@@ -292,6 +299,8 @@ export function CefrProgressForecastCards({
   studyTimeForecast: StudyTimeForecast;
   vocabularyForecast: VocabularyForecast;
 }) {
+  const effectiveDate = forecastEffectiveDate(studyTimeForecast);
+
   return (
     <section className="mt-6">
       <div className="mb-4">
@@ -316,6 +325,12 @@ export function CefrProgressForecastCards({
           title="Vocabulary progress"
         />
       </div>
+      {effectiveDate && (
+        <ForecastCalculationHelp
+          effectiveDate={effectiveDate}
+          mode="combined"
+        />
+      )}
     </section>
   );
 }

@@ -74,13 +74,13 @@ test.describe("Phase 4A CEFR visual review", () => {
     const studyProgress = page
       .getByRole("heading", { name: "Study Time progress" })
       .locator("xpath=ancestor::section[1]");
-    await expect(studyProgress.getByText("≈ 380 h")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 240 h")).toBeVisible();
     await expect(studyProgress.getByText("+60 hours")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 440 h now")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 580 h total")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 140 hours left")).toBeVisible();
-    await expect(studyProgress.getByText("30% completed")).toBeVisible();
-    await expect(studyProgress.getByText(/200 hour interval/i)).toHaveCount(0);
+    await expect(studyProgress.getByText("≈ 300 h now")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 480 h total")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 180 hours left")).toBeVisible();
+    await expect(studyProgress.getByText("25% completed")).toBeVisible();
+    await expect(studyProgress.getByText(/240 hour interval/i)).toHaveCount(0);
     await expect(studyProgress.getByText("Forecast to reach B2")).toBeVisible();
     await expect(
       studyProgress.getByText("Last 7 days", { exact: true }),
@@ -117,12 +117,8 @@ test.describe("Phase 4A CEFR visual review", () => {
     await expect(page.getByText(/lemmas?/i)).toHaveCount(0);
 
     await page.getByText("How these estimates work").click();
-    await expect(
-      page.getByText("A0 to A1: 80–120 hours (calculation value: 100 hours)"),
-    ).toBeVisible();
-    await expect(
-      page.getByText("C2: 5,000–8,000+ words (calculation value: 7,000 words)"),
-    ).toBeVisible();
+    await expect(page.getByText("Total typical hours from A0")).toBeVisible();
+    await expect(page.getByText("5,000-8,000+ words")).toBeVisible();
     await expect(
       page.getByText(
         "These ranges are based on vocabulary research by Milton and by Finlayson, Marsden, and Hawkes. They are not official CEFR standards.",
@@ -200,7 +196,7 @@ test.describe("Phase 4A CEFR visual review", () => {
 
     await page.getByLabel("State").selectOption("c2");
     await expect(page.getByRole("heading", { name: "Level C2" })).toBeVisible();
-    await expect(page.getByText("> 1,240 hours")).toBeVisible();
+    await expect(page.getByText("> 1,290 hours")).toBeVisible();
     await expect(page.getByText("> 7,400 words")).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /Weekly plan to reach/ }),
