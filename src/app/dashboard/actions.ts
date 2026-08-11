@@ -22,7 +22,7 @@ export type ResourceActionState = {
   resourceId?: string;
   resourceName?: string;
   insertedCount?: number;
-  preservedCount?: number;
+  updatedCount?: number;
 };
 
 function cefrMutationMessage(error: { code?: string; message: string }) {
@@ -538,7 +538,7 @@ export async function createVocabularyTotalBatch(
     status: "success",
     message: "Vocabulary date range saved.",
     insertedCount: data.inserted_count,
-    preservedCount: data.preserved_count,
+    updatedCount: data.updated_count,
   };
 }
 

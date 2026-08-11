@@ -531,10 +531,10 @@ export function VocabularyWorkspace({
           : rangeCount > 366
             ? "The date range can contain at most 366 days."
             : null;
-  const preservedPreviewCount = visibleTotals.filter(
+  const updatedPreviewCount = visibleTotals.filter(
     (total) => total.studyDate >= rangeStart && total.studyDate <= rangeEnd,
   ).length;
-  const newPreviewCount = Math.max(0, rangeCount - preservedPreviewCount);
+  const newPreviewCount = Math.max(0, rangeCount - updatedPreviewCount);
 
   function navigateToDate(dateKey: string) {
     if (reviewMode) {
@@ -596,21 +596,27 @@ export function VocabularyWorkspace({
   function applyReviewBatch() {
     setReviewTotalsByBoard((current) => {
       const boardTotals = current[activeBoard.id] ?? [];
-      const occupiedDates = new Set(
-        boardTotals.map((total) => total.studyDate),
+      const nextTotals = new Map(
+        boardTotals.map((total) => [total.studyDate, total]),
       );
-      const additions = Array.from({ length: rangeCount }, (_, index) => {
+
+      Array.from({ length: rangeCount }, (_, index) => {
         const studyDate = shiftDate(rangeStart, index);
-        return {
-          id: `53000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+        const existingTotal = nextTotals.get(studyDate);
+        nextTotals.set(studyDate, {
+          id:
+            existingTotal?.id ??
+            `53000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
           studyDate,
           wordsLearned: parsedWords,
-        };
-      }).filter((total) => !occupiedDates.has(total.studyDate));
+        });
+      });
 
       return {
         ...current,
-        [activeBoard.id]: [...boardTotals, ...additions],
+        [activeBoard.id]: [...nextTotals.values()].sort((left, right) =>
+          left.studyDate.localeCompare(right.studyDate),
+        ),
       };
     });
     closeForm();
@@ -1274,12 +1280,12 @@ export function VocabularyWorkspace({
                       REVIEW DATE RANGE
                     </p>
                     <h3 className="mt-1 text-xl font-bold text-slate-950">
-                      Add totals to {newPreviewCount} empty{" "}
-                      {newPreviewCount === 1 ? "date" : "dates"}?
+                      Save totals for {rangeCount}{" "}
+                      {rangeCount === 1 ? "date" : "dates"}?
                     </h3>
                     <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                       <div>
-                        <dt className="text-slate-500">Words per empty date</dt>
+                        <dt className="text-slate-500">Words per date</dt>
                         <dd className="mt-0.5 font-semibold text-slate-900">
                           {wordsLabel(parsedWords)}
                         </dd>
@@ -1299,10 +1305,11 @@ export function VocabularyWorkspace({
                       </div>
                     </dl>
                     <p className="mt-4 text-sm leading-6 text-slate-600">
-                      {preservedPreviewCount} existing{" "}
-                      {preservedPreviewCount === 1 ? "total" : "totals"} will be
-                      kept unchanged. Only empty dates will receive the new
-                      value.
+                      {newPreviewCount} empty{" "}
+                      {newPreviewCount === 1 ? "date" : "dates"} will be
+                      created. {updatedPreviewCount} already saved{" "}
+                      {updatedPreviewCount === 1 ? "date" : "dates"} will be
+                      overwritten with the new value.
                     </p>
                   </div>
                   <form
@@ -1370,11 +1377,11 @@ export function VocabularyWorkspace({
                     Add word totals by date range
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Existing daily totals are preserved. The new value is added
-                    only to empty dates.
+                    Existing daily totals in the selected range are overwritten
+                    with the new value.
                   </p>
                   <label className="mt-4 block font-semibold text-slate-950">
-                    Words learned per empty date
+                    Words learned per date
                     <input
                       type="number"
                       min={0}
@@ -1421,7 +1428,7 @@ export function VocabularyWorkspace({
                   ) : (
                     <p className="mt-2 text-sm font-medium text-slate-600">
                       {rangeCount} {rangeCount === 1 ? "date" : "dates"}:{" "}
-                      {newPreviewCount} empty, {preservedPreviewCount} already
+                      {newPreviewCount} empty, {updatedPreviewCount} already
                       saved
                     </p>
                   )}

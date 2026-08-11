@@ -266,10 +266,11 @@ current-period totals, or streaks until their date arrives.
 The user can save the same final word total across an inclusive date range.
 
 - The range must remain inside one calendar year and contain at most 366 dates.
-- Existing daily vocabulary totals are preserved unchanged.
-- The new value is created only for dates without a vocabulary record.
+- Existing daily vocabulary totals in the selected range are overwritten with
+  the new value.
+- The new value is created for dates without a vocabulary record.
 - The confirmation shows the inclusive range, requested word total, empty-date
-  count, and existing-date count before submission.
+  count, and overwritten existing-date count before submission.
 - The database operation is atomic and idempotent for one client-generated
   operation identifier.
 - Zero is a valid batch value and creates explicit red zero-word dates.

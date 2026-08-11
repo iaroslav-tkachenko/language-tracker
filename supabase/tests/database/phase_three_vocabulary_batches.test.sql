@@ -122,8 +122,8 @@ select is(
     where board_id = '61000000-0000-4000-8000-000000000001'
       and study_date = date '2026-07-03'
   ),
-  10,
-  'a value from an earlier batch is preserved'
+  20,
+  'a value from an earlier batch is overwritten'
 );
 select is(
   (
@@ -132,8 +132,8 @@ select is(
     where board_id = '61000000-0000-4000-8000-000000000001'
       and study_date = date '2026-07-04'
   ),
-  7,
-  'a single-day value is preserved'
+  20,
+  'a single-day value is overwritten'
 );
 select is(
   (
@@ -146,12 +146,12 @@ select is(
 );
 select is(
   (
-    select preserved_count
+    select updated_count
     from public.vocabulary_total_batches
     where id = '62000000-0000-4000-8000-000000000002'
   ),
   2::smallint,
-  'the batch reports two preserved dates'
+  'the batch reports two updated dates'
 );
 
 select lives_ok(
