@@ -16,8 +16,15 @@ test.describe("Phase 2 date-range sessions", () => {
   }, testInfo) => {
     const suffix = testInfo.project.name;
     const boardName = `Batch ${suffix}`;
+    const today = "2026-07-26";
     const startDate = "2026-07-20";
     const endDate = "2026-07-22";
+    const firstRangeDay = page.getByRole("button", {
+      name: /Monday, July 20, 2026: 30 minutes/,
+    });
+    const duplicatedRangeDay = page.getByRole("button", {
+      name: /Monday, July 20, 2026: 60 minutes/,
+    });
 
     await page.goto("/sign-in");
     await page.getByLabel("Email").fill(email ?? "");
@@ -28,6 +35,12 @@ test.describe("Phase 2 date-range sessions", () => {
     await page.goto("/settings");
     const boardLink = await createLanguageBoardFromSettings(page, boardName);
     await boardLink.click();
+    await expect(page).toHaveURL(/\/dashboard/);
+    const boardId = new URL(page.url()).searchParams.get("board");
+    expect(boardId).toBeTruthy();
+    await page.goto(
+      `/dashboard?board=${boardId}&date=${startDate}&today=${today}`,
+    );
 
     async function createRange() {
       await page.getByRole("button", { name: "Add study session" }).click();
@@ -53,21 +66,15 @@ test.describe("Phase 2 date-range sessions", () => {
     }
 
     await createRange();
-    await page
-      .getByRole("button", {
-        name: /Monday, July 20, 2026: 30 minutes/,
-      })
-      .click();
+    await expect(firstRangeDay).toBeVisible({ timeout: 15_000 });
+    await firstRangeDay.click();
     await expect(
       page.locator("article").filter({ hasText: "Reading" }),
     ).toHaveCount(1);
 
     await createRange();
-    await page
-      .getByRole("button", {
-        name: /Monday, July 20, 2026: 60 minutes/,
-      })
-      .click();
+    await expect(duplicatedRangeDay).toBeVisible({ timeout: 15_000 });
+    await duplicatedRangeDay.click();
     const matchingCards = page
       .locator("article")
       .filter({ hasText: "Reading" });
