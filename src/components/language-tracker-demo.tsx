@@ -22,7 +22,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode, type WheelEvent } from "react";
 
 type View = "study" | "statistics";
 type StudyEntry = {
@@ -137,6 +137,10 @@ function formatDuration(minutes: number) {
   const hours = Math.floor(minutes / 60);
   const remainder = minutes % 60;
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
+}
+
+function preventWheelNumberChange(event: WheelEvent<HTMLInputElement>) {
+  event.currentTarget.blur();
 }
 
 function heatColor(
@@ -1044,6 +1048,7 @@ function DayPanel({
             placeholder="Custom minutes"
             className="mt-2 w-full rounded-xl border border-dashed border-slate-400 px-3 py-2.5 text-center text-sm"
             value={customDuration}
+            onWheel={preventWheelNumberChange}
             onChange={(event) => onCustomDuration(event.target.value)}
           />
 

@@ -19,7 +19,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import {
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+  type WheelEvent,
+} from "react";
 
 import {
   createLanguageBoardAndRedirect,
@@ -577,6 +583,10 @@ export function VocabularyWorkspace({
     if (!canSave || rangeError) return;
     setBatchOperationId(createOperationId());
     setRangeReviewOpen(true);
+  }
+
+  function preventWheelNumberChange(event: WheelEvent<HTMLInputElement>) {
+    event.currentTarget.blur();
   }
 
   function applyReviewBatch() {
@@ -1376,6 +1386,7 @@ export function VocabularyWorkspace({
                       inputMode="numeric"
                       autoFocus
                       value={wordsLearned}
+                      onWheel={preventWheelNumberChange}
                       onChange={(event) => setWordsLearned(event.target.value)}
                       placeholder="Enter a whole number"
                       className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 px-4 text-lg outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
@@ -1511,6 +1522,7 @@ export function VocabularyWorkspace({
                   inputMode="numeric"
                   autoFocus
                   value={wordsLearned}
+                  onWheel={preventWheelNumberChange}
                   onChange={(event) => setWordsLearned(event.target.value)}
                   placeholder="Enter a whole number"
                   className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 px-4 text-lg outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"

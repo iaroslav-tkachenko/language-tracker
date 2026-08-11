@@ -19,7 +19,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import {
+  useActionState,
+  useEffect,
+  useMemo,
+  useState,
+  type WheelEvent,
+} from "react";
 
 import {
   createActivityType,
@@ -642,6 +648,10 @@ export function BoardWorkspace({
     setFormOpen(true);
   }
 
+  function preventWheelNumberChange(event: WheelEvent<HTMLInputElement>) {
+    event.currentTarget.blur();
+  }
+
   function selectCreateMode(mode: "single" | "range") {
     setCreateMode(mode);
     setRangeReviewOpen(false);
@@ -656,6 +666,365 @@ export function BoardWorkspace({
     if (!canSave || rangeError) return;
     setBatchOperationId(createOperationId());
     setRangeReviewOpen(true);
+  }
+
+  function renderEntryForm(className = "mt-4") {
+    return (
+      <div
+        className={`${className} rounded-2xl border border-slate-200 p-4 sm:p-5`}
+      >
+        {!editingEntryId && (
+          <div
+            role="group"
+            aria-label="Study session date mode"
+            className="mb-4 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
+          >
+            <button
+              type="button"
+              onClick={() => selectCreateMode("single")}
+              aria-pressed={createMode === "single"}
+              className={`min-h-10 rounded-lg px-3 text-sm font-semibold ${
+                createMode === "single"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-slate-600 hover:text-slate-950"
+              }`}
+            >
+              Single day
+            </button>
+            <button
+              type="button"
+              onClick={() => selectCreateMode("range")}
+              aria-pressed={createMode === "range"}
+              className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold ${
+                createMode === "range"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-slate-600 hover:text-slate-950"
+              }`}
+            >
+              <CalendarRange aria-hidden="true" className="size-4" />
+              Date range
+            </button>
+          </div>
+        )}
+
+        {rangeReviewOpen && !editingEntryId ? (
+          <div aria-labelledby="range-review-heading">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5">
+              <p className="text-sm font-semibold text-blue-700">
+                REVIEW DATE RANGE
+              </p>
+              <h3
+                id="range-review-heading"
+                className="mt-1 text-xl font-bold text-slate-950"
+              >
+                Add {rangeCount} study{" "}
+                {rangeCount === 1 ? "session" : "sessions"}?
+              </h3>
+              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-slate-500">Activity</dt>
+                  <dd className="mt-0.5 font-semibold text-slate-900">
+                    {activityById.get(activityId)?.name ??
+                      availableActivities.find(
+                        (activity) => activity.id === activityId,
+                      )?.name}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-slate-500">Daily duration</dt>
+                  <dd className="mt-0.5 font-semibold text-slate-900">
+                    {formatDuration(Number(resolvedDuration))}
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500">Inclusive dates</dt>
+                  <dd className="mt-0.5 font-semibold text-slate-900">
+                    {formatLongDate(rangeStart)} вЂ“ {formatLongDate(rangeEnd)}
+                  </dd>
+                </div>
+              </dl>
+              <p className="mt-4 text-sm leading-6 text-slate-600">
+                One independent session will be added to every date. Existing
+                sessions, including matching ones, will be kept.
+              </p>
+            </div>
+
+            <form action={batchAction} className="mt-5 flex flex-wrap gap-2">
+              <input
+                type="hidden"
+                name="operationId"
+                value={batchOperationId ?? ""}
+              />
+              <input type="hidden" name="boardId" value={selectedBoard.id} />
+              <input type="hidden" name="activityTypeId" value={activityId} />
+              <input
+                type="hidden"
+                name="durationMinutes"
+                value={resolvedDuration ?? ""}
+              />
+              <input type="hidden" name="startDate" value={rangeStart} />
+              <input type="hidden" name="endDate" value={rangeEnd} />
+              <button
+                type="submit"
+                disabled={batchPending}
+                className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:bg-blue-300"
+              >
+                {batchPending ? "Adding sessions..." : "Confirm and add"}
+              </button>
+              <button
+                type="button"
+                disabled={batchPending}
+                onClick={() => {
+                  setRangeReviewOpen(false);
+                  setBatchOperationId(null);
+                }}
+                className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-white disabled:text-slate-400"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                disabled={batchPending}
+                onClick={resetEntryForm}
+                className="min-h-12 rounded-xl px-4 font-semibold text-slate-600 hover:bg-white disabled:text-slate-400"
+              >
+                Cancel
+              </button>
+            </form>
+            {batchState.status === "error" && (
+              <p role="alert" className="mt-2 text-sm text-red-700">
+                {batchState.message}
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            <h3 className="font-semibold text-slate-950">
+              {editingEntryId ? "Edit study session" : "How long?"}
+            </h3>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {quickDurations.map((minutes) => (
+                <button
+                  key={minutes}
+                  type="button"
+                  onClick={() => {
+                    setDuration(minutes);
+                    setCustomDuration("");
+                  }}
+                  className={`min-h-11 rounded-xl border px-2 text-sm font-medium ${
+                    duration === minutes && !customDuration
+                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  {minutes} min
+                </button>
+              ))}
+            </div>
+            <input
+              type="number"
+              min={1}
+              max={1440}
+              inputMode="numeric"
+              value={customDuration}
+              onWheel={preventWheelNumberChange}
+              onChange={(event) => {
+                setCustomDuration(event.target.value);
+                setDuration(null);
+              }}
+              placeholder="Custom minutes"
+              aria-label="Custom minutes"
+              className="mt-3 min-h-11 w-full rounded-xl border border-dashed border-slate-400 px-4"
+            />
+
+            {createMode === "range" && !editingEntryId && (
+              <fieldset className="mt-5">
+                <legend className="font-semibold text-slate-950">
+                  Date range
+                </legend>
+                <p className="mt-1 text-sm text-slate-500">
+                  Both dates are included. The range must stay within one
+                  calendar year.
+                </p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    Start date
+                    <input
+                      type="date"
+                      value={rangeStart}
+                      onChange={(event) => {
+                        setRangeStart(event.target.value);
+                        setRangeReviewOpen(false);
+                        setBatchOperationId(null);
+                      }}
+                      className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3"
+                    />
+                  </label>
+                  <label className="text-sm font-medium text-slate-700">
+                    End date
+                    <input
+                      type="date"
+                      value={rangeEnd}
+                      onChange={(event) => {
+                        setRangeEnd(event.target.value);
+                        setRangeReviewOpen(false);
+                        setBatchOperationId(null);
+                      }}
+                      className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3"
+                    />
+                  </label>
+                </div>
+                {rangeError ? (
+                  <p className="mt-2 text-sm text-red-700">{rangeError}</p>
+                ) : (
+                  <p className="mt-2 text-sm font-medium text-slate-600">
+                    {rangeCount} {rangeCount === 1 ? "date" : "dates"} selected
+                  </p>
+                )}
+              </fieldset>
+            )}
+
+            <h3 className="mt-5 font-semibold text-slate-950">Activity</h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {availableActivities.map((activity) => {
+                return (
+                  <button
+                    key={activity.id}
+                    type="button"
+                    onClick={() => setActivityId(activity.id)}
+                    className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-medium ${
+                      activityId === activity.id
+                        ? "border-blue-600 bg-blue-50 text-blue-700"
+                        : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <ActivityIcon
+                      systemKey={activity.systemKey}
+                      aria-hidden="true"
+                      className="size-4"
+                    />
+                    {activity.name}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setOtherOpen((current) => !current)}
+                className="inline-flex min-h-10 items-center gap-1 rounded-full border border-dashed border-slate-400 px-3 text-sm font-medium text-slate-600 hover:border-blue-500 hover:text-blue-700"
+              >
+                <Plus aria-hidden="true" className="size-4" />
+                Other
+              </button>
+            </div>
+
+            {otherOpen && (
+              <form action={activityAction} className="mt-3 flex gap-2">
+                <input
+                  name="name"
+                  required
+                  maxLength={50}
+                  autoComplete="off"
+                  placeholder="Custom activity name"
+                  className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 px-4"
+                />
+                <button
+                  type="submit"
+                  disabled={activityPending}
+                  className="rounded-xl bg-slate-900 px-4 font-semibold text-white disabled:bg-slate-400"
+                >
+                  {activityPending ? "Adding..." : "Add"}
+                </button>
+              </form>
+            )}
+            {activityState.status === "error" && (
+              <p role="alert" className="mt-2 text-sm text-red-700">
+                {activityState.message}
+              </p>
+            )}
+
+            {createMode === "range" && !editingEntryId ? (
+              <div className="mt-6 flex gap-2">
+                <button
+                  type="button"
+                  onClick={openRangeReview}
+                  disabled={!canSave || Boolean(rangeError)}
+                  className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
+                >
+                  Review range
+                </button>
+                <button
+                  type="button"
+                  onClick={resetEntryForm}
+                  className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <form
+                action={editingEntryId ? updateAction : entryAction}
+                className="mt-6 flex gap-2"
+              >
+                {editingEntryId ? (
+                  <input type="hidden" name="entryId" value={editingEntryId} />
+                ) : (
+                  <>
+                    <input
+                      type="hidden"
+                      name="boardId"
+                      value={selectedBoard.id}
+                    />
+                    <input
+                      type="hidden"
+                      name="studyDate"
+                      value={selectedDate}
+                    />
+                  </>
+                )}
+                <input type="hidden" name="activityTypeId" value={activityId} />
+                <input
+                  type="hidden"
+                  name="durationMinutes"
+                  value={resolvedDuration ?? ""}
+                />
+                <button
+                  type="submit"
+                  disabled={
+                    !canSave || (editingEntryId ? updatePending : entryPending)
+                  }
+                  className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
+                >
+                  {editingEntryId
+                    ? updatePending
+                      ? "Updating..."
+                      : "Update"
+                    : entryPending
+                      ? "Saving..."
+                      : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetEntryForm}
+                  className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+              </form>
+            )}
+            {entryState.status === "error" && (
+              <p role="alert" className="mt-2 text-sm text-red-700">
+                {entryState.message}
+              </p>
+            )}
+            {updateState.status === "error" && (
+              <p role="alert" className="mt-2 text-sm text-red-700">
+                {updateState.message}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    );
   }
 
   function navigateYear(offset: number) {
@@ -1161,54 +1530,56 @@ export function BoardWorkspace({
 
           <div className="mt-4 space-y-3">
             {selectedEntries.map((entry) => (
-              <article
-                key={entry.id}
-                className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <ActivityIcon
-                  systemKey={
-                    activityById.get(entry.activityTypeId)?.systemKey ?? null
-                  }
-                  aria-hidden="true"
-                  className="size-5 shrink-0 text-slate-500"
-                />
-                <strong className="text-lg text-slate-950">
-                  {formatDuration(entry.durationMinutes)}
-                </strong>
-                <span className="min-w-0 flex-1 text-slate-600">
-                  {activityById.get(entry.activityTypeId)?.name ??
-                    "Archived activity"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => beginEdit(entry)}
-                  aria-label={`Edit ${activityById.get(entry.activityTypeId)?.name ?? "study session"}`}
-                  className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-blue-50 hover:text-blue-700"
-                >
-                  <Pencil aria-hidden="true" className="size-4.5" />
-                </button>
-                <form
-                  action={deleteStudyEntry}
-                  onSubmit={(event) => {
-                    if (
-                      !window.confirm(
-                        "Delete this study session? This action cannot be undone.",
-                      )
-                    ) {
-                      event.preventDefault();
+              <div key={entry.id}>
+                <article className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <ActivityIcon
+                    systemKey={
+                      activityById.get(entry.activityTypeId)?.systemKey ?? null
                     }
-                  }}
-                >
-                  <input type="hidden" name="entryId" value={entry.id} />
+                    aria-hidden="true"
+                    className="size-5 shrink-0 text-slate-500"
+                  />
+                  <strong className="text-lg text-slate-950">
+                    {formatDuration(entry.durationMinutes)}
+                  </strong>
+                  <span className="min-w-0 flex-1 text-slate-600">
+                    {activityById.get(entry.activityTypeId)?.name ??
+                      "Archived activity"}
+                  </span>
                   <button
-                    type="submit"
-                    aria-label={`Delete ${activityById.get(entry.activityTypeId)?.name ?? "study session"}`}
-                    className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-700"
+                    type="button"
+                    onClick={() => beginEdit(entry)}
+                    aria-label={`Edit ${activityById.get(entry.activityTypeId)?.name ?? "study session"}`}
+                    className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-blue-50 hover:text-blue-700"
                   >
-                    <Trash2 aria-hidden="true" className="size-4.5" />
+                    <Pencil aria-hidden="true" className="size-4.5" />
                   </button>
-                </form>
-              </article>
+                  <form
+                    action={deleteStudyEntry}
+                    onSubmit={(event) => {
+                      if (
+                        !window.confirm(
+                          "Delete this study session? This action cannot be undone.",
+                        )
+                      ) {
+                        event.preventDefault();
+                      }
+                    }}
+                  >
+                    <input type="hidden" name="entryId" value={entry.id} />
+                    <button
+                      type="submit"
+                      aria-label={`Delete ${activityById.get(entry.activityTypeId)?.name ?? "study session"}`}
+                      className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 aria-hidden="true" className="size-4.5" />
+                    </button>
+                  </form>
+                </article>
+                {formOpen &&
+                  editingEntryId === entry.id &&
+                  renderEntryForm("mt-3")}
+              </div>
             ))}
             {selectedEntries.length === 0 && (
               <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center">
@@ -1246,385 +1617,9 @@ export function BoardWorkspace({
               <Plus aria-hidden="true" className="size-5" />
               Add study session
             </button>
-          ) : (
-            <div className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
-              {!editingEntryId && (
-                <div
-                  role="group"
-                  aria-label="Study session date mode"
-                  className="mb-4 grid grid-cols-2 rounded-xl bg-slate-100 p-1"
-                >
-                  <button
-                    type="button"
-                    onClick={() => selectCreateMode("single")}
-                    aria-pressed={createMode === "single"}
-                    className={`min-h-10 rounded-lg px-3 text-sm font-semibold ${
-                      createMode === "single"
-                        ? "bg-white text-blue-700 shadow-sm"
-                        : "text-slate-600 hover:text-slate-950"
-                    }`}
-                  >
-                    Single day
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => selectCreateMode("range")}
-                    aria-pressed={createMode === "range"}
-                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold ${
-                      createMode === "range"
-                        ? "bg-white text-blue-700 shadow-sm"
-                        : "text-slate-600 hover:text-slate-950"
-                    }`}
-                  >
-                    <CalendarRange aria-hidden="true" className="size-4" />
-                    Date range
-                  </button>
-                </div>
-              )}
-
-              {rangeReviewOpen && !editingEntryId ? (
-                <div aria-labelledby="range-review-heading">
-                  <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5">
-                    <p className="text-sm font-semibold text-blue-700">
-                      REVIEW DATE RANGE
-                    </p>
-                    <h3
-                      id="range-review-heading"
-                      className="mt-1 text-xl font-bold text-slate-950"
-                    >
-                      Add {rangeCount} study{" "}
-                      {rangeCount === 1 ? "session" : "sessions"}?
-                    </h3>
-                    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                      <div>
-                        <dt className="text-slate-500">Activity</dt>
-                        <dd className="mt-0.5 font-semibold text-slate-900">
-                          {activityById.get(activityId)?.name ??
-                            availableActivities.find(
-                              (activity) => activity.id === activityId,
-                            )?.name}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-slate-500">Daily duration</dt>
-                        <dd className="mt-0.5 font-semibold text-slate-900">
-                          {formatDuration(Number(resolvedDuration))}
-                        </dd>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <dt className="text-slate-500">Inclusive dates</dt>
-                        <dd className="mt-0.5 font-semibold text-slate-900">
-                          {formatLongDate(rangeStart)} –{" "}
-                          {formatLongDate(rangeEnd)}
-                        </dd>
-                      </div>
-                    </dl>
-                    <p className="mt-4 text-sm leading-6 text-slate-600">
-                      One independent session will be added to every date.
-                      Existing sessions, including matching ones, will be kept.
-                    </p>
-                  </div>
-
-                  <form
-                    action={batchAction}
-                    className="mt-5 flex flex-wrap gap-2"
-                  >
-                    <input
-                      type="hidden"
-                      name="operationId"
-                      value={batchOperationId ?? ""}
-                    />
-                    <input
-                      type="hidden"
-                      name="boardId"
-                      value={selectedBoard.id}
-                    />
-                    <input
-                      type="hidden"
-                      name="activityTypeId"
-                      value={activityId}
-                    />
-                    <input
-                      type="hidden"
-                      name="durationMinutes"
-                      value={resolvedDuration ?? ""}
-                    />
-                    <input type="hidden" name="startDate" value={rangeStart} />
-                    <input type="hidden" name="endDate" value={rangeEnd} />
-                    <button
-                      type="submit"
-                      disabled={batchPending}
-                      className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:bg-blue-300"
-                    >
-                      {batchPending ? "Adding sessions..." : "Confirm and add"}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={batchPending}
-                      onClick={() => {
-                        setRangeReviewOpen(false);
-                        setBatchOperationId(null);
-                      }}
-                      className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-white disabled:text-slate-400"
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="button"
-                      disabled={batchPending}
-                      onClick={resetEntryForm}
-                      className="min-h-12 rounded-xl px-4 font-semibold text-slate-600 hover:bg-white disabled:text-slate-400"
-                    >
-                      Cancel
-                    </button>
-                  </form>
-                  {batchState.status === "error" && (
-                    <p role="alert" className="mt-2 text-sm text-red-700">
-                      {batchState.message}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <h3 className="font-semibold text-slate-950">
-                    {editingEntryId ? "Edit study session" : "How long?"}
-                  </h3>
-                  <div className="mt-3 grid grid-cols-4 gap-2">
-                    {quickDurations.map((minutes) => (
-                      <button
-                        key={minutes}
-                        type="button"
-                        onClick={() => {
-                          setDuration(minutes);
-                          setCustomDuration("");
-                        }}
-                        className={`min-h-11 rounded-xl border px-2 text-sm font-medium ${
-                          duration === minutes && !customDuration
-                            ? "border-blue-600 bg-blue-50 text-blue-700"
-                            : "border-slate-300 text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        {minutes} min
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="number"
-                    min={1}
-                    max={1440}
-                    inputMode="numeric"
-                    value={customDuration}
-                    onChange={(event) => {
-                      setCustomDuration(event.target.value);
-                      setDuration(null);
-                    }}
-                    placeholder="Custom minutes"
-                    aria-label="Custom minutes"
-                    className="mt-3 min-h-11 w-full rounded-xl border border-dashed border-slate-400 px-4"
-                  />
-
-                  {createMode === "range" && !editingEntryId && (
-                    <fieldset className="mt-5">
-                      <legend className="font-semibold text-slate-950">
-                        Date range
-                      </legend>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Both dates are included. The range must stay within one
-                        calendar year.
-                      </p>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <label className="text-sm font-medium text-slate-700">
-                          Start date
-                          <input
-                            type="date"
-                            value={rangeStart}
-                            onChange={(event) => {
-                              setRangeStart(event.target.value);
-                              setRangeReviewOpen(false);
-                              setBatchOperationId(null);
-                            }}
-                            className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3"
-                          />
-                        </label>
-                        <label className="text-sm font-medium text-slate-700">
-                          End date
-                          <input
-                            type="date"
-                            value={rangeEnd}
-                            onChange={(event) => {
-                              setRangeEnd(event.target.value);
-                              setRangeReviewOpen(false);
-                              setBatchOperationId(null);
-                            }}
-                            className="mt-1 min-h-11 w-full rounded-xl border border-slate-300 px-3"
-                          />
-                        </label>
-                      </div>
-                      {rangeError ? (
-                        <p className="mt-2 text-sm text-red-700">
-                          {rangeError}
-                        </p>
-                      ) : (
-                        <p className="mt-2 text-sm font-medium text-slate-600">
-                          {rangeCount} {rangeCount === 1 ? "date" : "dates"}{" "}
-                          selected
-                        </p>
-                      )}
-                    </fieldset>
-                  )}
-
-                  <h3 className="mt-5 font-semibold text-slate-950">
-                    Activity
-                  </h3>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {availableActivities.map((activity) => {
-                      return (
-                        <button
-                          key={activity.id}
-                          type="button"
-                          onClick={() => setActivityId(activity.id)}
-                          className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-sm font-medium ${
-                            activityId === activity.id
-                              ? "border-blue-600 bg-blue-50 text-blue-700"
-                              : "border-slate-300 text-slate-700 hover:bg-slate-50"
-                          }`}
-                        >
-                          <ActivityIcon
-                            systemKey={activity.systemKey}
-                            aria-hidden="true"
-                            className="size-4"
-                          />
-                          {activity.name}
-                        </button>
-                      );
-                    })}
-                    <button
-                      type="button"
-                      onClick={() => setOtherOpen((current) => !current)}
-                      className="inline-flex min-h-10 items-center gap-1 rounded-full border border-dashed border-slate-400 px-3 text-sm font-medium text-slate-600 hover:border-blue-500 hover:text-blue-700"
-                    >
-                      <Plus aria-hidden="true" className="size-4" />
-                      Other
-                    </button>
-                  </div>
-
-                  {otherOpen && (
-                    <form action={activityAction} className="mt-3 flex gap-2">
-                      <input
-                        name="name"
-                        required
-                        maxLength={50}
-                        autoComplete="off"
-                        placeholder="Custom activity name"
-                        className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 px-4"
-                      />
-                      <button
-                        type="submit"
-                        disabled={activityPending}
-                        className="rounded-xl bg-slate-900 px-4 font-semibold text-white disabled:bg-slate-400"
-                      >
-                        {activityPending ? "Adding..." : "Add"}
-                      </button>
-                    </form>
-                  )}
-                  {activityState.status === "error" && (
-                    <p role="alert" className="mt-2 text-sm text-red-700">
-                      {activityState.message}
-                    </p>
-                  )}
-
-                  {createMode === "range" && !editingEntryId ? (
-                    <div className="mt-6 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={openRangeReview}
-                        disabled={!canSave || Boolean(rangeError)}
-                        className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
-                      >
-                        Review range
-                      </button>
-                      <button
-                        type="button"
-                        onClick={resetEntryForm}
-                        className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <form
-                      action={editingEntryId ? updateAction : entryAction}
-                      className="mt-6 flex gap-2"
-                    >
-                      {editingEntryId ? (
-                        <input
-                          type="hidden"
-                          name="entryId"
-                          value={editingEntryId}
-                        />
-                      ) : (
-                        <>
-                          <input
-                            type="hidden"
-                            name="boardId"
-                            value={selectedBoard.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="studyDate"
-                            value={selectedDate}
-                          />
-                        </>
-                      )}
-                      <input
-                        type="hidden"
-                        name="activityTypeId"
-                        value={activityId}
-                      />
-                      <input
-                        type="hidden"
-                        name="durationMinutes"
-                        value={resolvedDuration ?? ""}
-                      />
-                      <button
-                        type="submit"
-                        disabled={
-                          !canSave ||
-                          (editingEntryId ? updatePending : entryPending)
-                        }
-                        className="min-h-12 flex-1 rounded-xl bg-blue-600 px-5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
-                      >
-                        {editingEntryId
-                          ? updatePending
-                            ? "Updating..."
-                            : "Update"
-                          : entryPending
-                            ? "Saving..."
-                            : "Save"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={resetEntryForm}
-                        className="min-h-12 rounded-xl border border-slate-300 px-5 font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        Cancel
-                      </button>
-                    </form>
-                  )}
-                  {entryState.status === "error" && (
-                    <p role="alert" className="mt-2 text-sm text-red-700">
-                      {entryState.message}
-                    </p>
-                  )}
-                  {updateState.status === "error" && (
-                    <p role="alert" className="mt-2 text-sm text-red-700">
-                      {updateState.message}
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+          ) : !editingEntryId ? (
+            renderEntryForm()
+          ) : null}
         </section>
 
         {studyTimeForecast.status !== "no-level" && (
