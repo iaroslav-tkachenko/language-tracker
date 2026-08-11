@@ -440,12 +440,12 @@ reference data. It stores transition ranges and exact calculation differences:
 
 | Transition | Indicative hours | Calculation hours |
 | ---------- | ---------------: | ----------------: |
-| A0 → A1    |           80–120 |               100 |
-| A1 → A2    |           90–140 |               110 |
-| A2 → B1    |          140–200 |               170 |
-| B1 → B2    |          160–240 |               200 |
-| B2 → C1    |          200–300 |               250 |
-| C1 → C2    |          280–450 |               350 |
+| A0 → A1    |            40–60 |                40 |
+| A1 → A2    |            60–90 |                60 |
+| A2 → B1    |          140–200 |               140 |
+| B1 → B2    |          160–240 |               240 |
+| B2 → C1    |          200–300 |               300 |
+| C1 → C2    |          280–450 |               450 |
 
 For the latest effective declaration below C2:
 
@@ -503,15 +503,16 @@ progress.
 
 Study Time disclosure:
 
-> This estimate is based on averaged data from Cambridge English, the
-> Goethe-Institut, and European language institutes. It is an approximate guide,
-> not a guaranteed timeframe for reaching a level.
+> Study Time help shows the current level's effective date, the per-step
+> indicative hour ranges and exact calculation values, cumulative ranges from
+> A0, cumulative calculation values from A0, and a note that the forecast is an
+> approximate guide rather than a guaranteed timeframe.
 
 Vocabulary disclosure:
 
-> The indicative ranges are based on research into vocabulary size across CEFR
-> levels (Milton; Finlayson, Marsden & Hawkes) and are not official CEFR
-> standards.
+> Vocabulary help shows the current level's effective date, the indicative
+> vocabulary ranges, exact calculation values, and a note that stored word totals
+> are approximate daily signals rather than deduplicated vocabulary records.
 
 ### 8.2 Weekly recommendation model
 

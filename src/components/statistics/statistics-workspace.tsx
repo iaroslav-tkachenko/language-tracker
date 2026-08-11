@@ -27,6 +27,7 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import { ForecastCalculationHelp } from "@/components/cefr/forecast-calculation-help";
 import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
 import {
   PROGRESS_FORECAST_DESCRIPTION,
@@ -979,6 +980,7 @@ export function StatisticsWorkspace({
 
     return {
       level: currentCefrLevel.level,
+      effectiveDate: currentCefrLevel.effectiveDate,
       estimatedLearningMinutes:
         getStudyTimeBaselineMinutes(currentCefrLevel.level) + eligibleMinutes,
       estimatedWordsKnown:
@@ -1544,6 +1546,10 @@ export function StatisticsWorkspace({
                 title="Vocabulary progress"
               />
             </div>
+            <ForecastCalculationHelp
+              effectiveDate={cefrOverview.effectiveDate}
+              mode="combined"
+            />
           </section>
         )}
       </div>

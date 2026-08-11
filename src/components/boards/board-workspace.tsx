@@ -36,6 +36,7 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import { ForecastCalculationHelp } from "@/components/cefr/forecast-calculation-help";
 import {
   highestLevelDescription,
   progressForecastDescription,
@@ -54,9 +55,6 @@ import {
   formatEstimatedMonth,
   formatForecastHours,
   formatPaceMinutes,
-  STUDY_TIME_DISCLOSURE_INTRO,
-  STUDY_TIME_DISCLOSURE_ITEMS,
-  STUDY_TIME_DISCLOSURE_NOTE,
   type StudyTimeForecast,
   type StudyTimePaceEstimate,
 } from "@/lib/cefr/study-time";
@@ -402,22 +400,10 @@ function StudyTimeForecastCard({
         </div>
       </div>
 
-      <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <summary className="cursor-pointer text-sm font-bold text-slate-700">
-          How we calculate this
-        </summary>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          {STUDY_TIME_DISCLOSURE_INTRO}
-        </p>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600">
-          {STUDY_TIME_DISCLOSURE_ITEMS.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          {STUDY_TIME_DISCLOSURE_NOTE}
-        </p>
-      </details>
+      <ForecastCalculationHelp
+        effectiveDate={forecast.effectiveDate}
+        mode="study"
+      />
     </section>
   );
 }

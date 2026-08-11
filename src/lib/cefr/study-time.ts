@@ -7,38 +7,38 @@ export const STUDY_TIME_TRANSITIONS = [
   {
     from: "A0",
     to: "A1",
-    indicativeRangeHours: [80, 120],
-    calculationHours: 100,
+    indicativeRangeHours: [40, 60],
+    calculationHours: 40,
   },
   {
     from: "A1",
     to: "A2",
-    indicativeRangeHours: [90, 140],
-    calculationHours: 110,
+    indicativeRangeHours: [60, 90],
+    calculationHours: 60,
   },
   {
     from: "A2",
     to: "B1",
     indicativeRangeHours: [140, 200],
-    calculationHours: 170,
+    calculationHours: 140,
   },
   {
     from: "B1",
     to: "B2",
     indicativeRangeHours: [160, 240],
-    calculationHours: 200,
+    calculationHours: 240,
   },
   {
     from: "B2",
     to: "C1",
     indicativeRangeHours: [200, 300],
-    calculationHours: 250,
+    calculationHours: 300,
   },
   {
     from: "C1",
     to: "C2",
     indicativeRangeHours: [280, 450],
-    calculationHours: 350,
+    calculationHours: 450,
   },
 ] as const satisfies ReadonlyArray<{
   from: CefrLevel;
@@ -50,19 +50,19 @@ export const STUDY_TIME_TRANSITIONS = [
 type StudyTimeTransition = (typeof STUDY_TIME_TRANSITIONS)[number];
 
 export const STUDY_TIME_DISCLOSURE_INTRO =
-  "The calculations are based on averaged guidance from Cambridge English, the Goethe-Institut, and European language institutes:";
+  "We estimate Study Time progress from your current declared level and the study time recorded since that level's start date. Future-dated sessions are not included.";
 
 export const STUDY_TIME_DISCLOSURE_ITEMS = [
-  "A0 -> A1: 80-120 hours (calculation value 100)",
-  "A1 -> A2: 90-140 hours (110)",
-  "A2 -> B1: 140-200 hours (170)",
-  "B1 -> B2: 160-240 hours (200)",
-  "B2 -> C1: 200-300 hours (250)",
-  "C1 -> C2: 280-450 hours (350)",
+  "A0 -> A1: 40-60 hours (calculation value 40)",
+  "A1 -> A2: 60-90 hours (60)",
+  "A2 -> B1: 140-200 hours (140)",
+  "B1 -> B2: 160-240 hours (240)",
+  "B2 -> C1: 200-300 hours (300)",
+  "C1 -> C2: 280-450 hours (450)",
 ] as const;
 
 export const STUDY_TIME_DISCLOSURE_NOTE =
-  "These are approximate reference points, not guaranteed timeframes.";
+  "These figures are approximate guides, not guaranteed timeframes.";
 
 export type StudyTimeForecastEntry = {
   studyDate: string;

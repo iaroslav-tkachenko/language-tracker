@@ -450,12 +450,12 @@ first approved model uses these transition values:
 
 | Transition | Indicative range | Calculation difference |
 | ---------- | ---------------: | ---------------------: |
-| A0 → A1    |     80–120 hours |              100 hours |
-| A1 → A2    |     90–140 hours |              110 hours |
-| A2 → B1    |    140–200 hours |              170 hours |
-| B1 → B2    |    160–240 hours |              200 hours |
-| B2 → C1    |    200–300 hours |              250 hours |
-| C1 → C2    |    280–450 hours |              350 hours |
+| A0 → A1    |      40–60 hours |               40 hours |
+| A1 → A2    |      60–90 hours |               60 hours |
+| A2 → B1    |    140–200 hours |              140 hours |
+| B1 → B2    |    160–240 hours |              240 hours |
+| B2 → C1    |    200–300 hours |              300 hours |
+| C1 → C2    |    280–450 hours |              450 hours |
 
 For a current declaration below C2:
 
@@ -498,15 +498,12 @@ seven- and thirty-day values as columns and uses rows for active days, average p
 next-level duration, and estimated month/year. Its heading names the next level
 as the forecast destination.
 
-Every Study Time result includes this disclosure:
-
-> Reference ranges and values used for calculations: A0 to A1: 80–120 hours
-> (calculation value: 100 hours); A1 to A2: 90–140 hours (110 hours); A2 to B1:
-> 140–200 hours (170 hours); B1 to B2: 160–240 hours (200 hours); B2 to C1:
-> 200–300 hours (250 hours); C1 to C2: 280–450 hours (350 hours). These figures
-> are based on averaged data from Cambridge English, the Goethe-Institut, and
-> European language institutes. They are approximate guides, not guaranteed
-> timeframes.
+Every Study Time result includes a `How we calculate this` disclosure with the
+current level's effective date, a table of step ranges, exact calculation
+values, cumulative ranges from A0, and cumulative calculation values from A0.
+It also states that forecasts use seven- and thirty-day calendar averages,
+including zero-study days, and that the figures are approximate guides rather
+than guaranteed timeframes.
 
 ### 10.8 Approximate Vocabulary reference model
 
@@ -541,19 +538,19 @@ size, and remaining targets. The methodology explains that recorded words are
 an approximate progress signal; individual words are not stored and the product
 cannot deduplicate repeated vocabulary.
 
-Every Vocabulary result includes this disclosure:
-
-> Reference ranges and values used for calculations: A1: 700–1,200 words
-> (calculation value: 900 words); A2: 1,200–2,000 words (1,600 words); B1:
-> 2,000–3,000 words (2,500 words); B2: 3,000–4,500 words (3,700 words); C1:
-> 4,000–6,000 words (5,000 words); C2: 5,000–8,000+ words (7,000 words). These
-> ranges are based on vocabulary research by Milton and by Finlayson, Marsden,
-> and Hawkes. They are not official CEFR standards.
+Every Vocabulary result includes a `How we calculate this` disclosure with the
+current level's effective date, a table of level vocabulary ranges, and exact
+calculation values. It also states that forecasts use seven- and thirty-day
+calendar averages, including zero-word days, and that daily word totals are an
+approximate signal rather than deduplicated vocabulary records.
 
 Both forecast models are guidance rather than assessment or guarantee. Language,
 learning background, intensity, exposure, age, retention, and other factors can
 materially change progress. CEFR descriptions are based on the
 [Council of Europe CEFR levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-%20descriptions).
+Progress can develop unevenly across skills depending on the activities a
+learner does most; for example, reading, speaking, listening, and writing may
+not all grow at the same pace.
 
 ## 11. Responsive UI
 
