@@ -151,6 +151,7 @@ export default async function DashboardPage({
   const [
     activitiesResult,
     entriesResult,
+    statisticsEntriesResult,
     forecastEntriesResult,
     earliestEntryResult,
     activeDateResult,
@@ -166,6 +167,12 @@ export default async function DashboardPage({
       .eq("board_id", selectedBoard.id)
       .gte("study_date", `${year}-01-01`)
       .lte("study_date", `${year}-12-31`)
+      .order("study_date")
+      .order("created_at"),
+    supabase
+      .from("study_entries")
+      .select("id, study_date, duration_minutes, activity_type_id")
+      .eq("board_id", selectedBoard.id)
       .order("study_date")
       .order("created_at"),
     supabase
@@ -193,6 +200,7 @@ export default async function DashboardPage({
   if (
     activitiesResult.error ||
     entriesResult.error ||
+    statisticsEntriesResult.error ||
     forecastEntriesResult.error ||
     earliestEntryResult.error ||
     activeDateResult.error
@@ -200,6 +208,7 @@ export default async function DashboardPage({
     console.error("Supabase board workspace read failed", {
       activities: activitiesResult.error?.message,
       entries: entriesResult.error?.message,
+      statisticsEntries: statisticsEntriesResult.error?.message,
       forecastEntries: forecastEntriesResult.error?.message,
       earliestEntry: earliestEntryResult.error?.message,
       activeDates: activeDateResult.error?.message,
@@ -218,6 +227,12 @@ export default async function DashboardPage({
         archived: activity.archived_at !== null,
       }))}
       entries={entriesResult.data.map((entry) => ({
+        id: entry.id,
+        studyDate: entry.study_date,
+        durationMinutes: entry.duration_minutes,
+        activityTypeId: entry.activity_type_id,
+      }))}
+      statisticsEntries={statisticsEntriesResult.data.map((entry) => ({
         id: entry.id,
         studyDate: entry.study_date,
         durationMinutes: entry.duration_minutes,

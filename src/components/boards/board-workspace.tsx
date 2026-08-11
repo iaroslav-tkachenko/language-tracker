@@ -80,6 +80,7 @@ type BoardWorkspaceProps = {
   selectedBoard: BoardSummary;
   activities: ActivitySummary[];
   entries: StudyEntrySummary[];
+  statisticsEntries: StudyEntrySummary[];
   earliestEntryDate: string | null;
   activeDateKeys: string[];
   selectedDate: string;
@@ -426,6 +427,7 @@ export function BoardWorkspace({
   selectedBoard,
   activities,
   entries,
+  statisticsEntries,
   earliestEntryDate,
   activeDateKeys,
   selectedDate,
@@ -584,8 +586,8 @@ export function BoardWorkspace({
       .map((entry) => entry.studyDate),
   ).size;
   const statistics = useMemo(
-    () => calculateStudyStatistics(entries, year, todayKey),
-    [entries, year, todayKey],
+    () => calculateStudyStatistics(statisticsEntries, year, todayKey),
+    [statisticsEntries, year, todayKey],
   );
   const activeDateKeySet = new Set(activeDateKeys);
   const latestEligibleDate = activeDateKeySet.has(todayKey)
