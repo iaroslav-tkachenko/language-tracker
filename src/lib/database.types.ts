@@ -323,8 +323,8 @@ export type Database = {
           end_date: string
           id: string
           inserted_count: number
-          preserved_count: number
           start_date: string
+          updated_count: number
           user_id: string
           words_learned: number
         }
@@ -334,8 +334,8 @@ export type Database = {
           end_date: string
           id: string
           inserted_count?: number
-          preserved_count?: number
           start_date: string
+          updated_count?: number
           user_id: string
           words_learned: number
         }
@@ -345,8 +345,8 @@ export type Database = {
           end_date?: string
           id?: string
           inserted_count?: number
-          preserved_count?: number
           start_date?: string
+          updated_count?: number
           user_id?: string
           words_learned?: number
         }
@@ -476,8 +476,8 @@ export type Database = {
           end_date: string
           id: string
           inserted_count: number
-          preserved_count: number
           start_date: string
+          updated_count: number
           user_id: string
           words_learned: number
         }

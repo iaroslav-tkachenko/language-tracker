@@ -297,22 +297,22 @@ reviewable.
 
 ### 5.8 `vocabulary_total_batches`
 
-| Column            | Type          | Constraints and purpose                               |
-| ----------------- | ------------- | ----------------------------------------------------- |
-| `id`              | `uuid`        | Client-generated operation identifier and primary key |
-| `user_id`         | `uuid`        | Required owner; references `profiles(user_id)`        |
-| `board_id`        | `uuid`        | Required owned board                                  |
-| `start_date`      | `date`        | Inclusive first date                                  |
-| `end_date`        | `date`        | Inclusive final date                                  |
-| `words_learned`   | `integer`     | Non-negative total for each previously empty date     |
-| `inserted_count`  | `smallint`    | Dates created by the operation                        |
-| `preserved_count` | `smallint`    | Existing dates retained unchanged                     |
-| `created_at`      | `timestamptz` | Audit timestamp                                       |
+| Column           | Type          | Constraints and purpose                               |
+| ---------------- | ------------- | ----------------------------------------------------- |
+| `id`             | `uuid`        | Client-generated operation identifier and primary key |
+| `user_id`        | `uuid`        | Required owner; references `profiles(user_id)`        |
+| `board_id`       | `uuid`        | Required owned board                                  |
+| `start_date`     | `date`        | Inclusive first date                                  |
+| `end_date`       | `date`        | Inclusive final date                                  |
+| `words_learned`  | `integer`     | Non-negative total for each date in the range         |
+| `inserted_count` | `smallint`    | Dates created by the operation                        |
+| `updated_count`  | `smallint`    | Existing dates overwritten by the operation           |
+| `created_at`     | `timestamptz` | Audit timestamp                                       |
 
 An authenticated database function validates the owned active board and the
 same-year range of at most 366 dates. A client-generated operation ID makes
-retries idempotent. One transaction creates totals only for empty dates with
-`on conflict do nothing`, preserving every existing daily total.
+retries idempotent. One transaction upserts the requested total for every date
+in the range, creating empty dates and overwriting existing daily totals.
 
 ### 5.9 Indexes
 
@@ -383,9 +383,9 @@ activities.
 Batch creation uses a single authenticated database function. The function derives the owner from `auth.uid()`, validates the owned board/activity and the complete range, records the operation ID, and inserts all generated entries atomically. Vocabulary uses an owned upsert constrained by the board/date uniqueness rule. CEFR create/edit/delete operations use owned constrained database functions that validate the browser-local effective date, reject an occupied effective date, serialize changes for one board, and preserve the no-adjacent-duplicate-level invariant.
 
 Vocabulary date-range creation similarly uses one authenticated transaction. It
-derives ownership from `auth.uid()`, preserves existing totals, inserts only
-empty dates, records inserted/preserved counts, and returns the original result
-when the same operation identifier and payload are retried.
+derives ownership from `auth.uid()`, upserts every date in the range, records
+inserted/updated counts, and returns the original result when the same operation
+identifier and payload are retried.
 
 ### 7.3 Client theme preference
 

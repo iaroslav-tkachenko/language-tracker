@@ -63,7 +63,7 @@ test.describe("Phase 3 Vocabulary", () => {
 
     await page.getByRole("button", { name: "Add words" }).click();
     await page.getByRole("button", { name: "Date range" }).click();
-    await page.getByLabel("Words learned per empty date").fill("4");
+    await page.getByLabel("Words learned per date").fill("4");
     await page.getByLabel("Start date").fill(firstDate);
     await page.getByLabel("End date").fill(thirdDate);
     await expect(
@@ -71,10 +71,10 @@ test.describe("Phase 3 Vocabulary", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Review range" }).click();
     await expect(
-      page.getByRole("heading", { name: "Add totals to 2 empty dates?" }),
+      page.getByRole("heading", { name: "Save totals for 3 dates?" }),
     ).toBeVisible();
     await expect(
-      page.getByText("1 existing total will be kept unchanged."),
+      page.getByText("1 already saved date will be overwritten"),
     ).toBeVisible();
     await page.getByRole("button", { name: "Confirm and add" }).click();
     await expect(page.getByRole("button", { name: "Add words" })).toBeVisible();
@@ -113,7 +113,7 @@ test.describe("Phase 3 Vocabulary", () => {
         .locator("article")
         .filter({ hasText: "Total in 2026" })
         .first(),
-    ).toContainText(/8\s*words/);
+    ).toContainText(/12\s*words/);
     await expect(
       selectedYearSection.getByText("Active days in 2026"),
     ).toBeVisible();
@@ -133,7 +133,7 @@ test.describe("Phase 3 Vocabulary", () => {
       currentVocabulary.locator("article").filter({
         hasText: "Longest streak",
       }),
-    ).toContainText(/2\s*days/);
+    ).toContainText(/3\s*days/);
     await expect(
       currentVocabulary.locator("article").filter({ hasText: "Today" }),
     ).toContainText(/0\s*words/);
@@ -141,13 +141,13 @@ test.describe("Phase 3 Vocabulary", () => {
       currentVocabulary
         .locator("article")
         .filter({ hasText: "Current week" })
-        .filter({ hasText: /8\s*words/ }),
+        .filter({ hasText: /12\s*words/ }),
     ).toBeVisible();
     await expect(
       currentVocabulary
         .locator("article")
         .filter({ hasText: "Current month" })
-        .filter({ hasText: /8\s*words/ }),
+        .filter({ hasText: /12\s*words/ }),
     ).toBeVisible();
 
     const wordsChart = page.locator("section").filter({

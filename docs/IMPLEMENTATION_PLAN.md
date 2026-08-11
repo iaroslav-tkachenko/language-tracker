@@ -155,8 +155,8 @@ merged on July 26, 2026.
 - Add RLS, composite board ownership, indexes, generated types, and pgTAP coverage.
 - Enable the `Study Time`/`Vocabulary` tracker switch while preserving board and year.
 - Implement create, edit, and confirmed delete for the single daily final word total.
-- Implement atomic, idempotent date-range creation that fills only empty dates
-  and preserves existing daily totals.
+- Implement atomic, idempotent date-range creation that writes the requested
+  total to every date in the range, overwriting existing daily totals.
 - Implement the green Vocabulary heatmap with fixed levels: 0, 1–2, 3–5, 6–9, 10–14, 15–19, 20–39, and 40+.
 - Implement selected-year and all-time word totals, non-future active days,
   averages, current-week/current-month totals, current streak, and longest
@@ -169,8 +169,8 @@ merged on July 26, 2026.
 ### Critical verification
 
 - Concurrent writes cannot create two values for one board/date.
-- Date-range retries cannot duplicate totals, and existing dates remain
-  unchanged.
+- Date-range retries cannot duplicate totals, and existing dates are overwritten
+  by the requested replacement value.
 - A second save updates the existing record; deletion returns the date to zero.
 - Every threshold boundary, year navigation, future total, active-day rule, and vocabulary streak is covered.
 - Shared Statistics navigation, metrics, and both period-distribution controls
