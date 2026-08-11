@@ -17,7 +17,7 @@ test.describe("Phase 1 Study Time", () => {
   test("completes the private Study Time lifecycle", async ({
     page,
   }, testInfo) => {
-    const suffix = testInfo.project.name;
+    const suffix = `${testInfo.project.name} retry ${testInfo.retry}`;
     const boardName = `E2E ${suffix}`;
     const activityName = `Review ${suffix}`;
     const mobile = testInfo.project.name.includes("mobile");
@@ -60,19 +60,37 @@ test.describe("Phase 1 Study Time", () => {
     await page.getByRole("button", { name: "30 min", exact: true }).click();
     await page.getByRole("button", { name: "Reading", exact: true }).click();
     await page.getByRole("button", { name: "Save" }).click();
-    const readingCard = page.locator("article").filter({ hasText: "Reading" });
+    const readingCard = page
+      .locator("article")
+      .filter({ hasText: "Reading" })
+      .first();
     await expect(readingCard).toContainText("30m");
 
     await readingCard.getByRole("button", { name: "Edit Reading" }).click();
+    const inlineEditor = readingCard.locator("xpath=following-sibling::*[1]");
     await expect(
-      page.getByRole("button", { name: "30 min", exact: true }),
+      inlineEditor.getByRole("heading", { name: "Edit study session" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Edit study session" }),
+    ).toHaveCount(1);
+    await expect(
+      inlineEditor.getByRole("button", { name: "30 min", exact: true }),
     ).toHaveClass(/border-blue-600/);
     await expect(
-      page.getByRole("button", { name: "Reading", exact: true }),
+      inlineEditor.getByRole("button", { name: "Reading", exact: true }),
     ).toHaveClass(/border-blue-600/);
-    await page.getByRole("button", { name: "45 min", exact: true }).click();
-    await page.getByRole("button", { name: "Podcast", exact: true }).click();
-    await page.getByRole("button", { name: "Update" }).click();
+    const customMinutes = inlineEditor.getByLabel("Custom minutes");
+    await customMinutes.fill("37");
+    await customMinutes.dispatchEvent("wheel", { deltaY: -100 });
+    await expect(customMinutes).toHaveValue("37");
+    await inlineEditor
+      .getByRole("button", { name: "45 min", exact: true })
+      .click();
+    await inlineEditor
+      .getByRole("button", { name: "Podcast", exact: true })
+      .click();
+    await inlineEditor.getByRole("button", { name: "Update" }).click();
 
     const podcastCard = page.locator("article").filter({ hasText: "Podcast" });
     await expect(podcastCard).toContainText("45m");
