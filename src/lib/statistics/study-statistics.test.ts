@@ -93,6 +93,24 @@ describe("study statistics", () => {
     expect(result.currentStreak).toBe(0);
     expect(result.longestStreak).toBe(1);
   });
+
+  it("scopes selected-year totals without scoping live streaks", () => {
+    const result = calculateStudyStatistics(
+      [
+        entry("2025-12-30", 10),
+        entry("2025-12-31", 10),
+        entry("2026-01-01", 10),
+        entry("2026-01-02", 10),
+      ],
+      2026,
+      "2026-01-02",
+    );
+
+    expect(result.selectedYearTotal).toBe(20);
+    expect(result.selectedYearActiveDays).toBe(2);
+    expect(result.currentStreak).toBe(4);
+    expect(result.longestStreak).toBe(4);
+  });
 });
 
 describe("study distributions", () => {
