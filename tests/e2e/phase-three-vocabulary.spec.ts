@@ -157,6 +157,33 @@ test.describe("Phase 3 Vocabulary", () => {
     await expect(wordsChart.getByLabel("Month")).toBeVisible();
     await wordsChart.getByRole("button", { name: "Year" }).click();
     await expect(wordsChart.getByLabel("Month")).toHaveCount(0);
+    const activityTotals = page.locator("section").filter({
+      has: page.getByRole("heading", {
+        name: "Activity totals in 2026",
+      }),
+    });
+    await expect(
+      await wordsChart.evaluate(
+        (chart, summary) =>
+          Boolean(
+            summary &&
+            chart.compareDocumentPosition(summary) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          ),
+        await selectedYearSection.elementHandle(),
+      ),
+    ).toBe(true);
+    await expect(
+      await selectedYearSection.evaluate(
+        (summary, totals) =>
+          Boolean(
+            totals &&
+            summary.compareDocumentPosition(totals) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          ),
+        await activityTotals.elementHandle(),
+      ),
+    ).toBe(true);
 
     const vocabularyLink = testInfo.project.name.includes("mobile")
       ? page

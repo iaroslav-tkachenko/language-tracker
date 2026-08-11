@@ -1206,109 +1206,6 @@ export function StatisticsWorkspace({
           </section>
         )}
 
-        <section aria-labelledby="year-summary-heading" className="mt-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2
-                id="year-summary-heading"
-                className="text-xl font-bold text-slate-950"
-              >
-                Selected year
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Metrics for the calendar year you select.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => navigateYear(-1)}
-                aria-label="Previous year"
-                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-              >
-                <ChevronLeft aria-hidden="true" className="size-4.5" />
-              </button>
-              <strong className="min-w-16 text-center text-xl text-slate-950">
-                {selectedYear}
-              </strong>
-              <button
-                type="button"
-                onClick={() => navigateYear(1)}
-                aria-label="Next year"
-                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-              >
-                <ChevronRight aria-hidden="true" className="size-4.5" />
-              </button>
-            </div>
-          </div>
-          <div className="mt-5">
-            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-blue-700 uppercase">
-              <Clock3 aria-hidden="true" className="size-4" />
-              Study Time
-            </h3>
-            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <MetricCard
-                icon={<Clock3 aria-hidden="true" className="size-5" />}
-                value={formatDuration(statistics.selectedYearTotal)}
-                label={`Total in ${selectedYear}`}
-              />
-              <MetricCard
-                icon={<CalendarDays aria-hidden="true" className="size-5" />}
-                value={statistics.selectedYearActiveDays}
-                label={`Days studied in ${selectedYear}`}
-              />
-              <MetricCard
-                icon={<Gauge aria-hidden="true" className="size-5" />}
-                value={formatDuration(statistics.calendarDayAverage, true)}
-                label="Average / calendar day"
-              />
-              <MetricCard
-                icon={<Gauge aria-hidden="true" className="size-5" />}
-                value={formatDuration(statistics.activeDayAverage, true)}
-                label="Average / active day"
-              />
-            </div>
-          </div>
-          <div className="mt-5">
-            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
-              <BookOpen aria-hidden="true" className="size-4" />
-              Vocabulary
-            </h3>
-            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <MetricCard
-                accent="green"
-                icon={<BookOpen aria-hidden="true" className="size-5" />}
-                value={`${vocabularyStatistics.totalWords.toLocaleString("en")} words`}
-                label={`Total in ${selectedYear}`}
-              />
-              <MetricCard
-                accent="green"
-                icon={<CalendarDays aria-hidden="true" className="size-5" />}
-                value={vocabularyStatistics.activeDays}
-                label={`Active days in ${selectedYear}`}
-              />
-              <MetricCard
-                accent="green"
-                icon={<Gauge aria-hidden="true" className="size-5" />}
-                value={`${vocabularyStatistics.calendarDayAverage.toLocaleString(
-                  "en",
-                  { maximumFractionDigits: 1 },
-                )} words`}
-                label="Average / calendar day"
-              />
-              <MetricCard
-                accent="green"
-                icon={<Gauge aria-hidden="true" className="size-5" />}
-                value={`${vocabularyStatistics.activeDayAverage.toLocaleString(
-                  "en",
-                  { maximumFractionDigits: 1 },
-                )} words`}
-                label="Average / study day"
-              />
-            </div>
-          </div>
-        </section>
-
         <section aria-labelledby="current-progress-heading" className="mt-8">
           <div>
             <h2
@@ -1497,6 +1394,109 @@ export function StatisticsWorkspace({
             </label>
           )}
           <VocabularyDistributionChart points={vocabularyChartPoints} />
+        </section>
+
+        <section aria-labelledby="year-summary-heading" className="mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2
+                id="year-summary-heading"
+                className="text-xl font-bold text-slate-950"
+              >
+                Selected year
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Metrics for the calendar year you select.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigateYear(-1)}
+                aria-label="Previous year"
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronLeft aria-hidden="true" className="size-4.5" />
+              </button>
+              <strong className="min-w-16 text-center text-xl text-slate-950">
+                {selectedYear}
+              </strong>
+              <button
+                type="button"
+                onClick={() => navigateYear(1)}
+                aria-label="Next year"
+                className="flex size-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ChevronRight aria-hidden="true" className="size-4.5" />
+              </button>
+            </div>
+          </div>
+          <div className="mt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-blue-700 uppercase">
+              <Clock3 aria-hidden="true" className="size-4" />
+              Study Time
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <MetricCard
+                icon={<Clock3 aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.selectedYearTotal)}
+                label={`Total in ${selectedYear}`}
+              />
+              <MetricCard
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={statistics.selectedYearActiveDays}
+                label={`Days studied in ${selectedYear}`}
+              />
+              <MetricCard
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.calendarDayAverage, true)}
+                label="Average / calendar day"
+              />
+              <MetricCard
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={formatDuration(statistics.activeDayAverage, true)}
+                label="Average / active day"
+              />
+            </div>
+          </div>
+          <div className="mt-5">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-emerald-700 uppercase">
+              <BookOpen aria-hidden="true" className="size-4" />
+              Vocabulary
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <MetricCard
+                accent="green"
+                icon={<BookOpen aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.totalWords.toLocaleString("en")} words`}
+                label={`Total in ${selectedYear}`}
+              />
+              <MetricCard
+                accent="green"
+                icon={<CalendarDays aria-hidden="true" className="size-5" />}
+                value={vocabularyStatistics.activeDays}
+                label={`Active days in ${selectedYear}`}
+              />
+              <MetricCard
+                accent="green"
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.calendarDayAverage.toLocaleString(
+                  "en",
+                  { maximumFractionDigits: 1 },
+                )} words`}
+                label="Average / calendar day"
+              />
+              <MetricCard
+                accent="green"
+                icon={<Gauge aria-hidden="true" className="size-5" />}
+                value={`${vocabularyStatistics.activeDayAverage.toLocaleString(
+                  "en",
+                  { maximumFractionDigits: 1 },
+                )} words`}
+                label="Average / study day"
+              />
+            </div>
+          </div>
         </section>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
