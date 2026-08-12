@@ -27,6 +27,7 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import { TodayQuerySync } from "@/components/dates/today-query-sync";
 import { ForecastCalculationHelp } from "@/components/cefr/forecast-calculation-help";
 import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
 import {
@@ -1014,6 +1015,7 @@ export function StatisticsWorkspace({
 
   return (
     <main className="min-h-screen bg-slate-50">
+      <TodayQuerySync yearParam="year" />
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
           <details className="group relative">

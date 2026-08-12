@@ -27,6 +27,7 @@ import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import { AddLanguageMenuAction } from "@/components/boards/add-language-menu-action";
 import { MissingLevelBubble } from "@/components/cefr/cefr-level-prompt";
 import { CefrProgressForecastCards } from "@/components/cefr/cefr-progress-forecast-cards";
+import { TodayQuerySync } from "@/components/dates/today-query-sync";
 import { WeeklyPlanCard } from "@/components/cefr/weekly-plan-card";
 import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
 import {
@@ -317,6 +318,7 @@ export function CefrHistoryWorkspace({
 
   return (
     <main className="min-h-screen bg-slate-50">
+      <TodayQuerySync />
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-3 px-4 sm:px-6">
           <details className="group relative">

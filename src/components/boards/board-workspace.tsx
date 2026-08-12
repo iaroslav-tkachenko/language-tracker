@@ -42,6 +42,7 @@ import {
   CefrLevelPrompt,
   MissingLevelBubble,
 } from "@/components/cefr/cefr-level-prompt";
+import { TodayQuerySync } from "@/components/dates/today-query-sync";
 import { ForecastCalculationHelp } from "@/components/cefr/forecast-calculation-help";
 import {
   highestLevelDescription,
@@ -1075,6 +1076,7 @@ export function BoardWorkspace({
 
   return (
     <main className="min-h-screen bg-white">
+      <TodayQuerySync dateParam="date" />
       <header className="border-b border-slate-200">
         <div className="mx-auto flex min-h-14 max-w-[1500px] items-center justify-between gap-4 px-4 sm:px-6">
           <details className="group relative">
