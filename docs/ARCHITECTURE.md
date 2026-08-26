@@ -411,7 +411,7 @@ shows that later phases should move aggregation into PostgreSQL:
 - `get_board_year_heatmap(board_id, year)` returns daily totals and intensity levels.
 - `get_board_statistics(board_id, selected_year, local_today)` returns totals, averages, active days, activity breakdown, current streak, and longest streak.
 - `get_board_distribution(board_id, granularity, period)` returns chart buckets.
-- `get_board_recent_activity(board_id, local_today)` returns minutes grouped by activity for the seven calendar dates ending at `local_today`.
+- `get_board_recent_activity(board_id, local_today, period_days)` returns minutes grouped by activity for a recent calendar window ending at `local_today`; the UI uses seven and thirty days.
 - `get_board_vocabulary_year(board_id, year, local_today)` returns daily word
   totals, selected-year and current-period totals, averages, active days,
   distributions, and vocabulary streaks.

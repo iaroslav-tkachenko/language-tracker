@@ -349,8 +349,9 @@ Future entries can appear in selected-year and selected-month distributions, but
 ### 10.5 Recent activity analysis
 
 Detailed statistics show actual Study Time grouped by activity across the
-selected year and across the latest seven calendar dates ending today. Both
-activity allocations use interactive thin-ring circular charts and a legend
+selected year, across the latest seven calendar dates ending today, and across
+the latest thirty calendar dates ending today. Activity allocations use
+interactive thin-ring circular charts and a legend
 that shows absolute duration and percentage of the period total. Hovering,
 focusing, or tapping one segment emphasizes it and dims the others. When a
 period has at most six activities, every activity is shown separately. When it
@@ -358,7 +359,8 @@ has more than six, the five activities with the greatest total duration remain
 visible and the sixth and all later activities are grouped into an expandable
 `Other` row. Active and archived activity history is included. The seven-date
 window includes zero-study dates and excludes future entries; its heading is
-`Activity totals in the last 7 days`.
+`Activity totals in the last 7 days`. The thirty-date window follows the same
+rules and uses the heading `Activity totals in the last 30 days`.
 
 The product also shows an approved suggested weekly learning mix for the
 transition from the current level to the next level. The reference week is ten

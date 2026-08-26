@@ -155,8 +155,9 @@ export function getActivityTotals(
 export function getRecentActivityTotals(
   entries: StudyStatisticsEntry[],
   todayKey: string,
+  periodDays = 7,
 ) {
-  const startDate = shiftDate(todayKey, -6);
+  const startDate = shiftDate(todayKey, -(periodDays - 1));
   const totals = new Map<string, number>();
   for (const entry of entries) {
     if (entry.studyDate < startDate || entry.studyDate > todayKey) continue;

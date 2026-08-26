@@ -921,6 +921,10 @@ export function StatisticsWorkspace({
     () => getRecentActivityTotals(entries, todayKey),
     [entries, todayKey],
   );
+  const recentThirtyDayTotals = useMemo(
+    () => getRecentActivityTotals(entries, todayKey, 30),
+    [entries, todayKey],
+  );
   const vocabularyStatistics = useMemo(
     () =>
       calculateVocabularyStatistics(vocabularyTotals, selectedYear, todayKey),
@@ -1512,6 +1516,12 @@ export function StatisticsWorkspace({
             title="Activity totals in the last 7 days"
             subtitle="Includes today and the previous six calendar dates."
             totals={recentTotals}
+            activities={activities}
+          />
+          <ActivityDonut
+            title="Activity totals in the last 30 days"
+            subtitle="Includes today and the previous 29 calendar dates."
+            totals={recentThirtyDayTotals}
             activities={activities}
           />
         </div>

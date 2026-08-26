@@ -154,4 +154,21 @@ describe("study distributions", () => {
 
     expect(totals.get("reading")).toBe(50);
   });
+
+  it("groups a configurable recent calendar window by activity", () => {
+    const totals = getRecentActivityTotals(
+      [
+        entry("2026-06-25", 100),
+        entry("2026-06-26", 10),
+        entry("2026-07-01", 20, "podcast"),
+        entry("2026-07-25", 30),
+        entry("2026-07-26", 100),
+      ],
+      "2026-07-25",
+      30,
+    );
+
+    expect(totals.get("reading")).toBe(40);
+    expect(totals.get("podcast")).toBe(20);
+  });
 });
