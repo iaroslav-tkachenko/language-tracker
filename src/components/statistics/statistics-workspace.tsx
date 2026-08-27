@@ -54,6 +54,7 @@ import {
   type VocabularyForecast,
 } from "@/lib/cefr/vocabulary";
 import {
+  getActivityAverageComparisonRows,
   calculateStudyStatistics,
   getActivityTotals,
   getDayDistribution,
@@ -62,6 +63,7 @@ import {
   getWeekDistribution,
   getYearDistribution,
   type ChartPoint,
+  type ActivityAverageComparisonRow,
   type StudyStatisticsEntry,
 } from "@/lib/statistics/study-statistics";
 import {
@@ -529,6 +531,195 @@ function ActivityLegendDuration({ minutes }: { minutes: number }) {
   );
 }
 
+function formatRoundedDuration(minutes: number) {
+  return formatDuration(Math.round(minutes));
+}
+
+function formatPercentChange(percent: number | null) {
+  if (percent === null) return "—";
+
+  const rounded = Math.round(percent);
+  if (Object.is(rounded, -0) || rounded === 0) return "0%";
+  return `${rounded > 0 ? "+" : ""}${rounded}%`;
+}
+
+function PercentChangeValue({ percent }: { percent: number | null }) {
+  const colorClass =
+    percent === null
+      ? "text-slate-400"
+      : percent > 0
+        ? "text-emerald-700"
+        : percent < 0
+          ? "text-rose-700"
+          : "text-slate-500";
+
+  return (
+    <span className={`font-normal tabular-nums ${colorClass}`}>
+      {formatPercentChange(percent)}
+    </span>
+  );
+}
+
+function ActivityAveragesTable({
+  activities,
+  rows,
+  selectedYear,
+}: {
+  activities: ActivitySummary[];
+  rows: ActivityAverageComparisonRow[];
+  selectedYear: number;
+}) {
+  const activityById = new Map(
+    activities.map((activity) => [activity.id, activity]),
+  );
+
+  return (
+    <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+      <div>
+        <h2 className="text-xl font-bold text-slate-950">
+          Activity averages by period
+        </h2>
+        <p className="mt-1 text-sm leading-6 text-slate-500">
+          Average minutes per calendar day, including days without study time.
+        </p>
+      </div>
+
+      <div className="relative mt-5">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] border-separate border-spacing-0 text-sm">
+            <caption className="sr-only">
+              Average study time by activity for {selectedYear}, the last 30
+              days, and the last 7 days
+            </caption>
+            <thead>
+              <tr className="text-xs font-bold tracking-wide text-slate-500 uppercase">
+                <th scope="col" className="px-4 py-3 text-left">
+                  Activity
+                </th>
+                <th scope="col" className="px-4 py-3 text-right">
+                  Avg / day in {selectedYear}
+                </th>
+                <th scope="col" className="px-4 py-3 text-right">
+                  Last 30 days avg
+                </th>
+                <th scope="col" className="px-4 py-3 text-right">
+                  30d vs year
+                </th>
+                <th scope="col" className="px-4 py-3 text-right">
+                  Last 7 days avg
+                </th>
+                <th scope="col" className="px-4 py-3 text-right">
+                  7d vs 30d
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => {
+                const activity = activityById.get(row.id);
+                const isTotalRow = row.kind === "total";
+                const rowLabel =
+                  row.kind === "total"
+                    ? "Total study time"
+                    : row.kind === "other"
+                      ? "Other"
+                      : (activity?.name ?? "Archived activity");
+                const systemKey =
+                  row.kind === "activity"
+                    ? (activity?.systemKey ?? null)
+                    : null;
+                const dotColor =
+                  row.kind === "total"
+                    ? "#3b82f6"
+                    : row.kind === "other"
+                      ? "#64748b"
+                      : activityChartColors[
+                          (index - 1) % activityChartColors.length
+                        ];
+                const durationClass = `border-t border-slate-100 px-4 py-3 text-right tabular-nums text-slate-950 ${
+                  isTotalRow ? "font-semibold" : "font-medium"
+                }`;
+
+                return (
+                  <tr
+                    key={row.id}
+                    className={`border-t border-slate-100 ${
+                      isTotalRow ? "bg-blue-50/60" : ""
+                    }`}
+                  >
+                    <th
+                      scope="row"
+                      className={`border-t border-slate-100 px-4 py-3 text-left ${
+                        isTotalRow
+                          ? "rounded-l-2xl font-bold text-slate-950"
+                          : "font-semibold text-slate-800"
+                      }`}
+                    >
+                      <span className="inline-flex min-w-0 items-center gap-2">
+                        <span
+                          aria-hidden="true"
+                          className="size-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: dotColor }}
+                        />
+                        {row.kind === "total" ? (
+                          <Clock3
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-blue-600"
+                          />
+                        ) : row.kind === "other" ? (
+                          <Ellipsis
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-slate-500"
+                          />
+                        ) : (
+                          <ActivityIcon
+                            systemKey={systemKey}
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-slate-500"
+                          />
+                        )}
+                        <span className="truncate">{rowLabel}</span>
+                      </span>
+                    </th>
+                    <td className={durationClass}>
+                      {formatRoundedDuration(row.selectedYearAverageMinutes)}
+                    </td>
+                    <td className={durationClass}>
+                      {formatRoundedDuration(row.thirtyDayAverageMinutes)}
+                    </td>
+                    <td className="border-t border-slate-100 px-4 py-3 text-right">
+                      <PercentChangeValue
+                        percent={row.thirtyDayVsYearPercent}
+                      />
+                    </td>
+                    <td className={durationClass}>
+                      {formatRoundedDuration(row.sevenDayAverageMinutes)}
+                    </td>
+                    <td
+                      className={`border-t border-slate-100 px-4 py-3 text-right ${
+                        isTotalRow ? "rounded-r-2xl" : ""
+                      }`}
+                    >
+                      <PercentChangeValue
+                        percent={row.sevenDayVsThirtyDayPercent}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 shadow-sm md:hidden"
+        >
+          <ChevronRight className="size-4" />
+        </span>
+      </div>
+    </section>
+  );
+}
+
 function ActivityDonut({
   title,
   subtitle,
@@ -924,6 +1115,10 @@ export function StatisticsWorkspace({
   const recentThirtyDayTotals = useMemo(
     () => getRecentActivityTotals(entries, todayKey, 30),
     [entries, todayKey],
+  );
+  const activityAverageRows = useMemo(
+    () => getActivityAverageComparisonRows(entries, selectedYear, todayKey),
+    [entries, selectedYear, todayKey],
   );
   const vocabularyStatistics = useMemo(
     () =>
@@ -1525,6 +1720,12 @@ export function StatisticsWorkspace({
             activities={activities}
           />
         </div>
+
+        <ActivityAveragesTable
+          activities={activities}
+          rows={activityAverageRows}
+          selectedYear={selectedYear}
+        />
 
         {cefrOverview?.weeklyRecommendation && (
           <div className="mt-6">

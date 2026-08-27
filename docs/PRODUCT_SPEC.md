@@ -362,6 +362,23 @@ window includes zero-study dates and excludes future entries; its heading is
 `Activity totals in the last 7 days`. The thirty-date window follows the same
 rules and uses the heading `Activity totals in the last 30 days`.
 
+Detailed statistics also show an activity-average comparison table after the
+activity allocation charts. The table shows average Study Time per calendar day
+for the selected year, the latest thirty calendar dates ending today, and the
+latest seven calendar dates ending today. The selected-year denominator is the
+number of elapsed calendar days from January 1 through today for the current
+year, every calendar day for a completed year, and zero for a future year. The
+recent-period denominators are always thirty and seven days. The table includes
+`Total study time`, the union of the top five activities from each period, and
+one `Other` row when any activity outside that union has minutes in any period.
+The `Other` row contains all activities outside the union for each period. The
+table compares the latest thirty-day average with the selected-year average and
+the latest seven-day average with the latest thirty-day average. Average
+durations round to the nearest minute and percentage changes round to whole
+percentages. If the previous average is zero and the current average is
+positive, the change displays `+100%`; if both values are zero, the change is
+unavailable.
+
 The product also shows an approved suggested weekly learning mix for the
 transition from the current level to the next level. The reference week is ten
 hours. Percentages always total 100% and are also displayed as hours per week.

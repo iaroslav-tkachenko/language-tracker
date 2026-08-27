@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   calculateStudyStatistics,
+  getActivityAverageComparisonRows,
   getDayDistribution,
   getMonthDistribution,
   getRecentActivityTotals,
@@ -170,5 +171,76 @@ describe("study distributions", () => {
 
     expect(totals.get("reading")).toBe(40);
     expect(totals.get("podcast")).toBe(20);
+  });
+});
+
+describe("activity average comparisons", () => {
+  it("uses the selected year, last 30 days, and last 7 days top activity union", () => {
+    const rows = getActivityAverageComparisonRows(
+      [
+        entry("2026-01-01", 500, "anki"),
+        entry("2026-01-01", 400, "tv"),
+        entry("2026-01-01", 300, "reading"),
+        entry("2026-01-01", 200, "podcast"),
+        entry("2026-01-01", 100, "speaking"),
+        entry("2026-01-08", 90, "game"),
+        entry("2026-01-01", 50, "youtube"),
+        entry("2026-01-01", 40, "shadowing"),
+        entry("2025-12-20", 600, "grammar"),
+        entry("2026-01-11", 1_000, "future"),
+      ],
+      2026,
+      "2026-01-10",
+    );
+
+    expect(rows.map((row) => row.id)).toEqual([
+      "__total__",
+      "anki",
+      "tv",
+      "reading",
+      "podcast",
+      "speaking",
+      "grammar",
+      "game",
+      "__other__",
+    ]);
+
+    const total = rows[0];
+    expect(total?.selectedYearAverageMinutes).toBe(168);
+    expect(total?.thirtyDayAverageMinutes).toBe(76);
+    expect(total?.sevenDayAverageMinutes).toBeCloseTo(90 / 7);
+
+    const grammar = rows.find((row) => row.id === "grammar");
+    expect(grammar?.selectedYearAverageMinutes).toBe(0);
+    expect(grammar?.thirtyDayAverageMinutes).toBe(20);
+    expect(grammar?.thirtyDayVsYearPercent).toBe(100);
+    expect(grammar?.sevenDayVsThirtyDayPercent).toBe(-100);
+
+    const other = rows.find((row) => row.id === "__other__");
+    expect(other?.selectedYearAverageMinutes).toBe(9);
+    expect(other?.thirtyDayAverageMinutes).toBe(3);
+    expect(other?.sevenDayAverageMinutes).toBe(0);
+    expect(other?.thirtyDayVsYearPercent).toBeCloseTo(-66.666);
+  });
+
+  it("uses every day in a completed selected year", () => {
+    const rows = getActivityAverageComparisonRows(
+      [entry("2024-02-29", 366)],
+      2024,
+      "2026-07-25",
+    );
+
+    expect(rows[0]?.selectedYearAverageMinutes).toBe(1);
+  });
+
+  it("returns zero selected-year averages for a future selected year", () => {
+    const rows = getActivityAverageComparisonRows(
+      [entry("2027-01-01", 60)],
+      2027,
+      "2026-07-25",
+    );
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.selectedYearAverageMinutes).toBe(0);
   });
 });

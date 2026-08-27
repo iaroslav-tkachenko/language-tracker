@@ -24,6 +24,19 @@ export type StudyStatistics = {
   longestStreak: number;
 };
 
+export type ActivityAverageComparisonRow = {
+  id: string;
+  kind: "total" | "activity" | "other";
+  selectedYearAverageMinutes: number;
+  thirtyDayAverageMinutes: number;
+  sevenDayAverageMinutes: number;
+  thirtyDayVsYearPercent: number | null;
+  sevenDayVsThirtyDayPercent: number | null;
+};
+
+const TOTAL_ACTIVITY_AVERAGE_ID = "__total__";
+const OTHER_ACTIVITY_AVERAGE_ID = "__other__";
+
 function sumMinutes(entries: StudyStatisticsEntry[]) {
   return entries.reduce((total, entry) => total + entry.durationMinutes, 0);
 }
@@ -51,6 +64,13 @@ function elapsedDaysInYear(year: number, todayKey: string) {
       (today.getTime() - new Date(year, 0, 1).getTime()) / 86_400_000,
     ) + 1
   );
+}
+
+function selectedYearCutoff(selectedYear: number, todayKey: string) {
+  const todayYear = fromDateKey(todayKey).getFullYear();
+  if (selectedYear < todayYear) return `${selectedYear}-12-31`;
+  if (selectedYear > todayYear) return null;
+  return todayKey;
 }
 
 function calculateStreaks(activeDateKeys: Set<string>, todayKey: string) {
@@ -167,6 +187,187 @@ export function getRecentActivityTotals(
     );
   }
   return totals;
+}
+
+function getBoundedActivityTotals({
+  entries,
+  startDate,
+  endDate,
+}: {
+  entries: StudyStatisticsEntry[];
+  startDate: string;
+  endDate: string | null;
+}) {
+  const totals = new Map<string, number>();
+  if (endDate === null) return totals;
+
+  for (const entry of entries) {
+    if (entry.studyDate < startDate || entry.studyDate > endDate) continue;
+    totals.set(
+      entry.activityTypeId,
+      (totals.get(entry.activityTypeId) ?? 0) + entry.durationMinutes,
+    );
+  }
+
+  return totals;
+}
+
+function topActivityIds(totals: Map<string, number>) {
+  return [...totals.entries()]
+    .filter(([, minutes]) => minutes > 0)
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 5)
+    .map(([activityTypeId]) => activityTypeId);
+}
+
+function calculatePercentChange(
+  previousAverageMinutes: number,
+  currentAverageMinutes: number,
+) {
+  if (previousAverageMinutes === 0) {
+    return currentAverageMinutes > 0 ? 100 : null;
+  }
+
+  return (
+    ((currentAverageMinutes - previousAverageMinutes) /
+      previousAverageMinutes) *
+    100
+  );
+}
+
+function averageMinutes(totalMinutes: number, periodDays: number) {
+  return periodDays === 0 ? 0 : totalMinutes / periodDays;
+}
+
+export function getActivityAverageComparisonRows(
+  entries: StudyStatisticsEntry[],
+  selectedYear: number,
+  todayKey: string,
+): ActivityAverageComparisonRow[] {
+  const selectedYearStart = `${selectedYear}-01-01`;
+  const selectedYearEnd = selectedYearCutoff(selectedYear, todayKey);
+  const selectedYearDays = elapsedDaysInYear(selectedYear, todayKey);
+  const selectedYearTotals = getBoundedActivityTotals({
+    entries,
+    startDate: selectedYearStart,
+    endDate: selectedYearEnd,
+  });
+  const thirtyDayTotals = getRecentActivityTotals(entries, todayKey, 30);
+  const sevenDayTotals = getRecentActivityTotals(entries, todayKey, 7);
+  const selectedActivityIds = new Set<string>();
+
+  for (const activityId of [
+    ...topActivityIds(selectedYearTotals),
+    ...topActivityIds(thirtyDayTotals),
+    ...topActivityIds(sevenDayTotals),
+  ]) {
+    selectedActivityIds.add(activityId);
+  }
+
+  const createRow = (
+    id: string,
+    kind: ActivityAverageComparisonRow["kind"],
+    selectedYearMinutes: number,
+    thirtyDayMinutes: number,
+    sevenDayMinutes: number,
+  ): ActivityAverageComparisonRow => {
+    const selectedYearAverageMinutes = averageMinutes(
+      selectedYearMinutes,
+      selectedYearDays,
+    );
+    const thirtyDayAverageMinutes = averageMinutes(thirtyDayMinutes, 30);
+    const sevenDayAverageMinutes = averageMinutes(sevenDayMinutes, 7);
+
+    return {
+      id,
+      kind,
+      selectedYearAverageMinutes,
+      thirtyDayAverageMinutes,
+      sevenDayAverageMinutes,
+      thirtyDayVsYearPercent: calculatePercentChange(
+        selectedYearAverageMinutes,
+        thirtyDayAverageMinutes,
+      ),
+      sevenDayVsThirtyDayPercent: calculatePercentChange(
+        thirtyDayAverageMinutes,
+        sevenDayAverageMinutes,
+      ),
+    };
+  };
+
+  const selectedYearTotal = sumMinutes(
+    selectedYearEnd === null
+      ? []
+      : entries.filter(
+          (entry) =>
+            entry.studyDate >= selectedYearStart &&
+            entry.studyDate <= selectedYearEnd,
+        ),
+  );
+  const thirtyDayTotal = [...thirtyDayTotals.values()].reduce(
+    (total, minutes) => total + minutes,
+    0,
+  );
+  const sevenDayTotal = [...sevenDayTotals.values()].reduce(
+    (total, minutes) => total + minutes,
+    0,
+  );
+
+  const rows = [
+    createRow(
+      TOTAL_ACTIVITY_AVERAGE_ID,
+      "total",
+      selectedYearTotal,
+      thirtyDayTotal,
+      sevenDayTotal,
+    ),
+  ];
+
+  for (const activityId of selectedActivityIds) {
+    rows.push(
+      createRow(
+        activityId,
+        "activity",
+        selectedYearTotals.get(activityId) ?? 0,
+        thirtyDayTotals.get(activityId) ?? 0,
+        sevenDayTotals.get(activityId) ?? 0,
+      ),
+    );
+  }
+
+  const otherSelectedYearMinutes = [...selectedYearTotals.entries()].reduce(
+    (total, [activityId, minutes]) =>
+      selectedActivityIds.has(activityId) ? total : total + minutes,
+    0,
+  );
+  const otherThirtyDayMinutes = [...thirtyDayTotals.entries()].reduce(
+    (total, [activityId, minutes]) =>
+      selectedActivityIds.has(activityId) ? total : total + minutes,
+    0,
+  );
+  const otherSevenDayMinutes = [...sevenDayTotals.entries()].reduce(
+    (total, [activityId, minutes]) =>
+      selectedActivityIds.has(activityId) ? total : total + minutes,
+    0,
+  );
+
+  if (
+    otherSelectedYearMinutes > 0 ||
+    otherThirtyDayMinutes > 0 ||
+    otherSevenDayMinutes > 0
+  ) {
+    rows.push(
+      createRow(
+        OTHER_ACTIVITY_AVERAGE_ID,
+        "other",
+        otherSelectedYearMinutes,
+        otherThirtyDayMinutes,
+        otherSevenDayMinutes,
+      ),
+    );
+  }
+
+  return rows;
 }
 
 export function getDayDistribution(
