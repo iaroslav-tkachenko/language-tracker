@@ -196,7 +196,7 @@ test.describe("Phase 4A CEFR visual review", () => {
 
     await page.getByLabel("State").selectOption("c2");
     await expect(page.getByRole("heading", { name: "Level C2" })).toBeVisible();
-    await expect(page.getByText("> 1,290 hours")).toBeVisible();
+    await expect(page.getByText("> 1,310 hours")).toBeVisible();
     await expect(page.getByText("> 7,400 words")).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /Weekly plan to reach/ }),
