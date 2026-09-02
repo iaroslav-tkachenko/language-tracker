@@ -77,10 +77,10 @@ test.describe("Phase 4A CEFR visual review", () => {
     await expect(studyProgress.getByText("≈ 240 h")).toBeVisible();
     await expect(studyProgress.getByText("+60 hours")).toBeVisible();
     await expect(studyProgress.getByText("≈ 300 h now")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 480 h total")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 180 hours left")).toBeVisible();
-    await expect(studyProgress.getByText("25% completed")).toBeVisible();
-    await expect(studyProgress.getByText(/240 hour interval/i)).toHaveCount(0);
+    await expect(studyProgress.getByText("≈ 550 h total")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 250 hours left")).toBeVisible();
+    await expect(studyProgress.getByText("19% completed")).toBeVisible();
+    await expect(studyProgress.getByText(/310 hour interval/i)).toHaveCount(0);
     await expect(studyProgress.getByText("Forecast to reach B2")).toBeVisible();
     await expect(
       studyProgress.getByText("Last 7 days", { exact: true }),
@@ -196,7 +196,7 @@ test.describe("Phase 4A CEFR visual review", () => {
 
     await page.getByLabel("State").selectOption("c2");
     await expect(page.getByRole("heading", { name: "Level C2" })).toBeVisible();
-    await expect(page.getByText("> 1,290 hours")).toBeVisible();
+    await expect(page.getByText("> 1,310 hours")).toBeVisible();
     await expect(page.getByText("> 7,400 words")).toBeVisible();
     await expect(
       page.getByRole("heading", { name: /Weekly plan to reach/ }),

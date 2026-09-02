@@ -472,8 +472,8 @@ first approved model uses these transition values:
 | A0 → A1    |      40–60 hours |               40 hours |
 | A1 → A2    |      60–90 hours |               60 hours |
 | A2 → B1    |    140–200 hours |              140 hours |
-| B1 → B2    |    160–240 hours |              240 hours |
-| B2 → C1    |    200–300 hours |              300 hours |
+| B1 → B2    |    160–240 hours |              310 hours |
+| B2 → C1    |    200–300 hours |              250 hours |
 | C1 → C2    |    280–450 hours |              450 hours |
 
 For a current declaration below C2:

@@ -1,7 +1,7 @@
 import { fromDateKey, shiftDate } from "@/lib/dates/study-calendar";
 import type { CefrLevel } from "@/lib/cefr/reference";
 
-export const STUDY_TIME_MODEL_VERSION = "study-time-cefr-v1";
+export const STUDY_TIME_MODEL_VERSION = "study-time-cefr-v2";
 
 export const STUDY_TIME_TRANSITIONS = [
   {
@@ -26,13 +26,13 @@ export const STUDY_TIME_TRANSITIONS = [
     from: "B1",
     to: "B2",
     indicativeRangeHours: [160, 240],
-    calculationHours: 240,
+    calculationHours: 310,
   },
   {
     from: "B2",
     to: "C1",
     indicativeRangeHours: [200, 300],
-    calculationHours: 300,
+    calculationHours: 250,
   },
   {
     from: "C1",
@@ -56,8 +56,8 @@ export const STUDY_TIME_DISCLOSURE_ITEMS = [
   "A0 -> A1: 40-60 hours (calculation value 40)",
   "A1 -> A2: 60-90 hours (60)",
   "A2 -> B1: 140-200 hours (140)",
-  "B1 -> B2: 160-240 hours (240)",
-  "B2 -> C1: 200-300 hours (300)",
+  "B1 -> B2: 160-240 hours (310)",
+  "B2 -> C1: 200-300 hours (250)",
   "C1 -> C2: 280-450 hours (450)",
 ] as const;
 

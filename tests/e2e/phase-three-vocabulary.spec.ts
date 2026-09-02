@@ -95,6 +95,7 @@ test.describe("Phase 3 Vocabulary", () => {
           .getByRole("link", { name: "Statistics" })
       : page.getByRole("link", { name: "Statistics" });
     await statisticsLink.click();
+    await page.goto(`/statistics?board=${boardId}&year=2026&today=${today}`);
     await expect(
       page.getByRole("heading", { name: "Your learning overview" }),
     ).toBeVisible();
