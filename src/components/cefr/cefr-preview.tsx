@@ -271,8 +271,8 @@ const studyTransitions: Record<Exclude<CefrLevel, "C2">, number> = {
   A0: 40,
   A1: 60,
   A2: 140,
-  B1: 240,
-  B2: 300,
+  B1: 310,
+  B2: 250,
   C1: 450,
 };
 const studyBaselines: Record<CefrLevel, number> = {
@@ -280,9 +280,9 @@ const studyBaselines: Record<CefrLevel, number> = {
   A1: 40,
   A2: 100,
   B1: 240,
-  B2: 480,
-  C1: 780,
-  C2: 1230,
+  B2: 550,
+  C1: 800,
+  C2: 1250,
 };
 const vocabularyMidpoints: Record<CefrLevel, number> = {
   A0: 0,
@@ -904,16 +904,16 @@ function Disclosure() {
                 <tr>
                   <th className="px-3 py-3">B1 {"->"} B2</th>
                   <td className="px-3 py-3">160-240 h</td>
-                  <td className="px-3 py-3 font-bold text-slate-900">240 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">310 h</td>
                   <td className="px-3 py-3">400-590 h</td>
-                  <td className="px-3 py-3 font-bold text-slate-900">480 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">550 h</td>
                 </tr>
                 <tr>
                   <th className="px-3 py-3">B2 {"->"} C1</th>
                   <td className="px-3 py-3">200-300 h</td>
-                  <td className="px-3 py-3 font-bold text-slate-900">300 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">250 h</td>
                   <td className="px-3 py-3">600-890 h</td>
-                  <td className="px-3 py-3 font-bold text-slate-900">780 h</td>
+                  <td className="px-3 py-3 font-bold text-slate-900">800 h</td>
                 </tr>
                 <tr>
                   <th className="px-3 py-3">C1 {"->"} C2</th>
@@ -921,7 +921,7 @@ function Disclosure() {
                   <td className="px-3 py-3 font-bold text-slate-900">450 h</td>
                   <td className="px-3 py-3">880-1,340 h</td>
                   <td className="px-3 py-3 font-bold text-slate-900">
-                    1,230 h
+                    1,250 h
                   </td>
                 </tr>
               </tbody>

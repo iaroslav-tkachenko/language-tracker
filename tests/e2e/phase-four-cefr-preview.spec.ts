@@ -77,10 +77,10 @@ test.describe("Phase 4A CEFR visual review", () => {
     await expect(studyProgress.getByText("≈ 240 h")).toBeVisible();
     await expect(studyProgress.getByText("+60 hours")).toBeVisible();
     await expect(studyProgress.getByText("≈ 300 h now")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 480 h total")).toBeVisible();
-    await expect(studyProgress.getByText("≈ 180 hours left")).toBeVisible();
-    await expect(studyProgress.getByText("25% completed")).toBeVisible();
-    await expect(studyProgress.getByText(/240 hour interval/i)).toHaveCount(0);
+    await expect(studyProgress.getByText("≈ 550 h total")).toBeVisible();
+    await expect(studyProgress.getByText("≈ 250 hours left")).toBeVisible();
+    await expect(studyProgress.getByText("19% completed")).toBeVisible();
+    await expect(studyProgress.getByText(/310 hour interval/i)).toHaveCount(0);
     await expect(studyProgress.getByText("Forecast to reach B2")).toBeVisible();
     await expect(
       studyProgress.getByText("Last 7 days", { exact: true }),

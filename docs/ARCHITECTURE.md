@@ -448,8 +448,8 @@ reference data. It stores transition ranges and exact calculation differences:
 | A0 → A1    |            40–60 |                40 |
 | A1 → A2    |            60–90 |                60 |
 | A2 → B1    |          140–200 |               140 |
-| B1 → B2    |          160–240 |               240 |
-| B2 → C1    |          200–300 |               300 |
+| B1 → B2    |          160–240 |               310 |
+| B2 → C1    |          200–300 |               250 |
 | C1 → C2    |          280–450 |               450 |
 
 For the latest effective declaration below C2:

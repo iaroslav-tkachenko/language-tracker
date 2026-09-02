@@ -20,8 +20,8 @@ describe("STUDY_TIME_TRANSITIONS", () => {
       ["A0", "A1", 40],
       ["A1", "A2", 60],
       ["A2", "B1", 140],
-      ["B1", "B2", 240],
-      ["B2", "C1", 300],
+      ["B1", "B2", 310],
+      ["B2", "C1", 250],
       ["C1", "C2", 450],
     ]);
   });
@@ -32,8 +32,9 @@ describe("getStudyTimeBaselineMinutes", () => {
     expect(getStudyTimeBaselineMinutes("A0")).toBe(0);
     expect(getStudyTimeBaselineMinutes("A1")).toBe(40 * 60);
     expect(getStudyTimeBaselineMinutes("B1")).toBe(240 * 60);
-    expect(getStudyTimeBaselineMinutes("B2")).toBe(480 * 60);
-    expect(getStudyTimeBaselineMinutes("C2")).toBe(1230 * 60);
+    expect(getStudyTimeBaselineMinutes("B2")).toBe(550 * 60);
+    expect(getStudyTimeBaselineMinutes("C1")).toBe(800 * 60);
+    expect(getStudyTimeBaselineMinutes("C2")).toBe(1250 * 60);
   });
 });
 
@@ -71,21 +72,21 @@ describe("calculateStudyTimeForecast", () => {
     expect(forecast.currentLevel).toBe("B1");
     expect(forecast.nextLevel).toBe("B2");
     expect(forecast.baselineMinutes).toBe(240 * 60);
-    expect(forecast.requiredMinutes).toBe(240 * 60);
+    expect(forecast.requiredMinutes).toBe(310 * 60);
     expect(forecast.eligibleMinutes).toBe(480);
     expect(forecast.estimatedTotalLearningMinutes).toBe(240 * 60 + 480);
-    expect(forecast.remainingMinutes).toBe(240 * 60 - 480);
-    expect(forecast.progressRatio).toBeCloseTo(480 / (240 * 60));
+    expect(forecast.remainingMinutes).toBe(310 * 60 - 480);
+    expect(forecast.progressRatio).toBeCloseTo(480 / (310 * 60));
     expect(forecast.sevenDayPace.totalMinutes).toBe(180);
     expect(forecast.sevenDayPace.entryDays).toBe(3);
     expect(forecast.sevenDayPace.averageMinutes).toBeCloseTo(180 / 7);
-    expect(forecast.sevenDayPace.estimate?.daysRemaining).toBe(542);
-    expect(forecast.sevenDayPace.estimate?.estimatedDate).toBe("2028-01-27");
+    expect(forecast.sevenDayPace.estimate?.daysRemaining).toBe(705);
+    expect(forecast.sevenDayPace.estimate?.estimatedDate).toBe("2028-07-08");
     expect(forecast.thirtyDayPace.totalMinutes).toBe(1479);
     expect(forecast.thirtyDayPace.entryDays).toBe(6);
     expect(forecast.thirtyDayPace.averageMinutes).toBeCloseTo(1479 / 30);
-    expect(forecast.thirtyDayPace.estimate?.daysRemaining).toBe(283);
-    expect(forecast.thirtyDayPace.estimate?.estimatedDate).toBe("2027-05-13");
+    expect(forecast.thirtyDayPace.estimate?.daysRemaining).toBe(368);
+    expect(forecast.thirtyDayPace.estimate?.estimatedDate).toBe("2027-08-06");
   });
 
   it("uses a zero floor when the transition reference is reached", () => {
@@ -126,8 +127,8 @@ describe("calculateStudyTimeForecast", () => {
 
     expect(forecast.status).toBe("highest-level");
     if (forecast.status !== "highest-level") return;
-    expect(forecast.baselineMinutes).toBe(1230 * 60);
-    expect(forecast.estimatedTotalLearningMinutes).toBe(1230 * 60 + 120);
+    expect(forecast.baselineMinutes).toBe(1250 * 60);
+    expect(forecast.estimatedTotalLearningMinutes).toBe(1250 * 60 + 120);
   });
 });
 
