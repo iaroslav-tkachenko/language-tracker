@@ -11,6 +11,15 @@ const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
 const currentDirectory = path.dirname(sourceDirectory);
 const exportDirectory = path.join(currentDirectory, "exports");
 const previewDirectory = path.join(currentDirectory, "previews");
+const publicIconDirectory = path.resolve(
+  currentDirectory,
+  "..",
+  "..",
+  "..",
+  "..",
+  "public",
+  "icons",
+);
 
 const expectedPngs = new Map([
   ["language-tracker-icon-1024.png", [1024, 1024]],
@@ -78,8 +87,62 @@ svgResult.passed =
 
 await sharp(Buffer.from(sourceSvg)).metadata();
 
-console.log(JSON.stringify({ pngs: results, svg: svgResult }, null, 2));
+const expectedWindowsIconSizes = [16, 24, 32, 48, 64, 128, 256];
+const windowsIconPath = path.join(
+  exportDirectory,
+  "language-tracker-symbol.ico",
+);
+const publicWindowsIconPath = path.join(
+  publicIconDirectory,
+  "language-tracker-symbol.ico",
+);
+const windowsIcon = await readFile(windowsIconPath);
+const publicWindowsIcon = await readFile(publicWindowsIconPath);
+const windowsIconCount = windowsIcon.readUInt16LE(4);
+const windowsIconSizes = Array.from(
+  { length: windowsIconCount },
+  (_, index) => {
+    const entryOffset = 6 + index * 16;
+    const width = windowsIcon.readUInt8(entryOffset) || 256;
+    const height = windowsIcon.readUInt8(entryOffset + 1) || 256;
+    const imageSize = windowsIcon.readUInt32LE(entryOffset + 8);
+    const imageOffset = windowsIcon.readUInt32LE(entryOffset + 12);
+    const pngSignature = windowsIcon
+      .subarray(imageOffset, imageOffset + 8)
+      .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    return { width, height, imageSize, pngSignature };
+  },
+);
+const windowsIconResult = {
+  name: "language-tracker-symbol.ico",
+  type: windowsIcon.readUInt16LE(2),
+  sizes: windowsIconSizes,
+  matchingPublicCopy: windowsIcon.equals(publicWindowsIcon),
+};
+windowsIconResult.passed =
+  windowsIconResult.type === 1 &&
+  windowsIconCount === expectedWindowsIconSizes.length &&
+  windowsIconSizes.every(
+    (entry, index) =>
+      entry.width === expectedWindowsIconSizes[index] &&
+      entry.height === expectedWindowsIconSizes[index] &&
+      entry.imageSize > 0 &&
+      entry.pngSignature,
+  ) &&
+  windowsIconResult.matchingPublicCopy;
 
-if (!results.every((result) => result.passed) || !svgResult.passed) {
+console.log(
+  JSON.stringify(
+    { pngs: results, svg: svgResult, windowsIcon: windowsIconResult },
+    null,
+    2,
+  ),
+);
+
+if (
+  !results.every((result) => result.passed) ||
+  !svgResult.passed ||
+  !windowsIconResult.passed
+) {
   process.exitCode = 1;
 }

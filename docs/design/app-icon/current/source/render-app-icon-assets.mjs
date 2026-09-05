@@ -10,29 +10,37 @@ const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
 const currentDirectory = path.dirname(sourceDirectory);
 const exportDirectory = path.join(currentDirectory, "exports");
 const previewDirectory = path.join(currentDirectory, "previews");
+const publicIconDirectory = path.resolve(
+  currentDirectory,
+  "..",
+  "..",
+  "..",
+  "..",
+  "public",
+  "icons",
+);
 const sourcePath = path.join(
   sourceDirectory,
   "language-tracker-icon-master.svg",
 );
 const sourceSvg = await readFile(sourcePath);
+const sourceText = sourceSvg.toString();
+const newline = sourceText.includes("\r\n") ? "\r\n" : "\n";
 const maskableSvg = Buffer.from(
-  sourceSvg
-    .toString()
-    .replace(
-      '<g id="artwork">',
-      '<g id="artwork" transform="translate(102.4 102.4) scale(0.8)">',
-    ),
+  sourceText.replace(
+    '<g id="artwork">',
+    '<g id="artwork" transform="translate(102.4 102.4) scale(0.8)">',
+  ),
 );
 const faviconSvg = Buffer.from(
-  sourceSvg
-    .toString()
+  sourceText
     .replace(
       '<g id="symbol">',
       '<g id="symbol" transform="translate(-309 -10) scale(1.55)">',
     )
     .replace(
       /<g\s+id="title-lockup"/,
-      '<g\n    display="none"\n    id="title-lockup"',
+      `<g${newline}    display="none"${newline}    id="title-lockup"`,
     ),
 );
 
@@ -70,6 +78,57 @@ await sharp(faviconSvg, { density: 768 })
   .flatten({ background })
   .png({ compressionLevel: 9, adaptiveFiltering: true })
   .toFile(path.join(exportDirectory, "favicon-32.png"));
+
+const windowsIconSizes = [16, 24, 32, 48, 64, 128, 256];
+const windowsIconPngs = await Promise.all(
+  windowsIconSizes.map((size) =>
+    sharp(faviconSvg, { density: 768 })
+      .resize(size, size, { fit: "fill" })
+      .flatten({ background })
+      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .toBuffer(),
+  ),
+);
+
+function createWindowsIcon(images, sizes) {
+  const directorySize = 6 + images.length * 16;
+  const icon = Buffer.alloc(
+    directorySize + images.reduce((total, image) => total + image.length, 0),
+  );
+  icon.writeUInt16LE(0, 0);
+  icon.writeUInt16LE(1, 2);
+  icon.writeUInt16LE(images.length, 4);
+
+  let imageOffset = directorySize;
+  images.forEach((image, index) => {
+    const entryOffset = 6 + index * 16;
+    const size = sizes[index];
+    icon.writeUInt8(size === 256 ? 0 : size, entryOffset);
+    icon.writeUInt8(size === 256 ? 0 : size, entryOffset + 1);
+    icon.writeUInt8(0, entryOffset + 2);
+    icon.writeUInt8(0, entryOffset + 3);
+    icon.writeUInt16LE(1, entryOffset + 4);
+    icon.writeUInt16LE(32, entryOffset + 6);
+    icon.writeUInt32LE(image.length, entryOffset + 8);
+    icon.writeUInt32LE(imageOffset, entryOffset + 12);
+    image.copy(icon, imageOffset);
+    imageOffset += image.length;
+  });
+
+  return icon;
+}
+
+const windowsIcon = createWindowsIcon(windowsIconPngs, windowsIconSizes);
+await Promise.all([
+  writeFile(
+    path.join(exportDirectory, "language-tracker-symbol.ico"),
+    windowsIcon,
+  ),
+  writeFile(
+    path.join(publicIconDirectory, "language-tracker-symbol.ico"),
+    windowsIcon,
+  ),
+]);
 
 const iconBuffers = new Map();
 for (const size of [32, 48, 64, 180, 192, 280, 512]) {
