@@ -402,7 +402,9 @@ MVP stores source entries only and derives heatmap/statistics on demand. The
 Statistics Server Component reads RLS-filtered study entries and Vocabulary
 daily totals for one selected board. Pure, unit-tested TypeScript functions
 calculate both trackers' selected-year/current-period totals, distributions,
-averages, active days, and streaks. This is proportionate to the expected MVP
+averages, active days, streaks, and all-time day/week/month records. Record
+calculations exclude dates after `local_today` and resolve equal maxima to the
+most recent period. This is proportionate to the expected MVP
 load and avoids persisted aggregate state.
 
 The following `security invoker` functions remain the target if measurement

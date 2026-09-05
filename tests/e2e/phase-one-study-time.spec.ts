@@ -121,6 +121,18 @@ test.describe("Phase 1 Study Time", () => {
     await expect(
       page.getByRole("heading", { name: "Current progress" }),
     ).toBeVisible();
+    const recordsSection = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "Personal Records", exact: true }),
+    });
+    await expect(
+      recordsSection.getByRole("row", { name: /Best Day/ }),
+    ).toContainText("15m");
+    await expect(
+      recordsSection.getByRole("row", { name: /Best Week/ }),
+    ).toContainText("15m");
+    await expect(
+      recordsSection.getByRole("row", { name: /Best Month/ }),
+    ).toContainText("15m");
     await expect(
       page.getByRole("heading", {
         name: "Activity totals in the last 7 days",

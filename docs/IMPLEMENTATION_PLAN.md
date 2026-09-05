@@ -356,7 +356,7 @@ successfully in CI before merge.
 - A0–C2 history is preserved with safe mutations and verified owner isolation.
 - Study Time and Vocabulary forecasts are deterministic, transparent,
   reproducible for seven- and thirty-day pace, and non-authoritative.
-- Recorded and estimated totals are clearly separated.
+- Tracked and estimated totals are clearly separated.
 - Combined statistics are responsive and accessible.
 - All required automated checks pass, manual desktop/mobile review is complete,
   documentation matches behavior, and the project owner approves the final

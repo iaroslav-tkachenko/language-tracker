@@ -54,6 +54,7 @@ import {
   type VocabularyForecast,
 } from "@/lib/cefr/vocabulary";
 import {
+  calculateStudyRecords,
   getActivityAverageComparisonRows,
   calculateStudyStatistics,
   getActivityTotals,
@@ -71,6 +72,7 @@ import {
   type ActivityDonutRow,
 } from "@/lib/statistics/activity-donut";
 import {
+  calculateVocabularyRecords,
   calculateVocabularyStatistics,
   getVocabularyDayDistribution,
   getVocabularyMonthDistribution,
@@ -79,6 +81,8 @@ import {
   type VocabularyChartPoint,
   type VocabularyDailyTotal,
 } from "@/lib/vocabulary/vocabulary-statistics";
+import { fromDateKey } from "@/lib/dates/study-calendar";
+import type { PeriodRecord } from "@/lib/statistics/period-records";
 
 type BoardSummary = { id: string; name: string };
 type ActivitySummary = {
@@ -114,11 +118,25 @@ function formatDuration(minutes: number, precise = false) {
   return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
-function MetricValue({ value }: { value: string | number }) {
+function MetricValue({
+  value,
+  tone = "default",
+}: {
+  value: string | number;
+  tone?: "default" | "blue" | "green";
+}) {
   const tokens = String(value).split(" ");
+  const valueColor =
+    tone === "blue"
+      ? "text-blue-700"
+      : tone === "green"
+        ? "text-emerald-700"
+        : "text-slate-950";
 
   return (
-    <strong className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xl leading-tight text-slate-950 sm:text-2xl">
+    <strong
+      className={`flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-xl leading-tight sm:text-2xl ${valueColor}`}
+    >
       {tokens.map((token, index) => {
         const compactMatch = token.match(/^([≈><]?\d[\d,.]*)([a-zA-Z]+)$/);
         if (compactMatch) {
@@ -181,6 +199,78 @@ function MetricCard({
         </div>
       </div>
     </article>
+  );
+}
+
+function formatRecordDate(record: PeriodRecord, period: Granularity) {
+  const start = fromDateKey(record.startDate);
+  const end = fromDateKey(record.endDate);
+
+  if (period === "day") {
+    return new Intl.DateTimeFormat("en", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(start);
+  }
+
+  if (period === "month") {
+    return new Intl.DateTimeFormat("en", {
+      month: "long",
+      year: "numeric",
+    }).format(start);
+  }
+
+  const startMonth = start.getMonth();
+  const startYear = start.getFullYear();
+  const endMonth = end.getMonth();
+  const endYear = end.getFullYear();
+  if (startYear === endYear && startMonth === endMonth) {
+    const month = new Intl.DateTimeFormat("en", { month: "short" }).format(
+      start,
+    );
+    return `${month} ${start.getDate()}–${end.getDate()}, ${startYear}`;
+  }
+  if (startYear === endYear) {
+    const shortDate = new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+    });
+    return `${shortDate.format(start)} – ${shortDate.format(end)}, ${startYear}`;
+  }
+
+  const fullDate = new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `${fullDate.format(start)} – ${fullDate.format(end)}`;
+}
+
+function RecordTableValue({
+  record,
+  period,
+  formatValue,
+  tone,
+}: {
+  record: PeriodRecord | null;
+  period: "day" | "week" | "month";
+  formatValue: (total: number) => string;
+  tone: "blue" | "green";
+}) {
+  if (!record) {
+    return (
+      <span className="text-sm font-medium text-slate-500">No record yet</span>
+    );
+  }
+
+  return (
+    <div>
+      <MetricValue value={formatValue(record.total)} tone={tone} />
+      <p className="mt-1 whitespace-nowrap text-sm text-slate-500">
+        {formatRecordDate(record, period)}
+      </p>
+    </div>
   );
 }
 
@@ -1104,6 +1194,10 @@ export function StatisticsWorkspace({
     () => calculateStudyStatistics(entries, selectedYear, todayKey),
     [entries, selectedYear, todayKey],
   );
+  const studyRecords = useMemo(
+    () => calculateStudyRecords(entries, todayKey),
+    [entries, todayKey],
+  );
   const activityTotals = useMemo(
     () => getActivityTotals(entries, selectedYear),
     [entries, selectedYear],
@@ -1124,6 +1218,10 @@ export function StatisticsWorkspace({
     () =>
       calculateVocabularyStatistics(vocabularyTotals, selectedYear, todayKey),
     [selectedYear, todayKey, vocabularyTotals],
+  );
+  const vocabularyRecords = useMemo(
+    () => calculateVocabularyRecords(vocabularyTotals, todayKey),
+    [todayKey, vocabularyTotals],
   );
   const chartPoints = useMemo(() => {
     if (granularity === "day") {
@@ -1364,10 +1462,10 @@ export function StatisticsWorkspace({
         </div>
 
         {cefrOverview && (
-          <section className="mt-6 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="mt-8">
             <div>
               <h2 className="text-xl font-bold text-slate-950">
-                Recorded and estimated totals
+                Tracked and estimated totals
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
                 Estimates combine your current-level baseline with activity
@@ -1406,6 +1504,77 @@ export function StatisticsWorkspace({
             </div>
           </section>
         )}
+
+        <section aria-labelledby="records-heading" className="mt-8">
+          <div>
+            <h2
+              id="records-heading"
+              className="text-xl font-bold text-slate-950"
+            >
+              Personal Records
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Your highest totals across all recorded history through today.
+            </p>
+          </div>
+          <div className="mt-5 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table className="w-full table-fixed border-collapse text-left">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/80">
+                  <th className="w-[31%] px-3 py-4 text-xs font-bold text-slate-700 sm:w-1/4 sm:px-5 sm:text-sm">
+                    Record
+                  </th>
+                  <th className="px-3 py-4 text-xs font-bold text-blue-700 sm:px-5 sm:text-sm">
+                    <span className="flex items-center gap-2">
+                      <Clock3 aria-hidden="true" className="size-4" />
+                      Study Time
+                    </span>
+                  </th>
+                  <th className="px-3 py-4 text-xs font-bold text-emerald-700 sm:px-5 sm:text-sm">
+                    <span className="flex items-center gap-2">
+                      <BookOpen aria-hidden="true" className="size-4" />
+                      Vocabulary
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {(["day", "week", "month"] as const).map((period) => (
+                  <tr
+                    key={period}
+                    className="border-b border-slate-200 last:border-b-0"
+                  >
+                    <th
+                      scope="row"
+                      className="px-3 py-5 text-base font-bold text-slate-950 sm:px-5 sm:text-lg"
+                    >
+                      Best {period[0]?.toUpperCase()}
+                      {period.slice(1)}
+                    </th>
+                    <td className="px-3 py-5 align-top sm:px-5">
+                      <RecordTableValue
+                        record={studyRecords[period]}
+                        period={period}
+                        formatValue={formatDuration}
+                        tone="blue"
+                      />
+                    </td>
+                    <td className="px-3 py-5 align-top sm:px-5">
+                      <RecordTableValue
+                        record={vocabularyRecords[period]}
+                        period={period}
+                        formatValue={(total) =>
+                          `${total.toLocaleString("en")} words`
+                        }
+                        tone="green"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <section aria-labelledby="current-progress-heading" className="mt-8">
           <div>

@@ -295,6 +295,13 @@ All statistics are scoped to the selected board.
   word total, active days, calendar-day average, and study-day average belong to
   `Selected year`. Current streak, longest streak, today, current-week, and
   current-month word totals belong to `Current progress` in that order.
+- The `Personal Records` section appears after `Tracked and estimated totals` and before
+  `Current progress`. It shows the highest all-time calendar-day, Monday-Sunday
+  week, and calendar-month totals for both Study Time and Vocabulary, with the
+  metric and corresponding date or date range. Future-dated records are
+  excluded. When multiple periods share the maximum, the most recent period is
+  shown. One table compares Study Time and Vocabulary, using the prominent row
+  labels `Best Day`, `Best Week`, and `Best Month`.
 - After the user declares a current level, detailed statistics also distinguish
   source-record totals from model-based estimates. The UI labels these metrics
   `Tracked study time`, `Estimated learning time`, `Tracked words`, and
