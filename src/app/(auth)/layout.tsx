@@ -1,4 +1,4 @@
-import { Clock3 } from "lucide-react";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -11,14 +11,19 @@ export default function AuthLayout({
       />
       <div className="relative w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2.5 text-blue-600">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
-            <Clock3 size={22} aria-hidden="true" />
-          </span>
+          <Image
+            src="/icons/favicon.svg"
+            alt=""
+            width={40}
+            height={40}
+            priority
+            className="size-10 rounded-xl"
+          />
           <span className="text-xl font-bold tracking-tight text-slate-950">
             Language Tracker
           </span>
         </div>
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
           {children}
         </section>
       </div>
