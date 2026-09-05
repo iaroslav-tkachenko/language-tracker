@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Language Tracker</title>
+  <rect width="1024" height="1024" fill="#155dfc" />
+  <g id="artwork">
+  <g id="symbol" transform="translate(-309 -10) scale(1.55)">
+  <g
+    fill="none"
+    stroke="#f8fafc"
+    stroke-width="24"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M700 338v-72c0-58-47-105-105-105H405c-58 0-105 47-105 105v82c0 47 31 88 75 101v63l72-51h100" />
+    <path d="M382 287h190" />
+    <path d="M382 354h136" />
+  </g>
+  <circle
+    cx="654"
+    cy="433"
+    r="101"
+    fill="#10b981"
+    stroke="#f8fafc"
+    stroke-width="24"
+  />
+  <path
+    d="M654 380v57l48 31"
+    fill="none"
+    stroke="#f8fafc"
+    stroke-width="24"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  </g>
+  <g
+    display="none"
+    id="title-lockup"
+    fill="#f8fafc"
+    font-family="Arial, sans-serif"
+    font-size="132"
+    font-weight="700"
+    text-anchor="middle"
+  >
+    <text x="512" y="714" textLength="650" lengthAdjust="spacingAndGlyphs">Language</text>
+    <text x="512" y="851" textLength="480" lengthAdjust="spacingAndGlyphs">Tracker</text>
+  </g>
+  </g>
+</svg>

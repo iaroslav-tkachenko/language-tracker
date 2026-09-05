@@ -69,4 +69,14 @@ describe("PWA manifest", () => {
       ),
     );
   });
+
+  it("uses the approved symbol-only SVG for the browser favicon", () => {
+    const runtime = readFileSync(resolve("public/icons/favicon.svg"));
+    const approved = readFileSync(
+      resolve("docs/design/app-icon/current/exports/favicon.svg"),
+    );
+    expect(runtime).toEqual(approved);
+    expect(runtime.toString()).toContain('display="none"');
+    expect(runtime.toString()).toContain('id="symbol"');
+  });
 });

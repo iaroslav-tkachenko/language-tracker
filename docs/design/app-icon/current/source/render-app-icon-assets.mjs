@@ -31,7 +31,7 @@ const faviconSvg = Buffer.from(
       '<g id="symbol" transform="translate(-309 -10) scale(1.55)">',
     )
     .replace(
-      '<g\n    id="title-lockup"',
+      /<g\s+id="title-lockup"/,
       '<g\n    display="none"\n    id="title-lockup"',
     ),
 );
@@ -50,6 +50,7 @@ await writeFile(
   path.join(exportDirectory, "language-tracker-icon-master.svg"),
   sourceSvg,
 );
+await writeFile(path.join(exportDirectory, "favicon.svg"), faviconSvg);
 
 await Promise.all([
   renderPng(1024, "language-tracker-icon-1024.png"),
