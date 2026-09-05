@@ -60,6 +60,10 @@ The final artwork uses colors already established in the application:
 - `current/exports/favicon-32.png` — 32 px symbol-only favicon adaptation.
 - `current/exports/favicon.svg` — scalable symbol-only favicon with enlarged
   dialogue-and-clock artwork and no title.
+- `current/exports/language-tracker-symbol.ico` — multi-size symbol-only Windows
+  desktop icon with embedded 16, 24, 32, 48, 64, 128, and 256 px images.
+- `public/icons/language-tracker-symbol.ico` — downloadable production copy of
+  the Windows desktop icon.
 - `current/previews/icon-preview-sheet.png` — 1800×1600 visual QA sheet.
 - `current/previews/validation-report.md` — programmatic and visual verification
   results.
