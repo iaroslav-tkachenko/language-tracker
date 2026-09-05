@@ -1,4 +1,8 @@
 import { fromDateKey, shiftDate } from "@/lib/dates/study-calendar";
+import {
+  calculatePeriodRecords,
+  type PeriodRecords,
+} from "@/lib/statistics/period-records";
 
 export type VocabularyDailyTotal = {
   studyDate: string;
@@ -17,6 +21,19 @@ export type VocabularyStatistics = {
   currentWeekWords: number;
   currentMonthWords: number;
 };
+
+export function calculateVocabularyRecords(
+  totals: VocabularyDailyTotal[],
+  todayKey: string,
+): PeriodRecords {
+  return calculatePeriodRecords(
+    totals.map((total) => ({
+      date: total.studyDate,
+      value: total.wordsLearned,
+    })),
+    todayKey,
+  );
+}
 
 function daysInYear(year: number) {
   return new Date(year, 1, 29).getMonth() === 1 ? 366 : 365;

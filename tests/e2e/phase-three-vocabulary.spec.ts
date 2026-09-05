@@ -100,6 +100,19 @@ test.describe("Phase 3 Vocabulary", () => {
       page.getByRole("heading", { name: "Your learning overview" }),
     ).toBeVisible();
 
+    const recordsSection = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "Personal Records", exact: true }),
+    });
+    await expect(
+      recordsSection.getByRole("row", { name: /Best Day/ }),
+    ).toContainText(/4\s*words[\s\S]*July 22, 2026/);
+    await expect(
+      recordsSection.getByRole("row", { name: /Best Week/ }),
+    ).toContainText(/12\s*words[\s\S]*Jul 20–26, 2026/);
+    await expect(
+      recordsSection.getByRole("row", { name: /Best Month/ }),
+    ).toContainText(/12\s*words[\s\S]*July 2026/);
+
     const selectedYearSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Selected year" }),
     });
@@ -122,6 +135,17 @@ test.describe("Phase 3 Vocabulary", () => {
     const currentProgressSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Current progress" }),
     });
+    expect(
+      await recordsSection.evaluate(
+        (records, currentProgress) =>
+          Boolean(
+            currentProgress &&
+            records.compareDocumentPosition(currentProgress) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          ),
+        await currentProgressSection.elementHandle(),
+      ),
+    ).toBe(true);
     const currentVocabulary = currentProgressSection
       .getByRole("heading", { name: "Vocabulary", exact: true })
       .locator("xpath=parent::div");

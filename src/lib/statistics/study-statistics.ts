@@ -1,4 +1,8 @@
 import { fromDateKey, shiftDate, toDateKey } from "@/lib/dates/study-calendar";
+import {
+  calculatePeriodRecords,
+  type PeriodRecords,
+} from "@/lib/statistics/period-records";
 
 export type StudyStatisticsEntry = {
   studyDate: string;
@@ -23,6 +27,19 @@ export type StudyStatistics = {
   currentStreak: number;
   longestStreak: number;
 };
+
+export function calculateStudyRecords(
+  entries: StudyStatisticsEntry[],
+  todayKey: string,
+): PeriodRecords {
+  return calculatePeriodRecords(
+    entries.map((entry) => ({
+      date: entry.studyDate,
+      value: entry.durationMinutes,
+    })),
+    todayKey,
+  );
+}
 
 export type ActivityAverageComparisonRow = {
   id: string;

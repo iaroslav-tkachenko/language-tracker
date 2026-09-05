@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  calculateStudyRecords,
   calculateStudyStatistics,
   getActivityAverageComparisonRows,
   getDayDistribution,
@@ -22,6 +23,28 @@ const entry = (
 });
 
 describe("study statistics", () => {
+  it("finds all-time records through today", () => {
+    const records = calculateStudyRecords(
+      [
+        entry("2025-12-31", 75),
+        entry("2026-07-20", 30),
+        entry("2026-07-20", 45),
+        entry("2026-07-25", 75),
+        entry("2026-07-27", 500),
+      ],
+      "2026-07-25",
+    );
+
+    expect(records.day?.startDate).toBe("2026-07-25");
+    expect(records.day?.total).toBe(75);
+    expect(records.week).toMatchObject({
+      total: 150,
+      startDate: "2026-07-20",
+      endDate: "2026-07-26",
+    });
+    expect(records.month?.total).toBe(150);
+  });
+
   it("includes future entries in the year total but excludes them from averages and active days", () => {
     const result = calculateStudyStatistics(
       [

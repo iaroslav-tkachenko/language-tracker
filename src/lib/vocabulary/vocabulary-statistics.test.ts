@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { getCalendarCells } from "@/lib/dates/study-calendar";
 import {
+  calculateVocabularyRecords,
   calculateVocabularyStatistics,
   getVocabularyDayDistribution,
   getVocabularyMonthDistribution,
@@ -114,6 +115,27 @@ describe("vocabulary statistics", () => {
     { studyDate: "2026-07-25", wordsLearned: 8 },
     { studyDate: "2026-07-27", wordsLearned: 40 },
   ];
+
+  it("finds all-time records through today and prefers the latest tie", () => {
+    const records = calculateVocabularyRecords(
+      [
+        { studyDate: "2025-12-31", wordsLearned: 40 },
+        { studyDate: "2026-07-20", wordsLearned: 15 },
+        { studyDate: "2026-07-25", wordsLearned: 40 },
+        { studyDate: "2026-07-27", wordsLearned: 1_000 },
+      ],
+      "2026-07-25",
+    );
+
+    expect(records.day?.startDate).toBe("2026-07-25");
+    expect(records.day?.total).toBe(40);
+    expect(records.week).toMatchObject({
+      total: 55,
+      startDate: "2026-07-20",
+      endDate: "2026-07-26",
+    });
+    expect(records.month?.total).toBe(55);
+  });
 
   it("includes future totals but excludes future active days", () => {
     expect(
