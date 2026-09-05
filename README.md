@@ -6,7 +6,8 @@ language boards.
 
 [![Quality checks](https://github.com/iaroslav-tkachenko/language-tracker/actions/workflows/quality.yml/badge.svg)](https://github.com/iaroslav-tkachenko/language-tracker/actions/workflows/quality.yml)
 
-[Try the live application](https://language-tracker-phi.vercel.app/) ·
+[Try the live application](https://language-tracker-app.vercel.app/) ·
+[Install on your phone](https://language-tracker-app.vercel.app/install) ·
 [Read the product specification](docs/PRODUCT_SPEC.md) ·
 [Explore the documentation](docs/README.md)
 
@@ -62,6 +63,15 @@ launch remain tracked in the
 - Supabase Auth and PostgreSQL with Row Level Security
 - Vercel
 - Vitest, Playwright, and pgTAP
+
+## Install on your phone
+
+Language Tracker is an installable web app; it does not require an App Store or
+Google Play download. Open the [installation page](https://language-tracker-app.vercel.app/install)
+on your phone. On Android, use the available **Install app** button or the
+browser menu. On iPhone or iPad, open **Share** and choose **Add to Home Screen**.
+The installed app uses the same account and data as the website and requires an
+internet connection; offline access is not supported.
 
 ## Local development
 

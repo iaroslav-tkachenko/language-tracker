@@ -206,7 +206,7 @@ production domain without callback errors.
 Goal: deploy one immutable release candidate before exposing it to users.
 
 **Completed August 10, 2026.** Vercel serves the application at
-`https://language-tracker-phi.vercel.app`. The canonical URL is configured as
+`https://language-tracker-app.vercel.app`. The canonical URL is configured as
 `NEXT_PUBLIC_SITE_URL` in the Production environment only, and both public
 Supabase variables point to project `fbkwirzlvyaykrimpqhy`. Preview deployments
 do not receive production database variables.
