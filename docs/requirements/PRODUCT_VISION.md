@@ -85,7 +85,10 @@ flowchart LR
 - One editable vocabulary total per board and date, with its own yearly green heatmap and statistics.
 - User-declared CEFR history and an approximate Cambridge-based next-level forecast.
 - Board-specific totals, averages, active days, streaks, activity totals, and time distributions.
-- Actual activity distribution for the latest seven calendar days.
+- Actual activity distribution for the selected year and the latest seven and
+  thirty calendar days.
+- Activity-average comparisons and an immutable suggested weekly learning mix
+  for the current-to-next CEFR transition.
 - Responsive English-language interface with system, light, and dark themes.
 - Safe archival that preserves historical entries and statistics.
 
@@ -102,7 +105,8 @@ flowchart LR
 - Offline mode.
 - Native mobile applications.
 - Automatic CEFR assessment or promotion.
-- User-editable CEFR hour targets, vocabulary-to-CEFR cutoffs, or ideal activity-distribution targets.
+- User-editable CEFR hour targets, vocabulary-to-CEFR cutoffs, or suggested
+  weekly learning-mix targets.
 
 ## 8. Assumptions
 

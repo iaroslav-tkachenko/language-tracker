@@ -74,6 +74,8 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-047`: Study Time heatmap thresholds are `0`, `1–14`, `15–29`, `30–59`, `60–119`, `120–180`, and `181+` minutes.
 - `BR-RULE-048`: Missed-day red begins with the board's earliest study entry; earlier dates, current/future zero-minute dates, and complete earlier empty years are white. Positive totals below 60 minutes use yellow-family levels and totals of 60 minutes or more use increasingly dark green levels.
 - `BR-RULE-049`: Heatmap levels are fixed across years rather than normalized to a year's maximum.
+- `BR-RULE-084`: Detailed statistics show actual activity allocation for the selected year and for the latest seven and thirty calendar dates ending today.
+- `BR-RULE-085`: Activity-average comparisons use per-calendar-day averages for the selected year, latest thirty days, and latest seven days, with a stable top-activity union and an `Other` remainder.
 
 ### Selected-day workflow
 
@@ -84,8 +86,8 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-054`: At 1366×768 CSS pixels and 100% browser zoom, the primary view shows the heatmap, summary, selected-day heading, and either its first entry or `Add study session` without page scrolling.
 - `BR-RULE-055`: A populated selected day shows `Add study session` below its existing cards.
 - `BR-RULE-056`: On mobile/touch layouts, edit and delete icons remain persistently visible on every study-entry card.
-- `BR-RULE-057`: During Phases 1 and 2, the visible Vocabulary tab is disabled and labelled `Coming soon`.
-- `BR-RULE-058`: `Top activity` does not appear in the primary summary; Phase 1 design review may use an isolated B1-to-B2 six-month test fixture until real Phase 4 CEFR data replaces it.
+- `BR-RULE-057`: Study Time and Vocabulary are both active tracker destinations and preserve the selected language board when the user switches between them.
+- `BR-RULE-058`: `Top activity` does not appear in the primary summary; any CEFR summary shown there is derived from the board's current declaration and recorded data.
 - `BR-RULE-059`: A study-entry card does not repeat the current board name; standard activities have distinct recognizable icons, while all user-created activities share one distinct custom-activity icon.
 - `BR-RULE-067`: Previous-day and next-day controls move the selected day by exactly one calendar date without changing the selected board.
 - `BR-RULE-068`: The selected-day total receives stronger visual emphasis than supporting labels, while remaining understandable to assistive technology.
@@ -110,14 +112,14 @@ Business requirements describe the outcomes and invariant rules the product must
 - `BR-RULE-072`: The current CEFR level is the latest effective declaration; earlier declarations remain visible in history.
 - `BR-RULE-073`: Forecasts use an approximate Cambridge English guided-learning-hours model for every language, with a prominent warning that it is guidance rather than an assessment or guarantee.
 - `BR-RULE-074`: Progress toward the next level subtracts eligible study time logged since the effective date of the current declaration from the reference hours between the two levels.
-- `BR-RULE-075`: The forecast pace is the average minutes per calendar day across today and the preceding six dates, including zero-study days and excluding future entries.
-- `BR-RULE-076`: A zero seven-day pace produces no estimated achievement date; C2 has no next-level forecast.
+- `BR-RULE-075`: Study Time and Vocabulary forecasts use independent averages across the latest seven and thirty calendar dates, including zero-value days and excluding future values.
+- `BR-RULE-076`: A zero pace produces no estimate for that tracker and period; C2 has no next-level forecast.
 - `BR-RULE-077`: Reaching the estimated hour target does not change the declared level and instead prompts the user to reassess it.
 
 ### Product reference models
 
 - `BR-RULE-080`: Vocabulary-to-CEFR midpoint references are fixed, non-editable, and used for the approved approximate vocabulary progress model.
-- `BR-RULE-081`: Ideal activity distributions will be fixed and non-editable per CEFR level, but their values remain deferred until separate product approval.
+- `BR-RULE-081`: Suggested weekly learning mixes are fixed, non-editable, level-specific reference guidance based on a ten-hour week; they are not personalized guarantees or records of actual activity.
 
 ## 4. Business acceptance statement
 

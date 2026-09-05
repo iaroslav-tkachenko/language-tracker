@@ -28,7 +28,8 @@ The MVP is private and single-user in nature: it has no social graph, public dat
 - UI localization or an app-language selector.
 - Offline support or native mobile applications.
 - Automatic CEFR assessment, certification, or promotion.
-- User-defined CEFR hour targets, CEFR vocabulary cutoffs, or ideal activity distributions.
+- User-defined CEFR hour targets, CEFR vocabulary cutoffs, or suggested weekly
+  learning-mix targets.
 
 ## 4. Users and access
 
@@ -476,6 +477,11 @@ first approved model uses these transition values:
 | B2 → C1    |    200–300 hours |              250 hours |
 | C1 → C2    |    280–450 hours |              450 hours |
 
+The indicative ranges describe standalone transition guidance. Calculation
+differences are the approved deltas between cumulative target points, so a
+calculation difference is not required to fall inside the corresponding
+standalone range.
+
 For a current declaration below C2:
 
 1. Required minutes equal the approved calculation difference for the transition.
@@ -566,7 +572,7 @@ approximate signal rather than deduplicated vocabulary records.
 Both forecast models are guidance rather than assessment or guarantee. Language,
 learning background, intensity, exposure, age, retention, and other factors can
 materially change progress. CEFR descriptions are based on the
-[Council of Europe CEFR levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-%20descriptions).
+[Council of Europe CEFR levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-descriptions).
 Progress can develop unevenly across skills depending on the activities a
 learner does most; for example, reading, speaking, listening, and writing may
 not all grow at the same pace.
@@ -592,7 +598,6 @@ not all grow at the same pace.
   example, `B1 → B2`); supporting copy shows the tracker-appropriate forecast
   and its seven- or thirty-day pace period. Desktop may show both pace periods
   and more methodology detail.
-- Phase 1 screenshot reviews may use an isolated test-user fixture reading `Current level: B1` and `Estimated B2: in about 6 months at this pace`. This fixture must never be presented as real data to a production user and is replaced by the Phase 4 calculation.
 - The statistics destination uses an explicit `Statistics` label or an icon-and-label treatment rather than an unexplained small icon.
 - A board-scoped CEFR management screen is reachable from Study Time,
   Vocabulary, and Statistics. The full-screen Settings section manages boards,

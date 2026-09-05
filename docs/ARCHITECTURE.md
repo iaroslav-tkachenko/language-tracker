@@ -452,6 +452,10 @@ reference data. It stores transition ranges and exact calculation differences:
 | B2 → C1    |          200–300 |               250 |
 | C1 → C2    |          280–450 |               450 |
 
+Indicative hours describe standalone transition guidance. Calculation hours are
+approved deltas between cumulative target points and therefore are not
+constrained to the corresponding standalone range.
+
 For the latest effective declaration below C2:
 
 ```text

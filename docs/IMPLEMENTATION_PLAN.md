@@ -9,8 +9,8 @@ The project owner approved the original MVP plan on July 14, 2026, the
 four-phase product direction on July 16, 2026, and Phase 1 visual work on July
 17, 2026. Phase 0 authentication, schema, security, hosted email confirmation,
 and password recovery passed automated and manual verification and were merged
-on July 25, 2026. The responsive Study Time prototype remains preserved at
-`/demo` while Phase 1 replaces fixtures with production-backed data.
+on July 25, 2026. The responsive Study Time prototype is preserved at `/demo`;
+the primary application uses production-backed data.
 
 The production-backed Phase 1 implementation includes language-board and
 activity lifecycle management, single-day entry create/edit/delete, the
@@ -323,9 +323,9 @@ owner approval.
 
 ### Phase 4H — Verification, accessibility, and documentation
 
-**Status:** complete for local application verification and documentation.
-Database and browser checks remain environment-dependent and must be rerun in
-CI or a clean local Supabase/browser stack before merge.
+**Status:** complete. Local application verification and documentation passed,
+and the environment-dependent database and browser checks were rerun
+successfully in CI before merge.
 
 - Unit-test all transition/midpoint differences, derived baselines, effective
   date subtraction, estimated totals, seven/thirty-day zero-inclusive pace,
@@ -401,19 +401,19 @@ and a physical mobile browser.
 - Required GitHub Actions application, database, and browser checks passed
   before merge.
 
-## 9. Hardening and deployment
+## 9. Production rollout
 
-**Status:** in progress. Execution and evidence are tracked in the
+**Status:** launch gates R0–R5 are complete. R6 operations readiness is in
+progress and R7 controlled soft launch has not started. Current evidence and
+remaining work are tracked in the
 [production launch runbook](development/PRODUCTION_LAUNCH.md).
 
-### Work
+### Remaining work
 
-- Complete critical Playwright journeys in desktop Chromium and emulated mobile, with targeted Firefox/WebKit coverage.
-- Run WCAG 2.2 AA-oriented automated and manual checks, including red/yellow/green heatmaps and color-vision considerations.
-- Test representative multi-year study, vocabulary, batch, and CEFR data and inspect query plans.
-- Rebuild a clean database and re-run all RLS/grant tests.
-- Verify Vercel Development, Preview, and Production environments, Supabase redirects, and production SMTP.
-- Update setup, migration, testing, deployment, and recovery documentation.
+- Complete the recurring operations and recovery evidence required by R6.
+- Conduct the controlled R7 soft launch and record feedback and incident
+  evidence.
+- Keep release, backup, recovery, rollback, and monitoring documentation current.
 
 ### Exit criteria
 
@@ -422,7 +422,7 @@ and a physical mobile browser.
 - No secret or service-role key is exposed to browser code or Git.
 - Product-owner acceptance passes on representative desktop and mobile viewports.
 
-## 10. Planned critical end-to-end journeys
+## 10. Critical end-to-end journeys
 
 1. Register, confirm email, sign in, recover password, and sign out.
 2. Manage two boards and prove their Study Time, Vocabulary, CEFR, and statistics remain separate.
@@ -446,7 +446,7 @@ and a physical mobile browser.
 | CEFR forecast appears authoritative          | Persistent approximation/source warning, self-declared language, and explicit unavailable states       |
 | Cross-language reference guidance varies     | Version and disclose the multi-source Study Time model and non-normative Vocabulary research model     |
 | Recorded words cannot be deduplicated        | Label Vocabulary reference totals as approximate and disclose that individual words are not stored     |
-| Deferred models acquire guessed values       | Traceable deferred requirements and an implementation gate requiring owner-approved values             |
+| Reference models drift without review        | Immutable versioned models, traceable requirements, and explicit product approval for changes          |
 | Future entries corrupt current metrics       | Centralized `local_today` cutoff and boundary fixtures for both trackers                               |
 | RLS policies miss new tables/functions       | Explicit allow/deny pgTAP coverage and composite ownership constraints before UI delivery              |
 
@@ -454,12 +454,13 @@ and a physical mobile browser.
 
 The expanded MVP is done only when:
 
-- Phases 0–5 in the approved specification are implemented, except explicitly deferred reference models;
+- Phases 0–5 in the approved specification are implemented;
 - every user-owned table and callable mutation has verified owner isolation;
 - batch, Study Time, Vocabulary, CEFR, and statistics rules pass boundary fixtures;
 - critical Playwright journeys pass on representative desktop and mobile configurations;
 - the interface is keyboard/touch usable and does not depend on color alone;
 - CEFR guidance is sourced, versioned, and presented as approximate;
 - authentication, SMTP, and redirect configuration are production-ready;
-- documentation accurately describes setup, behavior, calculations, and deferred scope;
-- no deferred values or out-of-scope feature has been silently introduced.
+- documentation accurately describes setup, behavior, calculations, and
+  out-of-scope boundaries;
+- no out-of-scope feature has been silently introduced.

@@ -1,111 +1,124 @@
-# Language Learning Time Tracker
+# Language Tracker
 
-A responsive web application for recording and reviewing foreign-language study time, newly learned vocabulary, and self-declared CEFR progress on private language boards.
+A deployed, responsive web application for recording language-learning
+time, newly learned vocabulary, and self-declared CEFR progress on private
+language boards.
+
+[![Quality checks](https://github.com/iaroslav-tkachenko/language-tracker/actions/workflows/quality.yml/badge.svg)](https://github.com/iaroslav-tkachenko/language-tracker/actions/workflows/quality.yml)
+
+[Try the live application](https://language-tracker-phi.vercel.app/) ·
+[Read the product specification](docs/PRODUCT_SPEC.md) ·
+[Explore the documentation](docs/README.md)
 
 ## Project status
 
-**Product Phases 0-5 and production launch gates R0-R5 are complete.** Language
-Tracker is deployed on Vercel with a separate production Supabase project, custom
-SMTP, encrypted off-site backups, tested recovery, and desktop/mobile release
-verification. Operations readiness and controlled soft launch are tracked in the
+Product Phases 0–5 and production launch gates R0–R5 are complete. The
+application is deployed on Vercel with a separate production Supabase project,
+custom SMTP, encrypted off-site backups, a successful restore rehearsal, and
+approved desktop/mobile smoke tests. Operations readiness and controlled soft
+launch remain tracked in the
 [production launch runbook](docs/development/PRODUCTION_LAUNCH.md).
 
-[Open Language Tracker production](https://language-tracker-phi.vercel.app/)
+## Screenshots
 
-### Current local preview
+### Study Time
 
-The current local application runs at
-[http://localhost:3000](http://localhost:3000):
+![Study Time dashboard with a populated German language board](docs/screenshots/study-time-dashboard.png)
 
-- [Sign in](http://localhost:3000/sign-in) — production-backed authentication.
-- [Dashboard](http://localhost:3000/dashboard) — responsive Study Time and
-  Vocabulary trackers.
-- [Statistics](http://localhost:3000/statistics) — board-scoped Study Time and
-  Vocabulary analytics.
-- [Study Time demo](http://localhost:3000/demo) — preserved design prototype.
+### Statistics and progress forecasts
 
-`pnpm dev` automatically exposes the development server to private LAN
-addresses for same-network mobile review. The LAN IP may change when the
-computer reconnects to Wi-Fi or a phone hotspot.
+![Board-scoped Study Time and Vocabulary statistics](docs/screenshots/statistics-dashboard.png)
 
-## Local setup
+![Study Time and Vocabulary progress forecasts toward the next CEFR level](docs/screenshots/progress-forecast-example.png)
 
-1. Keep the repository on drive `D:` and install dependencies there.
-2. Install Node.js 22, pnpm 10.22, and optionally Docker Desktop for the local Supabase stack.
-3. Run `pnpm install --frozen-lockfile`.
-4. Copy `.env.example` to `.env.local`.
-5. Follow the [Supabase setup guide](docs/development/SUPABASE_SETUP.md) to configure a hosted or local project.
-6. Run `pnpm dev` for development or `pnpm build` followed by `pnpm start` for a production-like check.
+### Mobile experience
 
-Never commit `.env.local` or a service-role key. The browser receives only the publishable key.
+<p align="center">
+  <img src="docs/screenshots/vocabulary-mobile.png" alt="Vocabulary tracker on a mobile screen" width="360">
+  <img src="docs/screenshots/cefr-level-history.png" alt="CEFR level history on a mobile screen" width="360">
+</p>
 
-## Quality commands
+## Highlights
 
-- `pnpm format:check` checks source formatting.
-- `pnpm lint` runs ESLint.
-- `pnpm typecheck` runs strict TypeScript checks.
-- `pnpm test` runs Vitest unit tests.
-- `pnpm test:e2e` runs Playwright desktop and mobile checks.
-- `pnpm db:reset` rebuilds a local Supabase database from migrations.
-- `pnpm db:test` runs pgTAP database and RLS tests.
-- `pnpm db:types` regenerates TypeScript types from the local schema.
+- Email/password authentication with confirmation and password recovery.
+- Private, per-user data protected by PostgreSQL Row Level Security.
+- Up to six language boards and a reusable global activity catalog per user.
+- Exact study-time logging for past, present, and future dates.
+- Atomic, idempotent date-range entry without overwriting existing sessions.
+- Separate Study Time and Vocabulary heatmaps with fixed, comparable thresholds.
+- One editable daily vocabulary total per board and date.
+- Board-scoped totals, averages, active days, streaks, distributions, and
+  seven-/thirty-day activity analysis.
+- User-declared CEFR history with transparent, approximate Study Time and
+  Vocabulary forecasts.
+- Suggested weekly learning mixes and activity-average comparisons.
+- Responsive, accessible English interface with system, light, and dark themes.
 
-The local database commands require a Docker-compatible runtime. The Windows Supabase wrapper stores its CLI home under the repository's ignored `.cache` directory on drive `D:`.
+## Technology
 
-The GitHub browser job starts an isolated local Supabase stack, creates a
-confirmed E2E-only user, and runs protected Study Time CRUD in desktop and
-mobile Chromium. Without those generated credentials, protected local E2E
-tests skip rather than touching a hosted account.
-
-## MVP summary
-
-- Email/password authentication with email confirmation and password recovery.
-- Private per-user data protected by Supabase Row Level Security.
-- Up to six language boards per user.
-- One global activity catalog per user, shared across all boards.
-- Unlimited study entries per calendar day plus atomic, non-overwriting date-range creation of up to 366 entries.
-- Exact durations from 1 to 1,440 minutes, with fixed quick-select values.
-- Separate Study Time and Vocabulary yearly heatmaps with fixed, comparable intensity thresholds.
-- One editable final vocabulary total per board and date.
-- Board-specific Study Time and Vocabulary totals, averages, active days,
-  streaks, period distributions, and recent activity allocation.
-- User-declared CEFR history and a clearly qualified Cambridge-based next-level forecast.
-- Responsive English-language interface for desktop and mobile.
-
-## Planned stack
-
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Supabase Auth
-- Supabase PostgreSQL with Row Level Security
+- Next.js 16 App Router and React 19
+- Strict TypeScript
+- Tailwind CSS 4
+- Supabase Auth and PostgreSQL with Row Level Security
 - Vercel
-- Playwright for critical end-to-end tests
-- pgTAP for database constraints, functions, and RLS policies
+- Vitest, Playwright, and pgTAP
 
-## Development storage
+## Local development
 
-The repository and installed dependencies live on drive `D:`. Package caches, browser-test artifacts, and other project-controlled development caches must also remain on `D:` as required by the project owner.
+### Prerequisites
+
+- Node.js 22
+- pnpm 10.22
+- Docker Desktop or another Docker-compatible runtime for the local Supabase
+  stack and database tests
+
+### Setup
+
+1. Clone the repository and enter its directory.
+2. Run `pnpm install --frozen-lockfile`.
+3. Copy `.env.example` to `.env.local`.
+4. Follow the [Supabase setup guide](docs/development/SUPABASE_SETUP.md) to
+   configure a hosted or local project.
+5. Run `pnpm dev` and open [http://localhost:3000](http://localhost:3000).
+
+For a production-like local check, run `pnpm build` followed by `pnpm start`.
+The preserved Study Time design prototype is available at `/demo` while the
+development server is running.
+
+Never commit `.env.local`, recovery codes, database passwords, or a Supabase
+service-role key. Browser code receives only the publishable key.
+
+## Quality checks
+
+| Command             | Purpose                                                   |
+| ------------------- | --------------------------------------------------------- |
+| `pnpm format:check` | Check formatting with Prettier                            |
+| `pnpm lint`         | Run ESLint                                                |
+| `pnpm typecheck`    | Run strict TypeScript checks                              |
+| `pnpm test`         | Run the Vitest unit suite                                 |
+| `pnpm test:e2e`     | Run Playwright desktop and mobile browser checks          |
+| `pnpm build`        | Create a production Next.js build                         |
+| `pnpm db:reset`     | Rebuild local Supabase from version-controlled migrations |
+| `pnpm db:test`      | Run pgTAP database, constraint, and RLS tests             |
+| `pnpm db:types`     | Regenerate TypeScript types from the local schema         |
+
+The database commands require a Docker-compatible runtime. The GitHub browser
+job starts an isolated Supabase stack and creates a confirmed E2E-only user;
+without generated local test credentials, protected E2E tests skip rather than
+accessing a hosted account.
 
 ## Documentation
 
-- [Documentation home](docs/README.md) — the recommended starting point, with reading paths for product, design, engineering, and QA.
-- [Product vision and scope](docs/requirements/PRODUCT_VISION.md)
-- [Business requirements](docs/requirements/BUSINESS_REQUIREMENTS.md)
-- [Functional requirements](docs/requirements/FUNCTIONAL_REQUIREMENTS.md)
-- [Non-functional requirements](docs/requirements/NON_FUNCTIONAL_REQUIREMENTS.md)
-- [Use cases](docs/requirements/USE_CASES.md)
-- [Requirements traceability matrix](docs/requirements/TRACEABILITY_MATRIX.md)
-- [Domain glossary](docs/requirements/GLOSSARY.md)
+The [documentation home](docs/README.md) provides role-based reading paths and
+the complete requirements set. Primary engineering documents are:
+
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
-- [Repository instructions](AGENTS.md)
+- [Requirements traceability matrix](docs/requirements/TRACEABILITY_MATRIX.md)
 - [Supabase setup and verification](docs/development/SUPABASE_SETUP.md)
 - [Production launch runbook](docs/development/PRODUCTION_LAUNCH.md)
 - [Production operations](docs/development/OPERATIONS.md)
-- [Phase 0 authentication screenshots](docs/design/phase-0/README.md)
 
-## Source language
-
-Code, identifiers, database objects, user-interface copy, and project documentation are written in English. Product discussions with the project owner may be conducted in Russian.
+Code, identifiers, database objects, UI copy, and project documentation are
+written in English. Product discussions may be conducted in Russian.

@@ -14,7 +14,11 @@ database reset against a linked production project.
 - A Supabase account
 - Docker Desktop or another Docker-compatible runtime for local database tests
 
-The repository, package store, Playwright browsers, and project-controlled caches must remain on drive `D:` on the owner's Windows machine.
+In the project owner's Windows environment, the repository, package store,
+Playwright browsers, and project-controlled caches remain on drive `D:`.
+Other contributors may use an appropriate local path; the supplied wrappers
+keep project-controlled Supabase state under the repository's ignored `.cache`
+directory.
 
 ## 2. Create the hosted project
 

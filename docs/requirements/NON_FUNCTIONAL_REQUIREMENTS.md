@@ -75,12 +75,12 @@ Non-functional requirements define the quality, security, operational, and imple
 
 ## 8. Transparency of estimates
 
-| ID              | Requirement                                                                                                                          | Verification                                               |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| `NFR-TRUST-001` | CEFR levels shall be presented as user-declared self-assessments, not system-verified proficiency.                                   | UI-copy and use-case review.                               |
-| `NFR-TRUST-002` | Remaining hours and dates shall be labelled approximate and accompanied by the Cambridge model source and cross-language limitation. | Content review and forecast component tests.               |
-| `NFR-TRUST-003` | The interface shall disclose the seven-calendar-day pace window and whether a forecast is unavailable due to zero recent study.      | Statistics and summary review.                             |
-| `NFR-TRUST-004` | Deferred vocabulary-to-CEFR and ideal-distribution models shall not appear until their fixed values and methodology are approved.    | Scope review and absence assertions before model approval. |
+| ID              | Requirement                                                                                                                            | Verification                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `NFR-TRUST-001` | CEFR levels shall be presented as user-declared self-assessments, not system-verified proficiency.                                     | UI-copy and use-case review.                                |
+| `NFR-TRUST-002` | Remaining units and dates shall be labelled approximate and accompanied by each model's source, methodology, and limitations.          | Content review and forecast component tests.                |
+| `NFR-TRUST-003` | The interface shall disclose the seven- and thirty-calendar-day pace windows and explain unavailable forecasts honestly.               | Statistics and summary review.                              |
+| `NFR-TRUST-004` | Vocabulary and suggested weekly learning-mix models shall remain immutable, versioned, and identifiable as non-authoritative guidance. | Reference-data tests, content review, and scope inspection. |
 
 ## 9. Maintainability and delivery
 

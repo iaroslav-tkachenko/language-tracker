@@ -41,14 +41,14 @@ flowchart TD
 - [Functional requirements](requirements/FUNCTIONAL_REQUIREMENTS.md) — observable system behavior identified as `FR-*` with acceptance criteria.
 - [Non-functional requirements](requirements/NON_FUNCTIONAL_REQUIREMENTS.md) — security, privacy, accessibility, performance, reliability, and maintainability constraints identified as `NFR-*`.
 - [Use cases](requirements/USE_CASES.md) — end-to-end user interactions identified as `UC-*`.
-- [Traceability matrix](requirements/TRACEABILITY_MATRIX.md) — links business intent to functionality, use cases, and planned verification.
+- [Traceability matrix](requirements/TRACEABILITY_MATRIX.md) — links business intent to functionality, use cases, and verification.
 - [Glossary](requirements/GLOSSARY.md) — approved domain terminology.
 
 ## Engineering documents
 
 - [Product specification](PRODUCT_SPEC.md) — approved narrative baseline for MVP behavior.
 - [Architecture](ARCHITECTURE.md) — system boundaries, security model, data model, and technical decisions.
-- [Implementation plan](IMPLEMENTATION_PLAN.md) — the current Phase 0–4 delivery sequence, review milestones, risks, exit criteria, and definition of done.
+- [Implementation plan](IMPLEMENTATION_PLAN.md) — the Phase 0–5 delivery sequence, review milestones, risks, exit criteria, and definition of done.
 - [Supabase setup and verification](development/SUPABASE_SETUP.md) — hosted/local setup, migrations, generated types, authentication redirects, and Phase 0 checks.
 - [Repository instructions](../AGENTS.md) — rules that apply to automated and human contributors.
 
@@ -111,7 +111,7 @@ A product change should include:
 2. the affected `BR`, `FR`, `NFR`, and `UC` identifiers;
 3. updated acceptance criteria;
 4. architecture or data implications, if any;
-5. updated traceability and planned tests;
+5. updated traceability and verification;
 6. product-owner approval for scope or behavior changes.
 
 Documentation changes are versioned in Git and reviewed through the same branch and pull-request workflow as code.

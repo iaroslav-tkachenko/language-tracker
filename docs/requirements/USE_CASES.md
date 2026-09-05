@@ -264,18 +264,22 @@ This document describes the main MVP interactions from the user's point of view.
    historically used archived activities.
 4. The learner sees active-day count, calendar-day average, active-day average, current streak, and longest streak.
 5. The learner switches distribution granularity among day, week, month, and year.
-6. The learner reviews `Activity totals in the last 7 days` using the same
-   interactive chart. With up to six activities, all remain separate; with
-   seven or more, the five largest remain visible and the sixth onward are
-   grouped into expandable `Other`.
-7. The learner reviews Study Time, Vocabulary, and CEFR information with clearly identified units and periods.
-8. The interface explains the period and methodology represented by each distribution or forecast.
+6. The learner reviews `Activity totals in the last 7 days` and `Activity
+totals in the last 30 days` using the same interactive chart. With up to six
+   activities, all remain separate; with seven or more, the five largest remain
+   visible and the sixth onward are grouped into expandable `Other`.
+7. The learner compares per-calendar-day Study Time averages for the selected
+   year, latest thirty days, and latest seven days by activity.
+8. The learner reviews Study Time, Vocabulary, CEFR information, and the
+   suggested weekly learning mix with clearly identified units and periods.
+9. The interface explains the period and methodology represented by each
+   distribution, comparison, recommendation, or forecast.
 
 **Calculation rules:** Future entries count in their selected year's total and heatmap, but not in current day/week/month metrics, averages, active-day counts, or streaks until their dates arrive. A current streak remains active when the latest active date is today or yesterday.
 
 **Postconditions:** All displayed metrics use the same board scope and approved date rules.
 
-**Related requirements:** `FR-STAT-001`–`FR-STAT-011`, `BR-010`.
+**Related requirements:** `FR-STAT-001`–`FR-STAT-017`, `BR-010`.
 
 ### UC-09 — Archive a populated board
 
@@ -364,11 +368,19 @@ This document describes the main MVP interactions from the user's point of view.
 2. The system saves the declaration without deleting earlier history.
 3. The system displays the current level and a concise sourced description.
 4. For A1–C1, the system calculates approximate remaining hours using the fixed Cambridge-based model and logged Study Time since the effective date.
-5. The system calculates the average across the latest seven calendar dates, including zero-study days.
-6. If pace is positive, the system displays an estimated date for the next level.
-7. The system displays the approximation and cross-language warning beside the forecast.
+5. The system calculates Study Time and Vocabulary averages across the latest
+   seven and thirty calendar dates, including zero-value days.
+6. For each positive applicable pace, the system displays an estimated date for
+   the next level.
+7. The system displays the immutable suggested weekly learning mix for the
+   current-to-next transition when the current level is below C2.
+8. The system displays approximation, methodology, and cross-language warnings
+   beside the forecasts.
 
-**Alternatives and errors:** A future effective date is rejected. Zero pace produces no estimated date. C2 has no next level. Completing estimated hours prompts reassessment but never changes the level automatically.
+**Alternatives and errors:** A future effective date is rejected. A zero pace
+produces no estimate for that tracker and period. C2 has no next level or weekly
+recommendation. Completing an estimated target prompts reassessment but never
+changes the level automatically.
 
 **Postconditions:** The declaration history is preserved and the forecast remains derived, transparent, and non-authoritative.
 
