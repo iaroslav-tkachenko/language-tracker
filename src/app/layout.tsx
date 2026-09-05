@@ -6,12 +6,34 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Language Tracker",
-  description: "Track language learning time with a yearly heatmap.",
+  description:
+    "Track language learning time, vocabulary, CEFR progress, and private statistics.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "Language Tracker",
+  appleWebApp: {
+    capable: true,
+    title: "Language Tracker",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/language-tracker-icon.svg", type: "image/svg+xml" },
+      { url: "/icons/favicon-32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [
+      {
+        url: "/icons/apple-touch-icon-180.png",
+        type: "image/png",
+        sizes: "180x180",
+      },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   colorScheme: "light dark",
   themeColor: "#ffffff",
 };

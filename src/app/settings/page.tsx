@@ -8,6 +8,7 @@ import {
   createLanguageBoard,
 } from "@/app/dashboard/actions";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
+import { AppInstallCard } from "@/components/install/app-install-card";
 import { ResourceCreateForm } from "@/components/resources/resource-create-form";
 import {
   ActivitySettingsList,
@@ -132,6 +133,7 @@ export default async function SettingsPage() {
         </div>
 
         <ThemeSelector />
+        <AppInstallCard compact />
 
         <section className="mt-6 max-w-4xl rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
