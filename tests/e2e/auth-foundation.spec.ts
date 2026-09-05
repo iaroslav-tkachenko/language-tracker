@@ -15,6 +15,7 @@ test.describe("authentication foundation", () => {
     await expect(
       page.getByRole("link", { name: "Create account" }),
     ).toHaveAttribute("href", "/sign-up");
+    await expect(page.locator('img[src="/icons/favicon.svg"]')).toBeVisible();
   });
 
   test("shows accessible validation errors", async ({ page }) => {
