@@ -58,6 +58,8 @@ The final artwork uses colors already established in the application:
   with scaled safe-zone artwork.
 - `current/exports/apple-touch-icon-180.png` — 180 px Apple touch icon.
 - `current/exports/favicon-32.png` — 32 px symbol-only favicon adaptation.
+- `current/exports/favicon.svg` — scalable symbol-only favicon with enlarged
+  dialogue-and-clock artwork and no title.
 - `current/previews/icon-preview-sheet.png` — 1800×1600 visual QA sheet.
 - `current/previews/validation-report.md` — programmatic and visual verification
   results.

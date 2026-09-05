@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/language-tracker-icon.svg", type: "image/svg+xml" },
+      { url: "/icons/favicon.svg", type: "image/svg+xml" },
       { url: "/icons/favicon-32.png", type: "image/png", sizes: "32x32" },
     ],
     apple: [
