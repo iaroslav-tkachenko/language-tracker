@@ -387,6 +387,41 @@ percentages. If the previous average is zero and the current average is
 positive, the change displays `+100%`; if both values are zero, the change is
 unavailable.
 
+### 10.6 Activity Heatmap
+
+`Activity Heatmap` appears immediately after `Activity averages by period` in
+Statistics. It uses the complete Study Time history of the selected language
+board and does not combine entries from other boards.
+
+The filter preserves activity catalog order and includes an activity only when
+it is currently active and at least one saved `study_entries` row on the
+selected board references it. Standard activities never used on that board,
+activities used only on another board, and archived custom activities are
+excluded. Restoring an archived activity makes it eligible again. Eligibility
+is all-time and does not change with the heatmap's open year. With no eligible
+activity, the section shows an empty state rather than the standard catalog.
+
+No activity is selected initially or after a reload. Selection resets when the
+language board changes, remains when the local heatmap year changes, and is not
+persisted. The year starts from browser-local `today`, uses the 1900–9999
+Statistics bounds, and is independent of the Statistics year and URL.
+
+The calendar is binary: a date is highlighted when at least one entry in the
+open year references any selected activity (OR semantics). Duration, entry
+count, and the number of matching selected activities do not affect its single
+blue highlight state. Future saved entries are included. With no selection or
+no matches, every date stays neutral; missed-day red and Study Time intensity
+levels are not used.
+
+Every real date cell identifies its full date and match state without relying
+on color. Pointer or keyboard activation opens one anchored popover containing
+only the full English date. Another date moves it; outside activation or Escape
+closes it, with Escape restoring focus. Decorative cells are not interactive,
+and the interaction never navigates or changes another selected date. Desktop
+and compact mobile half-year grids reuse the shared calendar utilities,
+including leap years. The feature adds no table, migration, RPC, cache, or
+persisted aggregate.
+
 The product also shows an approved suggested weekly learning mix for the
 transition from the current level to the next level. The reference week is ten
 hours. Percentages always total 100% and are also displayed as hours per week.

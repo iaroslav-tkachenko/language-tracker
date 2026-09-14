@@ -147,6 +147,63 @@ test.describe("Phase 1 Study Time", () => {
       recentActivitySection.getByText("100%", { exact: true }),
     ).toBeVisible();
 
+    const averagesSection = page.locator("section").filter({
+      has: page.getByRole("heading", {
+        name: "Activity averages by period",
+      }),
+    });
+    const activityHeatmap = page.locator("section").filter({
+      has: page.getByRole("heading", { name: "Activity Heatmap" }),
+    });
+    await expect(activityHeatmap).toBeVisible();
+    expect(
+      await averagesSection.evaluate(
+        (element, heatmap) => element.nextElementSibling === heatmap,
+        await activityHeatmap.elementHandle(),
+      ),
+    ).toBe(true);
+    await expect(activityHeatmap.getByRole("checkbox")).toHaveCount(1);
+    await expect(activityHeatmap.getByRole("checkbox")).not.toBeChecked();
+    await expect(activityHeatmap).toContainText(activityName);
+    await expect(activityHeatmap).not.toContainText("Reading");
+
+    const heatmapYear = activityHeatmap.locator("strong").first();
+    await expect(heatmapYear).toHaveText("2026");
+    await activityHeatmap.getByRole("checkbox", { name: activityName }).check();
+    await activityHeatmap
+      .getByRole("button", { name: "Next activity heatmap year" })
+      .click();
+    await expect(heatmapYear).toHaveText("2027");
+    await expect(
+      activityHeatmap.getByRole("checkbox", { name: activityName }),
+    ).toBeChecked();
+    await page.getByRole("button", { name: "Next year", exact: true }).click();
+    await expect(page).toHaveURL(/year=2027/);
+    await expect(heatmapYear).toHaveText("2027");
+    await activityHeatmap
+      .getByRole("button", { name: "Previous activity heatmap year" })
+      .click();
+
+    const matchingDateCell = activityHeatmap.getByRole("button", {
+      name: /: matching activity logged$/,
+    });
+    await matchingDateCell.press("Space");
+    const dateTooltip = activityHeatmap.getByRole("tooltip");
+    await expect(dateTooltip).toBeVisible();
+    await expect(dateTooltip).not.toContainText(/minute|study|activity/i);
+    await page.keyboard.press("Escape");
+    await expect(dateTooltip).toHaveCount(0);
+    await expect(matchingDateCell).toBeFocused();
+    await matchingDateCell.press("Enter");
+    await expect(activityHeatmap.getByRole("tooltip")).toBeVisible();
+    await page.getByRole("heading", { name: "Your learning overview" }).click();
+    await expect(activityHeatmap.getByRole("tooltip")).toHaveCount(0);
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+
     await page.getByLabel("Settings").click();
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: `Remove ${activityName}` }).click();

@@ -12,6 +12,7 @@
   --study-heat-4: #b8d79c;
   --study-heat-5: #78b76d;
   --study-heat-6: #3f8249;
+  --activity-heat-match: #3b82f6;
   --vocabulary-heat-empty: #f8fafc;
   --vocabulary-heat-1: #dcfce7;
   --vocabulary-heat-2: #bbf7d0;
@@ -34,6 +35,7 @@ html.dark {
   --study-heat-4: #1d4ed8;
   --study-heat-5: #2563eb;
   --study-heat-6: #60a5fa;
+  --activity-heat-match: #3b82f6;
   --vocabulary-heat-empty: #18222e;
   --vocabulary-heat-1: #123b38;
   --vocabulary-heat-2: #155148;

@@ -407,6 +407,15 @@ calculations exclude dates after `local_today` and resolve equal maxima to the
 most recent period. This is proportionate to the expected MVP
 load and avoids persisted aggregate state.
 
+The Statistics read also includes `archived_at` on the RLS-filtered activity
+catalog. The Activity Heatmap filters that ordered catalog against the complete
+Study Time history already loaded for the selected board. Pure TypeScript
+functions retain only currently active, historically used activity identities
+and derive a binary set of matching dates for the component's local year and
+OR-selected activity IDs. Selection and year exist only in client state; they
+create no request, URL parameter, or stored data. The calendar reuses shared
+date-cell utilities without sharing the Study Time heatmap's minute semantics.
+
 The following `security invoker` functions remain the target if measurement
 shows that later phases should move aggregation into PostgreSQL:
 
