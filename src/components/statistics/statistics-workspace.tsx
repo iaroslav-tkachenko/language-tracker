@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { ActivityIcon } from "@/components/activities/activity-icon";
+import { ActivityHeatmap } from "@/components/statistics/activity-heatmap";
 import { ConfirmSignOutForm } from "@/components/auth/confirm-sign-out-form";
 import { AddLanguageMenuAction } from "@/components/boards/add-language-menu-action";
 import {
@@ -89,6 +90,7 @@ type ActivitySummary = {
   id: string;
   name: string;
   systemKey: string | null;
+  archivedAt: string | null;
 };
 type Granularity = "day" | "week" | "month" | "year";
 
@@ -1894,6 +1896,13 @@ export function StatisticsWorkspace({
           activities={activities}
           rows={activityAverageRows}
           selectedYear={selectedYear}
+        />
+
+        <ActivityHeatmap
+          key={selectedBoard.id}
+          activities={activities}
+          entries={entries}
+          todayKey={todayKey}
         />
 
         {cefrOverview?.weeklyRecommendation && (
