@@ -72,7 +72,7 @@ export default async function StatisticsPage({
   ] = await Promise.all([
     supabase
       .from("activity_types")
-      .select("id, name, system_key")
+      .select("id, name, system_key, archived_at")
       .order("position")
       .order("created_at"),
     supabase
@@ -121,6 +121,7 @@ export default async function StatisticsPage({
         id: activity.id,
         name: activity.name,
         systemKey: activity.system_key,
+        archivedAt: activity.archived_at,
       }))}
       entries={entriesResult.data.map((entry) => ({
         studyDate: entry.study_date,
