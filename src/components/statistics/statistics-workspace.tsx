@@ -3,7 +3,9 @@
 import {
   BarChart3,
   BookOpen,
+  CalendarCheck2,
   CalendarDays,
+  CalendarX2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -13,6 +15,7 @@ import {
   Gauge,
   GraduationCap,
   LogOut,
+  Percent,
   Settings,
   Trophy,
 } from "lucide-react";
@@ -1463,19 +1466,19 @@ export function StatisticsWorkspace({
           </div>
         </div>
 
-        {cefrOverview && (
-          <section className="mt-8">
-            <div>
-              <h2 className="text-xl font-bold text-slate-950">
-                Tracked and estimated totals
-              </h2>
-              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-                Estimates combine your current-level baseline with activity
-                recorded since its start date. Tracked totals always reflect the
-                entries you saved.
-              </p>
-            </div>
+        <section className="mt-8">
+          <div>
+            <h2 className="text-xl font-bold text-slate-950">
+              Tracked and estimated totals
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+              {cefrOverview
+                ? "Estimates combine your current-level baseline with activity recorded since its start date. Tracked totals always reflect the entries you saved."
+                : "Your all-time learning-day totals reflect the Study Time entries you saved through today."}
+            </p>
+          </div>
 
+          {cefrOverview && (
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard
                 icon={<Clock3 aria-hidden="true" className="size-5" />}
@@ -1504,8 +1507,39 @@ export function StatisticsWorkspace({
                 label="Estimated words known"
               />
             </div>
-          </section>
-        )}
+          )}
+
+          <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <MetricCard
+              icon={<CalendarCheck2 aria-hidden="true" className="size-5" />}
+              value={`${statistics.allTimeActiveDays} ${
+                statistics.allTimeActiveDays === 1 ? "day" : "days"
+              }`}
+              label="Active days"
+            />
+            <MetricCard
+              icon={<CalendarDays aria-hidden="true" className="size-5" />}
+              value={`${statistics.daysSinceStarting} ${
+                statistics.daysSinceStarting === 1 ? "day" : "days"
+              }`}
+              label="Days since starting"
+            />
+            <MetricCard
+              icon={<CalendarX2 aria-hidden="true" className="size-5" />}
+              value={`${statistics.missedDays} ${
+                statistics.missedDays === 1 ? "day" : "days"
+              }`}
+              label="Days missed"
+            />
+            <MetricCard
+              icon={<Percent aria-hidden="true" className="size-5" />}
+              value={`${statistics.consistencyPercent.toLocaleString("en", {
+                maximumFractionDigits: 1,
+              })}%`}
+              label="Consistency"
+            />
+          </div>
+        </section>
 
         <section aria-labelledby="records-heading" className="mt-8">
           <div>
