@@ -19,6 +19,10 @@ export type ChartPoint = {
 export type StudyStatistics = {
   selectedYearTotal: number;
   selectedYearActiveDays: number;
+  allTimeActiveDays: number;
+  daysSinceStarting: number;
+  missedDays: number;
+  consistencyPercent: number;
   calendarDayAverage: number;
   activeDayAverage: number;
   currentDayTotal: number;
@@ -83,6 +87,16 @@ function elapsedDaysInYear(year: number, todayKey: string) {
   );
 }
 
+function inclusiveCalendarDays(startDateKey: string, endDateKey: string) {
+  return (
+    Math.round(
+      (fromDateKey(endDateKey).getTime() -
+        fromDateKey(startDateKey).getTime()) /
+        86_400_000,
+    ) + 1
+  );
+}
+
 function selectedYearCutoff(selectedYear: number, todayKey: string) {
   const todayYear = fromDateKey(todayKey).getFullYear();
   if (selectedYear < todayYear) return `${selectedYear}-12-31`;
@@ -137,6 +151,13 @@ export function calculateStudyStatistics(
   const activeDateKeys = new Set(
     eligibleEntries.map((entry) => entry.studyDate),
   );
+  const firstActiveDate = [...activeDateKeys].sort()[0] ?? null;
+  const allTimeActiveDays = activeDateKeys.size;
+  const daysSinceStarting =
+    firstActiveDate === null
+      ? 0
+      : inclusiveCalendarDays(firstActiveDate, todayKey);
+  const missedDays = daysSinceStarting - allTimeActiveDays;
   const selectedYearActiveDays = new Set(
     eligibleSelectedYearEntries.map((entry) => entry.studyDate),
   ).size;
@@ -152,6 +173,13 @@ export function calculateStudyStatistics(
   return {
     selectedYearTotal: sumMinutes(selectedYearEntries),
     selectedYearActiveDays,
+    allTimeActiveDays,
+    daysSinceStarting,
+    missedDays,
+    consistencyPercent:
+      daysSinceStarting === 0
+        ? 0
+        : (allTimeActiveDays / daysSinceStarting) * 100,
     calendarDayAverage:
       elapsedDays === 0 ? 0 : eligibleSelectedYearTotal / elapsedDays,
     activeDayAverage:

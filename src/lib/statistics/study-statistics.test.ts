@@ -62,6 +62,38 @@ describe("study statistics", () => {
     expect(result.calendarDayAverage).toBeCloseTo(90 / 206);
   });
 
+  it("summarizes all-time learning days from the first active day through today", () => {
+    const result = calculateStudyStatistics(
+      [
+        entry("2025-12-30", 20),
+        entry("2025-12-30", 40, "podcast"),
+        entry("2026-01-01", 30),
+        entry("2026-01-03", 45),
+        entry("2026-01-04", 60),
+      ],
+      2026,
+      "2026-01-03",
+    );
+
+    expect(result.allTimeActiveDays).toBe(3);
+    expect(result.daysSinceStarting).toBe(5);
+    expect(result.missedDays).toBe(2);
+    expect(result.consistencyPercent).toBe(60);
+  });
+
+  it("returns zero all-time learning-day metrics without eligible entries", () => {
+    const result = calculateStudyStatistics(
+      [entry("2026-07-26", 30)],
+      2026,
+      "2026-07-25",
+    );
+
+    expect(result.allTimeActiveDays).toBe(0);
+    expect(result.daysSinceStarting).toBe(0);
+    expect(result.missedDays).toBe(0);
+    expect(result.consistencyPercent).toBe(0);
+  });
+
   it("uses all calendar days for a completed-year average", () => {
     const result = calculateStudyStatistics(
       [entry("2024-02-29", 366)],
