@@ -391,6 +391,9 @@ and a physical mobile browser.
 - Rebuilt activity-allocation donuts with thinner interactive SVG rings,
   keyboard/touch highlighting, aligned duration/percentage columns, and a
   top-five plus expandable `Other` rule when at least seven activities exist.
+  Activity colors now remain consistent across periods, legends, expanded
+  items, and the average table, using standard system keys or immutable custom
+  activity IDs, with neutral slate reserved for the grouped `Other` category.
 - Added an Activity Heatmap immediately after the activity-average comparison.
   It derives an all-time, board-scoped catalog of active and actually used
   activities, starts with an empty local selection, applies binary OR matching

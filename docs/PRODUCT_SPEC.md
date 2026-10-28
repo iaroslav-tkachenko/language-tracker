@@ -370,6 +370,15 @@ window includes zero-study dates and excludes future entries; its heading is
 `Activity totals in the last 7 days`. The thirty-date window follows the same
 rules and uses the heading `Activity totals in the last 30 days`.
 
+Activity colors are consistent across all three allocation charts, their
+legends (including expanded items), and the activity-average table. Standard
+activities have fixed colors keyed by their system identity. Custom activities
+derive a stable color from their immutable activity ID, so changing rank,
+period, board, name, or archive state never changes the color. The aggregated
+`Other` category is always neutral slate; its expanded activities retain their
+own colors. Names, icons, durations, and percentages identify activities without
+relying on color alone; custom colors are not guaranteed to be visually unique.
+
 Detailed statistics also show an activity-average comparison table after the
 activity allocation charts. The table shows average Study Time per calendar day
 for the selected year, the latest thirty calendar dates ending today, and the

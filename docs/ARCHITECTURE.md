@@ -407,6 +407,13 @@ calculations exclude dates after `local_today` and resolve equal maxima to the
 most recent period. This is proportionate to the expected MVP
 load and avoids persisted aggregate state.
 
+`lib/statistics/activity-colors` provides the shared activity color resolver for
+allocation segments, legends, expanded grouped items, and average-table markers.
+Standard colors use `system_key`; custom colors use a deterministic ID hash.
+The grouped `Other` marker has a reserved neutral color. Color resolution is
+independent of totals, catalog order, and mutable labels and requires no stored
+color field, browser preference, or database migration.
+
 The Statistics read also includes `archived_at` on the RLS-filtered activity
 catalog. The Activity Heatmap filters that ordered catalog against the complete
 Study Time history already loaded for the selected board. Pure TypeScript
