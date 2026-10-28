@@ -76,6 +76,10 @@ import {
   type ActivityDonutRow,
 } from "@/lib/statistics/activity-donut";
 import {
+  getActivityColor,
+  OTHER_ACTIVITY_COLOR,
+} from "@/lib/statistics/activity-colors";
+import {
   calculateVocabularyRecords,
   calculateVocabularyStatistics,
   getVocabularyDayDistribution,
@@ -602,18 +606,6 @@ function CompactForecastCard({
   );
 }
 
-const activityChartColors = [
-  "#2563eb",
-  "#7c3aed",
-  "#0d9488",
-  "#ea580c",
-  "#db2777",
-  "#65a30d",
-  "#0891b2",
-  "#9333ea",
-  "#475569",
-];
-
 function ActivityLegendDuration({ minutes }: { minutes: number }) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
@@ -709,7 +701,7 @@ function ActivityAveragesTable({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => {
+              {rows.map((row) => {
                 const activity = activityById.get(row.id);
                 const isTotalRow = row.kind === "total";
                 const rowLabel =
@@ -726,10 +718,8 @@ function ActivityAveragesTable({
                   row.kind === "total"
                     ? "#3b82f6"
                     : row.kind === "other"
-                      ? "#64748b"
-                      : activityChartColors[
-                          (index - 1) % activityChartColors.length
-                        ];
+                      ? OTHER_ACTIVITY_COLOR
+                      : getActivityColor({ id: row.id, systemKey });
                 const durationClass = `border-t border-slate-100 px-4 py-3 text-right tabular-nums text-slate-950 ${
                   isTotalRow ? "font-semibold" : "font-medium"
                 }`;
@@ -852,14 +842,14 @@ function ActivityDonut({
         end: number;
       }
     >
-  >((result, row, index) => {
+  >((result, row) => {
     const start = result.at(-1)?.end ?? 0;
     const percentage = (row.minutes / totalMinutes) * 100;
     return [
       ...result,
       {
         ...row,
-        color: activityChartColors[index % activityChartColors.length],
+        color: row.items ? OTHER_ACTIVITY_COLOR : getActivityColor(row),
         percentage,
         start,
         end: start + percentage,
@@ -933,11 +923,12 @@ function ActivityDonut({
                   }}
                 >
                   <title>
-                    {segment.name}: {formatDuration(segment.minutes)} (
-                    {segment.percentage.toLocaleString("en", {
-                      maximumFractionDigits: 1,
-                    })}
-                    %)
+                    {`${segment.name}: ${formatDuration(segment.minutes)} (${segment.percentage.toLocaleString(
+                      "en",
+                      {
+                        maximumFractionDigits: 1,
+                      },
+                    )}%)`}
                   </title>
                 </circle>
               ))}
@@ -1032,6 +1023,13 @@ function ActivityDonut({
                           className="grid grid-cols-[minmax(0,1fr)_6.25rem_3.5rem] items-center gap-2 text-xs"
                         >
                           <span className="inline-flex min-w-0 items-center gap-2 text-slate-600">
+                            <span
+                              aria-hidden="true"
+                              className="size-3 shrink-0 rounded-full"
+                              style={{
+                                backgroundColor: getActivityColor(item),
+                              }}
+                            />
                             <ActivityIcon
                               systemKey={item.systemKey}
                               aria-hidden="true"
