@@ -317,6 +317,13 @@ All statistics are scoped to the selected board.
 - Estimated totals are unavailable without a current declaration. They are
   recalculated after any CEFR-history change and never rewrite Study Time or
   Vocabulary records.
+- The same top-level section always shows four all-time Study Time metrics:
+  `Active days`, `Days since starting`, `Days missed`, and `Consistency`.
+  Active days are unique dates with positive Study Time through today. Days
+  since starting count calendar dates from the first active day through today,
+  inclusively. Missed days are the difference between those values, and
+  consistency is the active-day percentage of that inclusive span. All four
+  values are zero before the first non-future Study Time entry.
 - When no current CEFR declaration exists, Study Time, Vocabulary, and
   Statistics each show a compact prompt to set the current language level. The
   prompt explains that adding a level unlocks more detailed progress analytics
