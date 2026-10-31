@@ -429,6 +429,19 @@ blue highlight state. Future saved entries are included. With no selection or
 no matches, every date stays neutral; missed-day red and Study Time intensity
 levels are not used.
 
+Each selected activity displays its number of distinct matching calendar dates
+in the heatmap's open year, using `1 day` or `N days`. Unselected activities do
+not display a count. A summary between the activity filters and calendar shows
+`Days with selected activities` and the number of unique highlighted dates for
+that same year. A date with multiple sessions or multiple selected activities
+counts once in the summary, rather than summing the individual activity counts.
+Both counts include future saved entries, update on selection or year changes,
+and remain scoped to the selected board. With no selection the summary prompts
+`Select an activity to see your day count.`; with a selection and no matching
+dates it shows `0 days`. The summary identifies its year, explains that dates
+are counted once even when activities overlap, and announces updates politely
+to assistive technology. Desktop and mobile present the same counts.
+
 Every real date cell identifies its full date and match state without relying
 on color. Pointer or keyboard activation opens one anchored popover containing
 only the full English date. Another date moves it; outside activation or Escape

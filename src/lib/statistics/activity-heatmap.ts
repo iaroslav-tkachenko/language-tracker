@@ -40,3 +40,25 @@ export function getActivityHeatmapDateKeys(
       .map((entry) => entry.studyDate),
   );
 }
+
+export function getActivityHeatmapDayCounts(
+  entries: ActivityHeatmapEntry[],
+  year: number,
+) {
+  const datesByActivity = new Map<string, Set<string>>();
+  const yearPrefix = `${year}-`;
+
+  for (const entry of entries) {
+    if (!entry.studyDate.startsWith(yearPrefix)) continue;
+    let dates = datesByActivity.get(entry.activityTypeId);
+    if (!dates) {
+      dates = new Set<string>();
+      datesByActivity.set(entry.activityTypeId, dates);
+    }
+    dates.add(entry.studyDate);
+  }
+
+  return new Map(
+    [...datesByActivity].map(([activityId, dates]) => [activityId, dates.size]),
+  );
+}
