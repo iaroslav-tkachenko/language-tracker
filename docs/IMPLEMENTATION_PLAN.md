@@ -401,6 +401,12 @@ and a physical mobile browser.
   desktop and mobile calendars provide accessible date-only popovers,
   outside/Escape dismissal, focus restoration, future entries, and leap years
   without stored data or changes to existing heatmaps and the Statistics year.
+- Added approved selected-year day counts to the Activity Heatmap: selected
+  activity filters show their distinct-day totals and a responsive summary
+  shows the unique highlighted-date total, counting overlapping activities
+  once. The summary includes its year, overlap guidance, no-selection and
+  zero-match states, and polite accessible updates; future saved entries follow
+  the calendar's existing inclusion rule. Counts derive from existing reads.
 
 ### Verification
 

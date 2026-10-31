@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getActivityHeatmapActivities,
   getActivityHeatmapDateKeys,
+  getActivityHeatmapDayCounts,
   type ActivityHeatmapActivity,
   type ActivityHeatmapEntry,
 } from "./activity-heatmap";
@@ -86,5 +87,52 @@ describe("getActivityHeatmapDateKeys", () => {
     expect([
       ...getActivityHeatmapDateKeys(boundaryEntries, ["reading"], 2024),
     ]).toEqual(boundaryEntries.map((entry) => entry.studyDate));
+  });
+});
+
+describe("getActivityHeatmapDayCounts", () => {
+  it("counts unique dates per activity while the combined heatmap counts shared dates once", () => {
+    const overlappingEntries = [
+      ...entries,
+      { studyDate: "2026-01-01", activityTypeId: "reading" },
+      { studyDate: "2026-01-01", activityTypeId: "podcast" },
+      { studyDate: "2026-02-28", activityTypeId: "podcast" },
+    ];
+    const counts = getActivityHeatmapDayCounts(overlappingEntries, 2026);
+    expect(counts.get("reading")).toBe(1);
+    expect(counts.get("podcast")).toBe(3);
+    expect(
+      getActivityHeatmapDateKeys(
+        overlappingEntries,
+        ["reading", "podcast"],
+        2026,
+      ).size,
+    ).toBe(3);
+  });
+
+  it("uses only the open year and includes future saved dates", () => {
+    expect(getActivityHeatmapDayCounts(entries, 2026).get("podcast")).toBe(2);
+    expect(getActivityHeatmapDayCounts(entries, 2025).get("reading")).toBe(1);
+    expect(getActivityHeatmapDayCounts(entries, 2027).get("reading")).toBe(1);
+    expect(getActivityHeatmapDayCounts(entries, 2024).size).toBe(0);
+  });
+
+  it("counts leap day and year boundaries without counting duplicate sessions", () => {
+    expect(
+      getActivityHeatmapDayCounts(
+        [
+          { studyDate: "2024-01-01", activityTypeId: "reading" },
+          { studyDate: "2024-02-29", activityTypeId: "reading" },
+          { studyDate: "2024-02-29", activityTypeId: "reading" },
+          { studyDate: "2024-12-31", activityTypeId: "reading" },
+          { studyDate: "2025-01-01", activityTypeId: "reading" },
+        ],
+        2024,
+      ).get("reading"),
+    ).toBe(3);
+  });
+
+  it("returns no counts for an empty board", () => {
+    expect(getActivityHeatmapDayCounts([], 2026).size).toBe(0);
   });
 });

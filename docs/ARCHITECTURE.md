@@ -422,6 +422,11 @@ and derive a binary set of matching dates for the component's local year and
 OR-selected activity IDs. Selection and year exist only in client state; they
 create no request, URL parameter, or stored data. The calendar reuses shared
 date-cell utilities without sharing the Study Time heatmap's minute semantics.
+Per-activity day counts are derived with one set of distinct dates per activity
+for the local heatmap year. The combined day count uses the size of the same
+matching-date set that paints the calendar, so overlapping selections and
+repeated sessions cannot inflate it. Both counts include future saved dates
+and require no additional read, database migration, or persisted state.
 
 The following `security invoker` functions remain the target if measurement
 shows that later phases should move aggregation into PostgreSQL:

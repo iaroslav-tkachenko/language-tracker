@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import {
   fromDateKey,
@@ -11,6 +11,7 @@ import {
 import {
   getActivityHeatmapActivities,
   getActivityHeatmapDateKeys,
+  getActivityHeatmapDayCounts,
   type ActivityHeatmapActivity,
   type ActivityHeatmapEntry,
 } from "@/lib/statistics/activity-heatmap";
@@ -51,6 +52,7 @@ export function ActivityHeatmap({
   entries: ActivityHeatmapEntry[];
   todayKey: string;
 }) {
+  const countIdPrefix = useId();
   const [year, setYear] = useState(Number(todayKey.slice(0, 4)));
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [openDate, setOpenDate] = useState<string | null>(null);
@@ -64,6 +66,10 @@ export function ActivityHeatmap({
     [entries, selectedIds, year],
   );
   const calendarCells = useMemo(() => getCalendarCells(year), [year]);
+  const activityDayCounts = useMemo(
+    () => getActivityHeatmapDayCounts(entries, year),
+    [entries, year],
+  );
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -211,22 +217,67 @@ export function ActivityHeatmap({
           <fieldset className="mt-5">
             <legend className="sr-only">Activities to show</legend>
             <div className="flex flex-wrap gap-2">
-              {availableActivities.map((activity) => (
-                <label
-                  key={activity.id}
-                  className="flex min-w-0 max-w-full cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(activity.id)}
-                    onChange={() => toggleActivity(activity.id)}
-                    className="mt-0.5 size-4 shrink-0 accent-blue-600"
-                  />
-                  <span className="min-w-0 break-words">{activity.name}</span>
-                </label>
-              ))}
+              {availableActivities.map((activity) => {
+                const selected = selectedIds.has(activity.id);
+                const dayCount = activityDayCounts.get(activity.id) ?? 0;
+                return (
+                  <label
+                    key={activity.id}
+                    className={`flex min-w-0 max-w-full cursor-pointer items-start gap-2 rounded-xl border px-3 py-2 text-sm font-medium ${selected ? "border-blue-200 bg-blue-50 text-blue-700" : "border-slate-200 bg-slate-50 text-slate-700"}`}
+                  >
+                    <input
+                      type="checkbox"
+                      aria-label={activity.name}
+                      aria-describedby={
+                        selected ? `${countIdPrefix}-${activity.id}` : undefined
+                      }
+                      checked={selected}
+                      onChange={() => toggleActivity(activity.id)}
+                      className="mt-0.5 size-4 shrink-0 accent-blue-600"
+                    />
+                    <span className="min-w-0 break-words">{activity.name}</span>
+                    {selected && (
+                      <span
+                        id={`${countIdPrefix}-${activity.id}`}
+                        className="shrink-0 border-l border-blue-200 pl-3 text-xs leading-5 tabular-nums"
+                      >
+                        {dayCount} {dayCount === 1 ? "day" : "days"}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
             </div>
           </fieldset>
+
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="mt-5 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+          >
+            <div>
+              <p className="text-sm font-medium text-slate-600">
+                Days with selected activities
+              </p>
+              {selectedIds.size === 0 ? (
+                <p className="mt-2 text-sm text-slate-500">
+                  Select an activity to see your day count.
+                </p>
+              ) : (
+                <p className="mt-1 text-lg font-semibold text-blue-700">
+                  <span className="text-3xl font-bold tabular-nums">
+                    {matchingDates.size}
+                  </span>{" "}
+                  {matchingDates.size === 1 ? "day" : "days"}
+                </p>
+              )}
+            </div>
+            <div className="text-xs leading-5 text-slate-500 sm:text-right">
+              <p className="text-sm font-semibold text-slate-700">In {year}</p>
+              <p>Each date counted once, even when activities overlap.</p>
+            </div>
+          </div>
 
           <div className="mt-6 hidden overflow-x-auto pb-2 sm:block">
             <div className="grid min-w-[720px] grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2">

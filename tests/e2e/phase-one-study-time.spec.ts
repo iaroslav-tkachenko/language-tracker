@@ -169,11 +169,25 @@ test.describe("Phase 1 Study Time", () => {
 
     const heatmapYear = activityHeatmap.locator("strong").first();
     await expect(heatmapYear).toHaveText("2026");
+    const activityDaySummary = activityHeatmap.getByRole("status");
+    await expect(activityDaySummary).toContainText(
+      "Select an activity to see your day count.",
+    );
     await activityHeatmap.getByRole("checkbox", { name: activityName }).check();
+    await expect(activityDaySummary).toContainText("1 day");
+    await expect(activityDaySummary).toContainText("In 2026");
+    await expect(
+      activityHeatmap.locator("label").filter({ hasText: activityName }),
+    ).toContainText("1 day");
     await activityHeatmap
       .getByRole("button", { name: "Next activity heatmap year" })
       .click();
     await expect(heatmapYear).toHaveText("2027");
+    await expect(activityDaySummary).toContainText("0 days");
+    await expect(activityDaySummary).toContainText("In 2027");
+    await expect(
+      activityHeatmap.locator("label").filter({ hasText: activityName }),
+    ).toContainText("0 days");
     await expect(
       activityHeatmap.getByRole("checkbox", { name: activityName }),
     ).toBeChecked();
@@ -183,6 +197,17 @@ test.describe("Phase 1 Study Time", () => {
     await activityHeatmap
       .getByRole("button", { name: "Previous activity heatmap year" })
       .click();
+    await expect(activityDaySummary).toContainText("1 day");
+    await activityHeatmap
+      .getByRole("checkbox", { name: activityName })
+      .uncheck();
+    await expect(activityDaySummary).toContainText(
+      "Select an activity to see your day count.",
+    );
+    await expect(
+      activityHeatmap.locator("label").filter({ hasText: activityName }),
+    ).not.toContainText("1 day");
+    await activityHeatmap.getByRole("checkbox", { name: activityName }).check();
 
     const matchingDateCell = activityHeatmap.getByRole("button", {
       name: /: matching activity logged$/,
