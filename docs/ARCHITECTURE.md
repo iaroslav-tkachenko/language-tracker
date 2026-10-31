@@ -423,10 +423,14 @@ OR-selected activity IDs. Selection and year exist only in client state; they
 create no request, URL parameter, or stored data. The calendar reuses shared
 date-cell utilities without sharing the Study Time heatmap's minute semantics.
 Per-activity day counts are derived with one set of distinct dates per activity
-for the local heatmap year. The combined day count uses the size of the same
-matching-date set that paints the calendar, so overlapping selections and
-repeated sessions cannot inflate it. Both counts include future saved dates
-and require no additional read, database migration, or persisted state.
+for the local heatmap year, including future saved dates. The combined coverage
+summary filters the calendar's matching-date set to January 1 through the earlier
+of browser-local today and December 31 of the open year. UTC date arithmetic
+counts calendar days without daylight-saving offsets. The matching unique-date
+count divided by elapsed calendar days gives the percentage; future years have
+zero elapsed days and an unavailable percentage. Overlapping selections and
+repeated sessions cannot inflate coverage. These transformations require no
+additional read, database migration, or persisted state.
 
 The following `security invoker` functions remain the target if measurement
 shows that later phases should move aggregation into PostgreSQL:

@@ -174,7 +174,8 @@ test.describe("Phase 1 Study Time", () => {
       "Select an activity to see your day count.",
     );
     await activityHeatmap.getByRole("checkbox", { name: activityName }).check();
-    await expect(activityDaySummary).toContainText("1 day");
+    await expect(activityDaySummary).toContainText(/1\s+of \d+ days/);
+    await expect(activityDaySummary).toContainText(/\d(?:\.\d)?%/);
     await expect(activityDaySummary).toContainText("In 2026");
     await expect(
       activityHeatmap.locator("label").filter({ hasText: activityName }),
@@ -183,7 +184,12 @@ test.describe("Phase 1 Study Time", () => {
       .getByRole("button", { name: "Next activity heatmap year" })
       .click();
     await expect(heatmapYear).toHaveText("2027");
-    await expect(activityDaySummary).toContainText("0 days");
+    await expect(activityDaySummary).toContainText(/0\s+of 0 days/);
+    await expect(activityDaySummary).toContainText("—");
+    await expect(activityDaySummary).toContainText(
+      "This year hasn't started yet.",
+    );
+    await expect(activityDaySummary).not.toContainText("%");
     await expect(activityDaySummary).toContainText("In 2027");
     await expect(
       activityHeatmap.locator("label").filter({ hasText: activityName }),
@@ -197,7 +203,7 @@ test.describe("Phase 1 Study Time", () => {
     await activityHeatmap
       .getByRole("button", { name: "Previous activity heatmap year" })
       .click();
-    await expect(activityDaySummary).toContainText("1 day");
+    await expect(activityDaySummary).toContainText(/1\s+of \d+ days/);
     await activityHeatmap
       .getByRole("checkbox", { name: activityName })
       .uncheck();
