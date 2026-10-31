@@ -432,15 +432,24 @@ levels are not used.
 Each selected activity displays its number of distinct matching calendar dates
 in the heatmap's open year, using `1 day` or `N days`. Unselected activities do
 not display a count. A summary between the activity filters and calendar shows
-`Days with selected activities` and the number of unique highlighted dates for
-that same year. A date with multiple sessions or multiple selected activities
-counts once in the summary, rather than summing the individual activity counts.
-Both counts include future saved entries, update on selection or year changes,
-and remain scoped to the selected board. With no selection the summary prompts
-`Select an activity to see your day count.`; with a selection and no matching
-dates it shows `0 days`. The summary identifies its year, explains that dates
-are counted once even when activities overlap, and announces updates politely
-to assistive technology. Desktop and mobile present the same counts.
+`Days with selected activities`, the number of distinct matching dates through
+browser-local today, the elapsed calendar-day denominator, and coverage as a
+percentage. For example, `28 of 304 days · 9.2%` on October 31, 2026. The current
+year's denominator includes every date from January 1 through today, inclusive,
+regardless of the board's first entry. Past years use their full 365 or 366
+calendar days. Future years show `0 of 0 days · —` and explain that the year has
+not started; the percentage is unavailable rather than dividing by zero.
+A date with multiple sessions or multiple selected activities counts once in
+the summary. Future saved dates stay highlighted and remain in individual
+activity counts, but are excluded from the summary's numerator and percentage.
+The percentage is matching elapsed dates divided by elapsed calendar days,
+formatted with at most one decimal place. Counts and coverage update on
+selection or year changes and remain scoped to the selected board. With no
+selection the summary prompts `Select an activity to see your day count.`;
+with no matching elapsed dates it shows `0 of N days · 0%` for a started year.
+The summary identifies its year and calendar range, explains that dates are
+counted once even when activities overlap, and announces updates politely to
+assistive technology. Desktop and mobile present the same counts and coverage.
 
 Every real date cell identifies its full date and match state without relying
 on color. Pointer or keyboard activation opens one anchored popover containing

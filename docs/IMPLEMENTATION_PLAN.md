@@ -403,10 +403,13 @@ and a physical mobile browser.
   without stored data or changes to existing heatmaps and the Statistics year.
 - Added approved selected-year day counts to the Activity Heatmap: selected
   activity filters show their distinct-day totals and a responsive summary
-  shows the unique highlighted-date total, counting overlapping activities
-  once. The summary includes its year, overlap guidance, no-selection and
-  zero-match states, and polite accessible updates; future saved entries follow
-  the calendar's existing inclusion rule. Counts derive from existing reads.
+  shows unique matching elapsed dates out of calendar days from January 1
+  through today (inclusive), with a percentage. Past years use the full year;
+  future years have no elapsed days and an unavailable percentage. Overlapping
+  activities count once. The summary includes its year, calendar range, overlap
+  guidance, no-selection and zero-match states, and polite accessible updates.
+  Future entries retain calendar highlights and individual activity counts but
+  do not inflate elapsed-day coverage. Counts derive from existing reads.
 
 ### Verification
 

@@ -10,6 +10,7 @@ import {
 } from "@/lib/dates/study-calendar";
 import {
   getActivityHeatmapActivities,
+  getActivityHeatmapCoverage,
   getActivityHeatmapDateKeys,
   getActivityHeatmapDayCounts,
   type ActivityHeatmapActivity,
@@ -66,6 +67,10 @@ export function ActivityHeatmap({
     [entries, selectedIds, year],
   );
   const calendarCells = useMemo(() => getCalendarCells(year), [year]);
+  const coverage = useMemo(
+    () => getActivityHeatmapCoverage(matchingDates, year, todayKey),
+    [matchingDates, year, todayKey],
+  );
   const activityDayCounts = useMemo(
     () => getActivityHeatmapDayCounts(entries, year),
     [entries, year],
@@ -265,16 +270,32 @@ export function ActivityHeatmap({
                   Select an activity to see your day count.
                 </p>
               ) : (
-                <p className="mt-1 text-lg font-semibold text-blue-700">
+                <p className="mt-1 flex flex-wrap items-baseline gap-x-2 text-lg font-semibold text-blue-700">
                   <span className="text-3xl font-bold tabular-nums">
-                    {matchingDates.size}
+                    {coverage.matchingDays}
                   </span>{" "}
-                  {matchingDates.size === 1 ? "day" : "days"}
+                  <span>
+                    of {coverage.elapsedDays}{" "}
+                    {coverage.elapsedDays === 1 ? "day" : "days"}
+                  </span>{" "}
+                  <span aria-hidden="true">·</span>{" "}
+                  <span className="tabular-nums">
+                    {coverage.percentage === null
+                      ? "—"
+                      : `${coverage.percentage.toLocaleString("en", { maximumFractionDigits: 1 })}%`}
+                  </span>
                 </p>
               )}
             </div>
             <div className="text-xs leading-5 text-slate-500 sm:text-right">
               <p className="text-sm font-semibold text-slate-700">In {year}</p>
+              <p>
+                {coverage.elapsedDays === 0
+                  ? "This year hasn't started yet."
+                  : year === Number(todayKey.slice(0, 4))
+                    ? "January 1 through today, inclusive."
+                    : "January 1 through December 31."}
+              </p>
               <p>Each date counted once, even when activities overlap.</p>
             </div>
           </div>

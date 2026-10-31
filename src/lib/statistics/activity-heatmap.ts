@@ -62,3 +62,32 @@ export function getActivityHeatmapDayCounts(
     [...datesByActivity].map(([activityId, dates]) => [activityId, dates.size]),
   );
 }
+
+export function getActivityHeatmapCoverage(
+  matchingDateKeys: Iterable<string>,
+  year: number,
+  todayKey: string,
+) {
+  const startDateKey = `${year}-01-01`;
+  const endDateKey = todayKey < `${year}-12-31` ? todayKey : `${year}-12-31`;
+  if (endDateKey < startDateKey) {
+    return { matchingDays: 0, elapsedDays: 0, percentage: null };
+  }
+
+  const [endYear, endMonth, endDay] = endDateKey.split("-").map(Number);
+  const elapsedDays =
+    (Date.UTC(endYear, endMonth - 1, endDay) - Date.UTC(year, 0, 1)) /
+      86_400_000 +
+    1;
+  const matchingDays = new Set(
+    [...matchingDateKeys].filter(
+      (dateKey) => dateKey >= startDateKey && dateKey <= endDateKey,
+    ),
+  ).size;
+
+  return {
+    matchingDays,
+    elapsedDays,
+    percentage: (matchingDays / elapsedDays) * 100,
+  };
+}
