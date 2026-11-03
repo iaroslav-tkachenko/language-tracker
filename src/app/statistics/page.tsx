@@ -27,6 +27,27 @@ function isDateKey(value: string | undefined): value is string {
   );
 }
 
+async function readStudyEntries(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  boardId: string,
+) {
+  const pageSize = 1000;
+  const entries = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await supabase
+      .from("study_entries")
+      .select("study_date, duration_minutes, activity_type_id")
+      .eq("board_id", boardId)
+      .order("study_date")
+      .order("created_at")
+      .order("id")
+      .range(offset, offset + pageSize - 1);
+    if (error) return { data: null, error };
+    entries.push(...data);
+    if (data.length < pageSize) return { data: entries, error: null };
+  }
+}
+
 export default async function StatisticsPage({
   searchParams,
 }: StatisticsPageProps) {
@@ -75,12 +96,7 @@ export default async function StatisticsPage({
       .select("id, name, system_key, archived_at")
       .order("position")
       .order("created_at"),
-    supabase
-      .from("study_entries")
-      .select("study_date, duration_minutes, activity_type_id")
-      .eq("board_id", selectedBoard.id)
-      .order("study_date")
-      .order("created_at"),
+    readStudyEntries(supabase, selectedBoard.id),
     supabase
       .from("vocabulary_daily_totals")
       .select("study_date, words_learned")

@@ -361,11 +361,13 @@ Each chart has its own granularity selector:
 
 Future entries can appear in selected-year and selected-month distributions, but they remain excluded from current-period averages and streaks as specified above.
 
-### 10.5 Recent activity analysis
+### 10.5 Activity analysis
 
-Detailed statistics show actual Study Time grouped by activity across the
-selected year, across the latest seven calendar dates ending today, and across
-the latest thirty calendar dates ending today. Activity allocations use
+Detailed statistics show four Study Time allocations in this order: all time,
+the selected year, the latest thirty calendar dates ending today, and the latest
+seven calendar dates ending today. `Activity totals all time` includes all saved
+entries on the selected board across years, including future saved dates.
+Activity allocations use
 interactive thin-ring circular charts and a legend
 that shows absolute duration and percentage of the period total. Hovering,
 focusing, or tapping one segment emphasizes it and dims the others. When a
@@ -377,7 +379,7 @@ window includes zero-study dates and excludes future entries; its heading is
 `Activity totals in the last 7 days`. The thirty-date window follows the same
 rules and uses the heading `Activity totals in the last 30 days`.
 
-Activity colors are consistent across all three allocation charts, their
+Activity colors are consistent across all four allocation charts, their
 legends (including expanded items), and the activity-average table. Standard
 activities have fixed colors keyed by their system identity. Custom activities
 derive a stable color from their immutable activity ID, so changing rank,
