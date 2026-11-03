@@ -143,7 +143,10 @@ test.describe("Phase 1 Study Time", () => {
       "Activity totals in the last 7 days",
     ]);
     const allTimeActivitySection = page.locator("section").filter({
-      has: activityChartHeadings.first(),
+      has: page.getByRole("heading", {
+        name: "Activity totals all time",
+        exact: true,
+      }),
     });
     await expect(
       allTimeActivitySection.getByText("100%", { exact: true }),
