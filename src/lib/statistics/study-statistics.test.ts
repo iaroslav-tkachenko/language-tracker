@@ -4,6 +4,7 @@ import {
   calculateStudyRecords,
   calculateStudyStatistics,
   getActivityAverageComparisonRows,
+  getActivityTotals,
   getDayDistribution,
   getMonthDistribution,
   getRecentActivityTotals,
@@ -23,6 +24,28 @@ const entry = (
 });
 
 describe("study statistics", () => {
+  it("sums activity time across all recorded years when no year is selected", () => {
+    const entries = [
+      entry("2025-12-31", 75),
+      entry("2026-01-01", 45),
+      entry("2026-01-01", 20, "archived-activity"),
+      entry("2027-01-01", 30),
+    ];
+
+    expect(getActivityTotals(entries)).toEqual(
+      new Map([
+        ["reading", 150],
+        ["archived-activity", 20],
+      ]),
+    );
+    expect(getActivityTotals(entries, 2026)).toEqual(
+      new Map([
+        ["reading", 45],
+        ["archived-activity", 20],
+      ]),
+    );
+  });
+
   it("finds all-time records through today", () => {
     const records = calculateStudyRecords(
       [

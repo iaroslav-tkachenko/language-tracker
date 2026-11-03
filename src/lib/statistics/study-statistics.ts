@@ -204,11 +204,13 @@ export function calculateStudyStatistics(
 
 export function getActivityTotals(
   entries: StudyStatisticsEntry[],
-  selectedYear: number,
+  selectedYear?: number,
 ) {
+  const yearPrefix = selectedYear === undefined ? null : `${selectedYear}-`;
   const totals = new Map<string, number>();
   for (const entry of entries) {
-    if (!entry.studyDate.startsWith(`${selectedYear}-`)) continue;
+    if (yearPrefix !== null && !entry.studyDate.startsWith(yearPrefix))
+      continue;
     totals.set(
       entry.activityTypeId,
       (totals.get(entry.activityTypeId) ?? 0) + entry.durationMinutes,

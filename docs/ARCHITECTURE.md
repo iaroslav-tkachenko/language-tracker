@@ -407,6 +407,10 @@ calculations exclude dates after `local_today` and resolve equal maxima to the
 most recent period. This is proportionate to the expected MVP
 load and avoids persisted aggregate state.
 
+Statistics reads the selected board's Study Time entries in pages of up to
+1,000 rows, ordered by study date, creation time, and entry ID. The all-time
+activity allocation sums those entries by activity identity across years.
+
 `lib/statistics/activity-colors` provides the shared activity color resolver for
 allocation segments, legends, expanded grouped items, and average-table markers.
 Standard colors use `system_key`; custom colors use a deterministic ID hash.

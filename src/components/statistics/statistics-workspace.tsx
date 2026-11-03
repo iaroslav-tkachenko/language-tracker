@@ -1205,6 +1205,10 @@ export function StatisticsWorkspace({
     () => getActivityTotals(entries, selectedYear),
     [entries, selectedYear],
   );
+  const allTimeActivityTotals = useMemo(
+    () => getActivityTotals(entries),
+    [entries],
+  );
   const recentTotals = useMemo(
     () => getRecentActivityTotals(entries, todayKey),
     [entries, todayKey],
@@ -1905,21 +1909,27 @@ export function StatisticsWorkspace({
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <ActivityDonut
+            title="Activity totals all time"
+            subtitle="Includes active and archived activity history."
+            totals={allTimeActivityTotals}
+            activities={activities}
+          />
+          <ActivityDonut
             title={`Activity totals in ${selectedYear}`}
             subtitle="Includes active and archived activity history."
             totals={activityTotals}
             activities={activities}
           />
           <ActivityDonut
-            title="Activity totals in the last 7 days"
-            subtitle="Includes today and the previous six calendar dates."
-            totals={recentTotals}
-            activities={activities}
-          />
-          <ActivityDonut
             title="Activity totals in the last 30 days"
             subtitle="Includes today and the previous 29 calendar dates."
             totals={recentThirtyDayTotals}
+            activities={activities}
+          />
+          <ActivityDonut
+            title="Activity totals in the last 7 days"
+            subtitle="Includes today and the previous six calendar dates."
+            totals={recentTotals}
             activities={activities}
           />
         </div>

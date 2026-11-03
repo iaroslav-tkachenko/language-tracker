@@ -394,6 +394,9 @@ and a physical mobile browser.
   Activity colors now remain consistent across periods, legends, expanded
   items, and the average table, using standard system keys or immutable custom
   activity IDs, with neutral slate reserved for the grouped `Other` category.
+  The four allocation charts show all time, selected year, last 30 days, and
+  last 7 days in that order. Statistics pages through the board's Study Time
+  entries for complete history.
 - Added an Activity Heatmap immediately after the activity-average comparison.
   It derives an all-time, board-scoped catalog of active and actually used
   activities, starts with an empty local selection, applies binary OR matching

@@ -133,10 +133,23 @@ test.describe("Phase 1 Study Time", () => {
     await expect(
       recordsSection.getByRole("row", { name: /Best Month/ }),
     ).toContainText("15m");
-    await expect(
-      page.getByRole("heading", {
-        name: "Activity totals in the last 7 days",
+    const activityChartHeadings = page.getByRole("heading", {
+      name: /^Activity totals /,
+    });
+    await expect(activityChartHeadings).toHaveText([
+      "Activity totals all time",
+      "Activity totals in 2026",
+      "Activity totals in the last 30 days",
+      "Activity totals in the last 7 days",
+    ]);
+    const allTimeActivitySection = page.locator("section").filter({
+      has: page.getByRole("heading", {
+        name: "Activity totals all time",
+        exact: true,
       }),
+    });
+    await expect(
+      allTimeActivitySection.getByText("100%", { exact: true }),
     ).toBeVisible();
     const recentActivitySection = page.locator("section").filter({
       has: page.getByRole("heading", {
