@@ -89,7 +89,7 @@ export default async function StatisticsPage({
     activitiesResult,
     entriesResult,
     vocabularyTotalsResult,
-    currentCefrLevelResult,
+    cefrHistoryResult,
   ] = await Promise.all([
     supabase
       .from("activity_types")
@@ -104,27 +104,25 @@ export default async function StatisticsPage({
       .order("study_date"),
     supabase
       .from("cefr_level_events")
-      .select("id, level, effective_date")
+      .select("id, level, effective_date, created_at")
       .eq("board_id", selectedBoard.id)
       .lte("effective_date", localToday)
       .order("effective_date", { ascending: false })
       .order("created_at", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .order("id", { ascending: false }),
   ]);
 
   if (
     activitiesResult.error ||
     entriesResult.error ||
     vocabularyTotalsResult.error ||
-    currentCefrLevelResult.error
+    cefrHistoryResult.error
   ) {
     console.error("Supabase statistics read failed", {
       activities: activitiesResult.error?.message,
       entries: entriesResult.error?.message,
       vocabularyTotals: vocabularyTotalsResult.error?.message,
-      currentCefrLevel: currentCefrLevelResult.error?.message,
+      cefrHistory: cefrHistoryResult.error?.message,
     });
     throw new Error("Statistics could not be loaded.");
   }
@@ -148,15 +146,18 @@ export default async function StatisticsPage({
         studyDate: total.study_date,
         wordsLearned: total.words_learned,
       }))}
-      currentCefrLevel={
-        currentCefrLevelResult.data &&
-        isCefrLevel(currentCefrLevelResult.data.level)
-          ? {
-              level: currentCefrLevelResult.data.level,
-              effectiveDate: currentCefrLevelResult.data.effective_date,
-            }
-          : null
-      }
+      cefrHistory={cefrHistoryResult.data.flatMap((event) =>
+        isCefrLevel(event.level)
+          ? [
+              {
+                id: event.id,
+                level: event.level,
+                effectiveDate: event.effective_date,
+                createdAt: event.created_at,
+              },
+            ]
+          : [],
+      )}
       selectedYear={selectedYear}
       todayKey={localToday}
     />

@@ -39,7 +39,8 @@ import {
   highestLevelDescription,
   progressForecastDescription,
 } from "@/lib/cefr/copy";
-import type { CefrLevel } from "@/lib/cefr/reference";
+import { getLevelPeriods, type CefrLevelEvent } from "@/lib/cefr/history";
+import { LevelDurationChart } from "@/components/statistics/level-duration-chart";
 import { getWeeklyRecommendation } from "@/lib/cefr/recommendations";
 import {
   calculateStudyTimeForecast,
@@ -107,7 +108,7 @@ type StatisticsWorkspaceProps = {
   activities: ActivitySummary[];
   entries: StudyStatisticsEntry[];
   vocabularyTotals: VocabularyDailyTotal[];
-  currentCefrLevel: { level: CefrLevel; effectiveDate: string } | null;
+  cefrHistory: CefrLevelEvent[];
   selectedYear: number;
   todayKey: string;
 };
@@ -1177,10 +1178,15 @@ export function StatisticsWorkspace({
   activities,
   entries,
   vocabularyTotals,
-  currentCefrLevel,
+  cefrHistory,
   selectedYear,
   todayKey,
 }: StatisticsWorkspaceProps) {
+  const levelPeriods = useMemo(
+    () => getLevelPeriods(cefrHistory, todayKey),
+    [cefrHistory, todayKey],
+  );
+  const currentCefrLevel = levelPeriods[0]?.event ?? null;
   const router = useRouter();
   const todayMonth = Number(todayKey.slice(5, 7));
   const vocabularyDate =
@@ -1460,10 +1466,19 @@ export function StatisticsWorkspace({
               Your learning overview
             </h1>
             {cefrOverview && (
-              <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1.5 text-sm font-bold text-violet-700">
-                <GraduationCap aria-hidden="true" className="size-4" />
-                Current level · {cefrOverview.level}
-              </p>
+              <div>
+                <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1.5 text-sm font-bold text-violet-700">
+                  <GraduationCap aria-hidden="true" className="size-4" />
+                  Current level · {cefrOverview.level}
+                </p>
+                <p className="mt-2 text-sm text-slate-600">
+                  {levelPeriods[0].duration} · Since{" "}
+                  {fromDateKey(cefrOverview.effectiveDate).toLocaleDateString(
+                    "en",
+                    { year: "numeric", month: "short", day: "numeric" },
+                  )}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -1984,6 +1999,12 @@ export function StatisticsWorkspace({
               mode="combined"
             />
           </section>
+        )}
+        {levelPeriods.length > 1 && (
+          <LevelDurationChart
+            periods={levelPeriods}
+            boardId={selectedBoard.id}
+          />
         )}
       </div>
     </main>

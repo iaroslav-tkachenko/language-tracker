@@ -35,7 +35,8 @@ import {
   CEFR_LEVELS,
   type CefrLevel,
 } from "@/lib/cefr/reference";
-import type { CefrLevelEvent } from "@/lib/cefr/history";
+import { getLevelPeriods, type CefrLevelEvent } from "@/lib/cefr/history";
+import { shiftDate } from "@/lib/dates/study-calendar";
 import { calculateStudyTimeForecast } from "@/lib/cefr/study-time";
 import { calculateVocabularyForecast } from "@/lib/cefr/vocabulary";
 
@@ -277,6 +278,7 @@ export function CefrHistoryWorkspace({
 }: CefrHistoryWorkspaceProps) {
   const [formMode, setFormMode] = useState<FormMode>({ kind: "closed" });
   const currentEvent = history[0] ?? null;
+  const periods = getLevelPeriods(history, todayKey);
   const currentDetails = currentEvent
     ? CEFR_LEVEL_DETAILS[currentEvent.level]
     : null;
@@ -477,7 +479,7 @@ export function CefrHistoryWorkspace({
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">
                 {currentEvent
-                  ? `Since ${formatDate(currentEvent.effectiveDate)}`
+                  ? `Since ${formatDate(currentEvent.effectiveDate)} · ${periods[0].duration}`
                   : "Add your level to see progress estimates and forecasts."}
               </p>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-700">
@@ -556,8 +558,8 @@ export function CefrHistoryWorkspace({
             </div>
           ) : (
             <div className="mt-6 space-y-3">
-              {history.map((event, index) => {
-                const isCurrent = index === 0;
+              {periods.map((period) => {
+                const { event, current: isCurrent } = period;
                 return (
                   <article
                     key={event.id}
@@ -581,8 +583,10 @@ export function CefrHistoryWorkspace({
                           )}
                         </div>
                         <p className="mt-1 text-sm leading-6 text-slate-600">
-                          {isCurrent ? "Since" : "From"}{" "}
-                          {formatDate(event.effectiveDate)}
+                          {isCurrent
+                            ? `Since ${formatDate(event.effectiveDate)}`
+                            : `${formatDate(event.effectiveDate)} – ${formatDate(shiftDate(period.endExclusive, -1))}`}{" "}
+                          · {period.duration}
                         </p>
                       </div>
                     </div>
