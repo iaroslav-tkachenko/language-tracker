@@ -79,7 +79,15 @@ test.describe("Phase 4C CEFR history", () => {
     await submitLevelUpdate();
     await expect(page.getByRole("heading", { name: "Level B1" })).toBeVisible();
     await expect(page.getByText("Since July 12, 2026").first()).toBeVisible();
-    await expect(page.getByText("From January 1, 2026")).toBeVisible();
+    await expect(
+      page.getByText(/January 1, 2026 – July 11, 2026/),
+    ).toBeVisible();
+    await page.goto(`/statistics?board=${boardId}&today=${today}`);
+    const chart = page.getByRole("region", { name: "Time at each level" });
+    await expect(chart).toBeVisible();
+    await expect(chart.getByText("↑ A0 to B1 · Higher")).toBeVisible();
+    await expect(chart.getByText("First recorded level")).toBeVisible();
+    await page.goto(`/cefr?board=${boardId}&today=${today}`);
 
     await page.getByRole("button", { name: "Edit" }).first().click();
     await chooseLevel("B2");

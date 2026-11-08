@@ -512,7 +512,18 @@ Advice is product-authored and grouped into short actionable items:
   an application-defined starting state, not an official CEFR level.
 - Earlier declarations remain visible in reverse chronological order; the
   declaration with the latest effective date is current.
-- The current history row labels its date as `Since`; earlier rows use `From`.
+- The current history row labels its date as `Since`; earlier rows show their
+  start and end dates.
+- The current summary and each history period show elapsed calendar duration.
+  A previous period ends on the day before the next declaration; its duration
+  is measured to that next declaration. The current period is measured to
+  browser-local today and shows `Started today` on its start date. Calendar
+  months are clamped to the last day when the target month is shorter.
+- Statistics shows the current level's date and duration near its overview.
+  When at least two declarations exist, a chart at the bottom compares each
+  continuous period, independent of the selected year. Increases are green,
+  decreases red, and the first recorded level neutral; text and arrows also
+  communicate direction. Returning to a level creates a separate period.
 - The current-level summary and current history row share the heading pattern
   `Level <level>` plus a `Current` badge and a `Since` date. A0 uses the full
   heading `Level A0 - Absolute zero`.
