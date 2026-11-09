@@ -740,7 +740,7 @@ export function BoardWorkspace({
                 <div className="sm:col-span-2">
                   <dt className="text-slate-500">Inclusive dates</dt>
                   <dd className="mt-0.5 font-semibold text-slate-900">
-                    {formatLongDate(rangeStart)} вЂ“ {formatLongDate(rangeEnd)}
+                    {formatLongDate(rangeStart)} – {formatLongDate(rangeEnd)}
                   </dd>
                 </div>
               </dl>
