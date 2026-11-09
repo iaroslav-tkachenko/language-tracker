@@ -21,6 +21,8 @@ test.describe("Phase 3 Vocabulary", () => {
     const secondDate = "2026-07-21";
     const thirdDate = "2026-07-22";
 
+    await page.clock.setFixedTime(new Date(`${today}T12:00:00`));
+
     await page.goto("/sign-in");
     await page.getByLabel("Email").fill(email ?? "");
     await page.getByLabel("Password").fill(password ?? "");
