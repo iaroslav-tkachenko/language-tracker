@@ -52,6 +52,29 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Resolve Ubuntu mirrors when runner DNS is unavailable
+        shell: bash
+        run: |
+          for host in azure.archive.ubuntu.com archive.ubuntu.com security.ubuntu.com; do
+            if timeout 6 getent ahostsv4 "$host" > /dev/null; then
+              continue
+            fi
+
+            response=$(curl --fail --silent --show-error --retry 3 --max-time 15 \
+              --header 'accept: application/dns-json' \
+              "https://cloudflare-dns.com/dns-query?name=${host}&type=A")
+            address=$(python3 -c '
+          import ipaddress, json, sys
+          records = json.load(sys.stdin).get("Answer", [])
+          addresses = (ipaddress.ip_address(record["data"]) for record in records if record["type"] == 1)
+          print(next((str(address) for address in addresses if address.is_global), ""))
+          ' <<< "$response")
+            if [ -z "$address" ]; then
+              echo "Could not resolve $host" >&2
+              exit 1
+            fi
+            echo "$address $host" | sudo tee -a /etc/hosts > /dev/null
+          done
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm db:start
       - run: pnpm db:reset
